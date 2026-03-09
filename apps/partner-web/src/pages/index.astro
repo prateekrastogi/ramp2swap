@@ -12,12 +12,74 @@ import '../styles/design-system.css';
     <link rel="icon" type="image/png" href="/logo.png" />
   </head>
   <body class="page">
-    <main class="container">
-      <section class="surface section" style="display: grid; place-items: center; min-height: 60vh; text-align: center;">
-        <img src="/logo_horizontal.png" alt="Ramp2Swap" style="max-width: 360px; width: 100%; height: auto;" />
-        <p class="body" style="margin-top: 12px;">Partner Portal</p>
-        <a class="btn-primary" href="/design-system" style="margin-top: 16px;">View Design System</a>
-      </section>
+    <input id="sidebar-collapse" class="sidebar-control" type="checkbox" />
+    <input id="sidebar-pin" class="sidebar-control" type="checkbox" />
+    <input id="sidebar-mobile" class="sidebar-control" type="checkbox" />
+
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <header class="mobile-topbar content-layer">
+      <label for="sidebar-mobile" class="hamburger-btn" aria-label="Open navigation">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </label>
+      <img class="logo-mark mobile-topbar-mark" src="/logo.png" alt="Ramp2Swap mark" />
+    </header>
+
+    <label for="sidebar-mobile" class="mobile-overlay" aria-hidden="true"></label>
+
+    <main class="dashboard-shell content-layer">
+      <aside class="sidebar glass on-glass">
+        <div class="sidebar-brand">
+          <img class="logo-horizontal sidebar-logo-horizontal" src="/logo_horizontal.png" alt="Ramp2Swap" />
+          <img class="logo-mark sidebar-logo-mark" src="/logo.png" alt="Ramp2Swap mark" />
+          <label for="sidebar-mobile" class="sidebar-close" aria-label="Close navigation">✕</label>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+          <section class="nav-section">
+            <a class="nav-item nav-item-active" href="#" data-label="Overview"><span class="nav-icon">◫</span><span class="nav-text">Overview</span></a>
+            <a class="nav-item" href="#" data-label="Link Generator"><span class="nav-icon">⛓</span><span class="nav-text">Link Generator</span></a>
+            <a class="nav-item" href="#" data-label="Transactions"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
+            <a class="nav-item" href="#" data-label="Earnings & Payouts"><span class="nav-icon">$</span><span class="nav-text">Earnings & Payouts</span></a>
+            <a class="nav-item" href="#" data-label="Analytics"><span class="nav-icon">◔</span><span class="nav-text">Analytics</span></a>
+            <a class="nav-item" href="#" data-label="Branding Kit"><span class="nav-icon">▣</span><span class="nav-text">Branding Kit</span></a>
+          </section>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <label for="sidebar-collapse" class="sidebar-collapse-btn desktop-only">
+            <span class="nav-icon">‹</span>
+            <span class="nav-text">Collapse</span>
+          </label>
+
+          <a class="nav-item" href="#" data-label="Settings"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></a>
+          <a class="nav-item" href="#" data-label="Help"><span class="nav-icon">i</span><span class="nav-text">Help</span></a>
+
+          <a class="sidebar-profile" href="#" data-label="Profile">
+            <span class="sidebar-avatar"></span>
+            <span class="profile-copy">
+              <span class="profile-name">Partner Account</span>
+              <span class="profile-role">PRO PLAN</span>
+            </span>
+            <span class="profile-chevron">›</span>
+          </a>
+        </div>
+      </aside>
+
+      <section class="dashboard-content" aria-label="Dashboard content area"></section>
     </main>
+
+    <script>
+      const collapseControl = document.getElementById('sidebar-collapse');
+      if (collapseControl instanceof HTMLInputElement && window.matchMedia('(min-width: 1280px)').matches) {
+        collapseControl.checked = false;
+      }
+    </script>
   </body>
 </html>
