@@ -1,0 +1,107 @@
+---
+const features = [
+  {
+    title: 'Fast rendering',
+    desc: 'Astro ships minimal JavaScript by default for strong performance.'
+  },
+  {
+    title: 'Clean structure',
+    desc: 'Page-first organization with simple reusable sections and styles.'
+  },
+  {
+    title: 'Cloudflare ready',
+    desc: 'Configured with the Cloudflare adapter for deployment.'
+  }
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ramp2Swap partner web pure Astro demo" />
+    <title>ramp2swap Partner Portal</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <img src="/logo_horizontal.png" alt="Ramp2Swap" class="logo" />
+        <h1>Pure Astro Demo</h1>
+        <p>Static-first UI with no React runtime.</p>
+      </header>
+
+      <section class="grid">
+        {features.map((feature) => (
+          <article class="card">
+            <h2>{feature.title}</h2>
+            <p>{feature.desc}</p>
+          </article>
+        ))}
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(html, body) {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background: #020617;
+    color: #e2e8f0;
+  }
+
+  .container {
+    margin: 0 auto;
+    max-width: 960px;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .hero {
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 2rem;
+    background: linear-gradient(135deg, #0f172a, #111827);
+  }
+
+  .logo {
+    width: min(420px, 100%);
+    height: auto;
+  }
+
+  h1 {
+    margin: 1rem 0 0.5rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+
+  .hero p {
+    margin: 0;
+    color: #94a3b8;
+  }
+
+  .grid {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 1rem;
+    background: #0b1220;
+  }
+
+  h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+  }
+
+  .card p {
+    margin: 0;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+</style>
