@@ -16,7 +16,12 @@
 	},
 	"compatibility_flags": [
 		"nodejs_compat"
-	]
+	],
+	"env": {
+		"staging": {
+			"name": "partner-api-staging"
+		}
+	}
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

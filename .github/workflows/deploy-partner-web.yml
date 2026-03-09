@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - staging
     paths:
       - 'apps/partner-web/**'
       - '.github/workflows/deploy-partner-web.yml'
@@ -39,7 +40,13 @@ jobs:
           npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_LINUX_VERSION}"
 
       - name: Deploy to Cloudflare Workers
-        run: npm run deploy --workspace apps/partner-web
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
+            npm run deploy --workspace apps/partner-web -- --env staging
+          else
+            npm run deploy --workspace apps/partner-web
+          fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

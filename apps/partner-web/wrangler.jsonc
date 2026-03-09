@@ -17,6 +17,11 @@
 	},
 	"observability": {
 		"enabled": true
+	},
+	"env": {
+		"staging": {
+			"name": "partner-web-staging"
+		}
 	}
 	/**
 	 * Smart Placement
