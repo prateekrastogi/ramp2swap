@@ -1162,7 +1162,7 @@ body {
 .hamburger-btn {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--white-a-07);
   background: rgba(10,13,15,0.7);
   display: grid;
@@ -1170,12 +1170,16 @@ body {
   cursor: pointer;
 }
 
-.hamburger-line {
+.hamburger-icon {
   width: 20px;
-  height: 2px;
-  background: var(--slate-100);
-  display: block;
-  margin: 2.5px 0;
+  height: 20px;
+}
+
+.hamburger-line {
+  stroke: var(--slate-100);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  transform-origin: 12px 12px;
   transition: transform 200ms ease, opacity 200ms ease;
 }
 
@@ -1566,15 +1570,15 @@ body {
     background: rgba(10,13,15,0.95);
   }
 
-  #sidebar-mobile:checked ~ .mobile-topbar .hamburger-line:nth-child(1) {
+  #sidebar-mobile:checked ~ .mobile-topbar .hamburger-line-top {
     transform: translateY(7px) rotate(45deg);
   }
 
-  #sidebar-mobile:checked ~ .mobile-topbar .hamburger-line:nth-child(2) {
+  #sidebar-mobile:checked ~ .mobile-topbar .hamburger-line-mid {
     opacity: 0;
   }
 
-  #sidebar-mobile:checked ~ .mobile-topbar .hamburger-line:nth-child(3) {
+  #sidebar-mobile:checked ~ .mobile-topbar .hamburger-line-bottom {
     transform: translateY(-7px) rotate(-45deg);
   }
 }
