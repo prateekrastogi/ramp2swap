@@ -30,18 +30,19 @@ import '../styles/design-system.css';
           <line class="hamburger-line hamburger-line-bottom" x1="5" y1="17" x2="19" y2="17"></line>
         </svg>
       </label>
-      <img class="logo-mark mobile-topbar-mark" src="/logo.png" alt="Ramp2Swap mark" />
+      <label for="sidebar-mobile" class="mobile-topbar-logo-toggle" aria-label="Toggle navigation">
+        <img class="logo-mark mobile-topbar-mark" src="/logo.png" alt="Ramp2Swap mark" />
+      </label>
     </header>
 
     <label for="sidebar-mobile" class="mobile-overlay" aria-hidden="true"></label>
 
     <main class="dashboard-shell content-layer">
       <aside class="sidebar glass on-glass">
-        <div class="sidebar-brand">
+        <button class="sidebar-brand" id="sidebar-brand-toggle" type="button" aria-label="Toggle navigation">
           <img class="logo-horizontal sidebar-logo-horizontal" src="/logo_horizontal.png" alt="Ramp2Swap" />
           <img class="logo-mark sidebar-logo-mark" src="/logo.png" alt="Ramp2Swap mark" />
-          <label for="sidebar-mobile" class="sidebar-close" aria-label="Close navigation">✕</label>
-        </div>
+        </button>
 
         <nav class="sidebar-nav" aria-label="Primary navigation">
           <section class="nav-section">
@@ -55,11 +56,6 @@ import '../styles/design-system.css';
         </nav>
 
         <div class="sidebar-bottom">
-          <label for="sidebar-collapse" class="sidebar-collapse-btn desktop-only">
-            <span class="nav-icon">‹</span>
-            <span class="nav-text">Collapse</span>
-          </label>
-
           <a class="nav-item" href="#" data-label="Settings"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></a>
           <a class="nav-item" href="#" data-label="Help"><span class="nav-icon">i</span><span class="nav-text">Help</span></a>
 
@@ -81,6 +77,32 @@ import '../styles/design-system.css';
       const collapseControl = document.getElementById('sidebar-collapse');
       if (collapseControl instanceof HTMLInputElement && window.matchMedia('(min-width: 1280px)').matches) {
         collapseControl.checked = false;
+      }
+
+      const sidebarBrandToggle = document.getElementById('sidebar-brand-toggle');
+      const mobileControl = document.getElementById('sidebar-mobile');
+      const pinControl = document.getElementById('sidebar-pin');
+
+      if (
+        sidebarBrandToggle instanceof HTMLButtonElement &&
+        mobileControl instanceof HTMLInputElement &&
+        pinControl instanceof HTMLInputElement
+      ) {
+        sidebarBrandToggle.addEventListener('click', () => {
+          if (window.matchMedia('(max-width: 767px)').matches) {
+            mobileControl.checked = !mobileControl.checked;
+            return;
+          }
+
+          if (window.matchMedia('(min-width: 768px) and (max-width: 1279px)').matches) {
+            pinControl.checked = !pinControl.checked;
+            return;
+          }
+
+          if (collapseControl instanceof HTMLInputElement) {
+            collapseControl.checked = !collapseControl.checked;
+          }
+        });
       }
     </script>
   </body>
