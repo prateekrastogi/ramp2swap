@@ -32,8 +32,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Ensure optional native dependencies are present
-        run: npm install --include=optional --no-audit --no-fund
+      - name: Install Rollup Linux native binary (npm optional-deps workaround)
+        shell: bash
+        run: |
+          ROLLUP_LINUX_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/rollup'].optionalDependencies['@rollup/rollup-linux-x64-gnu']")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_LINUX_VERSION}"
 
       - name: Deploy to Cloudflare Workers
         run: npm run deploy --workspace apps/partner-web
