@@ -1,0 +1,359 @@
+/*
+  Ramp2Swap Partner Portal Design System
+  -------------------------------------
+  Single source of truth for tokens and UI primitives.
+  Constraint: Use only approved Obsidian/Slate/Mint colors.
+  Typography: Syne (display), DM Mono (data), DM Sans (body/UI).
+  Enforcement:
+  1) Do not add ad-hoc colors, fonts, or responsive type values outside this file.
+  2) Update DESIGN_SYSTEM.md before changing system rules.
+  3) After any UI edit, run: npm run build --workspace apps/partner-web
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&family=Syne:wght@700;800&display=swap');
+
+:root {
+  /* 60% Obsidian */
+  --obsidian-900: #0A0D0F;
+  --obsidian-800: #0F1419;
+  --obsidian-700: #141C24;
+  --obsidian-600: #1E2C3A;
+
+  /* 30% Slate */
+  --slate-100: #E8F0F7;
+  --slate-300: #7A98B3;
+  --slate-500: #3D5269;
+  --slate-700: #243040;
+
+  /* 10% Mint */
+  --mint-500: #00E5A0;
+  --mint-600: #00C484;
+  --mint-tint-strong: rgba(0,229,160,0.12);
+  --mint-tint-soft: rgba(0,229,160,0.06);
+
+  --font-display: 'Syne', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-body: 'DM Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-data: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;
+
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--obsidian-900);
+  color: var(--slate-100);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.page {
+  min-height: 100vh;
+  background: var(--obsidian-900);
+}
+
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+.section {
+  margin-top: 20px;
+  padding: 20px;
+}
+
+.surface {
+  background: var(--obsidian-800);
+  border: 1px solid var(--obsidian-600);
+  border-radius: var(--radius-lg);
+}
+
+.surface-secondary {
+  background: var(--obsidian-700);
+  border: 1px solid var(--obsidian-600);
+  border-radius: var(--radius-md);
+}
+
+.card {
+  padding: 16px;
+  background: var(--obsidian-800);
+  border: 1px solid var(--obsidian-600);
+  border-radius: var(--radius-md);
+}
+
+.card-accent {
+  border-top: 1px solid var(--mint-500);
+  background: linear-gradient(var(--mint-tint-soft), var(--mint-tint-soft)), var(--obsidian-800);
+}
+
+.card-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* Swap widget layout rule: two-column desktop, stacked mobile */
+.swap-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* DISPLAY (fluid compression with clamp) */
+.heading-hero {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5.5vw, 76px);
+  font-weight: 800;
+  letter-spacing: clamp(-1px, -0.15vw, -2px);
+  line-height: 1.04;
+  color: var(--slate-100);
+}
+
+.heading-section {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 56px);
+  font-weight: 800;
+  letter-spacing: clamp(-0.5px, -0.1vw, -1.5px);
+  line-height: 1.08;
+  color: var(--slate-100);
+}
+
+.heading-card {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.4vw, 18px);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+  color: var(--slate-100);
+}
+
+/* DATA */
+.data-large {
+  margin: 0;
+  font-family: var(--font-data);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  color: var(--slate-100);
+}
+
+.data-small {
+  margin: 0;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  color: var(--slate-500);
+}
+
+/* UI LABEL */
+.ui-label {
+  display: block;
+  margin: 0;
+  font-family: var(--font-data);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate-300);
+}
+
+/* BODY */
+.body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--slate-300);
+}
+
+.body-small {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--slate-500);
+}
+
+/* INTERACTIVE */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--mint-500);
+  border-radius: var(--radius-sm);
+  background: var(--mint-500);
+  color: var(--obsidian-900);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.btn-primary:hover {
+  background: var(--mint-600);
+  border-color: var(--mint-600);
+}
+
+.badge-active {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--mint-500);
+  border-radius: 999px;
+  background: var(--mint-tint-strong);
+  color: var(--mint-500);
+  font-family: var(--font-data);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.input {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--obsidian-600);
+  border-radius: var(--radius-sm);
+  background: var(--obsidian-700);
+  color: var(--slate-100);
+  padding: 0 12px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Swap amount input remains 26px on mobile by design */
+.swap-amount-input {
+  width: 100%;
+  height: 56px;
+  border: 1px solid var(--obsidian-600);
+  border-radius: var(--radius-sm);
+  background: var(--obsidian-700);
+  color: var(--slate-100);
+  padding: 0 14px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+
+.input::placeholder,
+.swap-amount-input::placeholder {
+  color: var(--slate-500);
+}
+
+/* Tablet tier: 768-1279 */
+@media (max-width: 1279px) {
+  .heading-card {
+    font-size: 17px;
+    letter-spacing: -0.3px;
+  }
+
+  .data-large {
+    font-size: 22px;
+    letter-spacing: -0.3px;
+  }
+
+  .data-small {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .ui-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .body {
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  .body-small {
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.65;
+  }
+
+  .btn-primary {
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Mobile tier: <768 */
+@media (max-width: 767px) {
+  body {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.75;
+  }
+
+  .swap-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .heading-card {
+    font-size: 16px;
+    letter-spacing: -0.2px;
+  }
+
+  .data-large {
+    font-size: 20px;
+    letter-spacing: -0.2px;
+  }
+
+  .data-small {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  .ui-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  .body {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.75;
+  }
+
+  .body-small {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  .btn-primary {
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+}
