@@ -39,6 +39,9 @@ jobs:
           ROLLUP_LINUX_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/rollup'].optionalDependencies['@rollup/rollup-linux-x64-gnu']")"
           npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_LINUX_VERSION}"
 
+      - name: Enforce partner-web design system guardrails
+        run: npm run check:design-system --workspace apps/partner-web
+
       - name: Deploy to Cloudflare Workers
         shell: bash
         run: |

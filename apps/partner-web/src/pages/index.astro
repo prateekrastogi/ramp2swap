@@ -1,26 +1,5 @@
 ---
 import '../styles/design-system.css';
-
-const foundations = [
-  { key: 'Obsidian (60%)', value: '#0A0D0F · #0F1419 · #141C24 · #1E2C3A' },
-  { key: 'Slate (30%)', value: '#E8F0F7 · #7A98B3 · #3D5269 · #243040' },
-  { key: 'Mint (10%)', value: '#00E5A0 · #00C484 · rgba(0,229,160,0.12) · rgba(0,229,160,0.06)' }
-];
-
-const components = [
-  {
-    title: 'Surface hierarchy',
-    desc: 'Use obsidian layers to define elevation and layout depth.',
-  },
-  {
-    title: 'Typography structure',
-    desc: 'Syne for power, DM Mono for truth, DM Sans for clarity.',
-  },
-  {
-    title: 'Action discipline',
-    desc: 'Reserve mint for CTA, active states, and key callouts only.',
-  },
-];
 ---
 
 <!doctype html>
@@ -28,78 +7,16 @@ const components = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Ramp2Swap portal design system" />
-    <title>Ramp2Swap Portal Design System</title>
+    <meta name="description" content="Ramp2Swap partner portal" />
+    <title>Ramp2Swap Partner Portal</title>
     <link rel="icon" type="image/png" href="/logo.png" />
   </head>
   <body class="page">
     <main class="container">
-      <section class="surface section">
+      <section class="surface section" style="display: grid; place-items: center; min-height: 60vh; text-align: center;">
         <img src="/logo_horizontal.png" alt="Ramp2Swap" style="max-width: 360px; width: 100%; height: auto;" />
-        <h1 class="heading-hero" style="margin-top: 16px;">Portal Design System</h1>
-        <p class="body" style="margin-top: 10px; max-width: 700px;">
-          Strict token-based UI system using only approved palette and typography primitives.
-        </p>
-        <div style="margin-top: 16px;">
-          <a class="btn-primary" href="#components">Primary CTA</a>
-        </div>
-      </section>
-
-      <section class="surface-secondary section" style="margin-top: 20px;">
-        <h2 class="heading-section">Palette Foundations</h2>
-        <div class="card-grid">
-          {foundations.map((item) => (
-            <article class="card">
-              <p class="heading-card">{item.key}</p>
-              <p class="data-small" style="margin-top: 8px;">{item.value}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section id="components" class="surface-secondary section" style="margin-top: 20px;">
-        <h2 class="heading-section">Core Components</h2>
-        <div class="card-grid">
-          {components.map((item, index) => (
-            <article class={`card ${index === 0 ? 'card-accent' : ''}`}>
-              <p class="heading-card">{item.title}</p>
-              <p class="body" style="margin-top: 8px;">{item.desc}</p>
-            </article>
-          ))}
-        </div>
-
-        <div class="card-grid" style="margin-top: 16px;">
-          <article class="card">
-            <label class="ui-label" for="email">Input Field</label>
-            <input id="email" class="input" placeholder="name@partner.com" />
-          </article>
-          <article class="card">
-            <p class="ui-label">Status</p>
-            <span class="badge-active">Active Partner</span>
-          </article>
-          <article class="card">
-            <p class="ui-label">Data Callout</p>
-            <p class="data-large" style="color: var(--mint-500);">Rate: 1.0031</p>
-            <p class="data-small" style="margin-top: 6px;">Updated 14:42:19 UTC</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="surface-secondary section" style="margin-top: 20px;">
-        <h2 class="heading-section">Swap Layout Rule</h2>
-        <div class="swap-layout" style="margin-top: 16px;">
-          <article class="card">
-            <p class="heading-card">Copy Column</p>
-            <p class="body" style="margin-top: 8px;">
-              Desktop and tablet keep this beside the widget. Mobile stacks this above the widget.
-            </p>
-          </article>
-          <article class="card card-accent">
-            <p class="ui-label">Swap Amount</p>
-            <input class="swap-amount-input" value="1250.00" />
-            <p class="data-small" style="margin-top: 8px;">Stays 26px Syne 700 on mobile by design.</p>
-          </article>
-        </div>
+        <p class="body" style="margin-top: 12px;">Partner Portal</p>
+        <a class="btn-primary" href="/design-system" style="margin-top: 16px;">View Design System</a>
       </section>
     </main>
   </body>

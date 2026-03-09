@@ -30,6 +30,23 @@
   --mint-600: #00C484;
   --mint-tint-strong: rgba(0,229,160,0.12);
   --mint-tint-soft: rgba(0,229,160,0.06);
+  --mint-tint-faint: rgba(0,229,160,0.04);
+  --mint-glow-strong: rgba(0,229,160,0.5);
+  --mint-border-soft: rgba(0,229,160,0.15);
+  --mint-border-focus: rgba(0,229,160,0.35);
+  --mint-ring-soft: rgba(0,229,160,0.08);
+  --mint-ring-edge: rgba(0,229,160,0.06);
+  --mint-border-hover: rgba(0,229,160,0.1);
+  --mint-press-bg: rgba(0,229,160,0.85);
+
+  /* Glass neutrals + ambient blue token */
+  --white-a-06: rgba(255,255,255,0.06);
+  --white-a-07: rgba(255,255,255,0.07);
+  --white-a-08: rgba(255,255,255,0.08);
+  --white-a-10: rgba(255,255,255,0.10);
+  --white-a-12: rgba(255,255,255,0.12);
+  --white-a-14: rgba(255,255,255,0.14);
+  --blue-orb: rgba(0,120,255,0.07);
 
   --font-display: 'Syne', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   --font-body: 'DM Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
@@ -268,6 +285,174 @@ body {
   color: var(--slate-500);
 }
 
+/* ------------------------------------------------------------------
+   Glassmorphism system
+   ------------------------------------------------------------------ */
+
+/* Non-negotiable ambient layer: glass needs vivid content behind it */
+.ambient-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ambient-orb {
+  position: fixed;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.ambient-orb--mint-top {
+  top: -200px;
+  right: -150px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, var(--mint-tint-strong) 0%, transparent 65%);
+  filter: blur(80px);
+}
+
+.ambient-orb--blue-bottom {
+  bottom: 10%;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--blue-orb) 0%, transparent 65%);
+  filter: blur(100px);
+}
+
+.ambient-orb--mint-center {
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--mint-tint-faint) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  filter: blur(60px);
+}
+
+/* Ensure content sits above ambient backdrop */
+.content-layer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Shared glass behavior */
+.glass {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Tier 1 — Base glass (cards, panels) */
+.glass-tier-1 {
+  background: rgba(15, 20, 25, 0.55);
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--white-a-07);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.3),
+    inset 0 1px 0 var(--white-a-06);
+  --glass-hover-bg: rgba(15, 20, 25, 0.63);
+}
+
+/* Tier 2 — Elevated glass (modals, swap widget) */
+.glass-tier-2 {
+  background: rgba(15, 20, 25, 0.72);
+  backdrop-filter: blur(40px) saturate(160%);
+  border: 1px solid var(--white-a-10);
+  box-shadow:
+    0 8px 48px rgba(0,0,0,0.45),
+    inset 0 1px 0 var(--white-a-08);
+  --glass-hover-bg: rgba(15, 20, 25, 0.80);
+}
+
+/* Tier 3 — Overlay glass (dropdowns, tooltips) */
+.glass-tier-3 {
+  background: rgba(20, 28, 36, 0.85);
+  backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid var(--white-a-12);
+  box-shadow:
+    0 16px 64px rgba(0,0,0,0.6),
+    inset 0 1px 0 var(--white-a-10);
+  --glass-hover-bg: rgba(20, 28, 36, 0.93);
+}
+
+/* Tier 4 — Nav glass (fixed navbar only) */
+.glass-tier-4-nav {
+  background: rgba(10, 13, 15, 0.70);
+  backdrop-filter: blur(20px) saturate(120%);
+  border-bottom: 1px solid var(--white-a-06);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+}
+
+/* Mint glass variant — action surfaces only */
+.glass-mint {
+  background: var(--mint-tint-faint);
+  backdrop-filter: blur(40px) saturate(160%);
+  border: 1px solid var(--mint-border-soft);
+  box-shadow:
+    0 8px 48px rgba(0,0,0,0.4),
+    0 0 0 1px var(--mint-ring-edge),
+    inset 0 1px 0 var(--mint-tint-strong);
+}
+
+.glass-mint::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+}
+
+/* Interactive states for glass surfaces */
+.glass-interactive {
+  transition: all 0.25s ease;
+}
+
+.glass-interactive:hover {
+  background: var(--glass-hover-bg, inherit);
+  border-color: var(--white-a-14);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.35),
+    0 0 0 1px var(--mint-border-hover),
+    inset 0 1px 0 var(--white-a-08);
+}
+
+.input-glass:focus-visible {
+  outline: none;
+  border: 1px solid var(--mint-border-focus);
+  box-shadow:
+    0 0 0 3px var(--mint-ring-soft),
+    inset 0 1px 0 var(--mint-ring-edge);
+  backdrop-filter: blur(40px) saturate(180%);
+}
+
+.btn-glass:active {
+  background: var(--mint-press-bg);
+  transform: translateY(1px);
+  box-shadow:
+    0 5px 14px rgba(0,0,0,0.24),
+    inset 0 1px 0 var(--mint-tint-strong);
+}
+
+/* Typography adjustment when text sits on glass */
+.on-glass .body {
+  font-weight: 400;
+}
+
+.on-glass .body-small {
+  font-weight: 500;
+}
+
+.on-glass .heading-hero {
+  letter-spacing: clamp(-1px, -0.12vw, -1.5px);
+}
+
+.on-glass .heading-section {
+  letter-spacing: clamp(-0.5px, -0.08vw, -1px);
+}
+
 /* Tablet tier: 768-1279 */
 @media (max-width: 1279px) {
   .heading-card {
@@ -305,6 +490,22 @@ body {
   .btn-primary {
     font-size: 14px;
     letter-spacing: -0.01em;
+  }
+
+  .glass-tier-1 {
+    backdrop-filter: blur(16px) saturate(120%);
+  }
+
+  .glass-tier-2 {
+    backdrop-filter: blur(32px) saturate(140%);
+  }
+
+  .glass-tier-3 {
+    backdrop-filter: blur(48px) saturate(160%);
+  }
+
+  .glass-tier-4-nav {
+    backdrop-filter: blur(16px) saturate(120%);
   }
 }
 
@@ -355,5 +556,21 @@ body {
   .btn-primary {
     font-size: 15px;
     letter-spacing: 0;
+  }
+
+  .glass-tier-1 {
+    backdrop-filter: blur(12px) saturate(120%);
+  }
+
+  .glass-tier-2 {
+    backdrop-filter: blur(24px) saturate(140%);
+  }
+
+  .glass-tier-3 {
+    backdrop-filter: blur(36px) saturate(160%);
+  }
+
+  .glass-tier-4-nav {
+    backdrop-filter: blur(12px) saturate(120%);
   }
 }

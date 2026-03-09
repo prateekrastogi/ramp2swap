@@ -1,0 +1,110 @@
+---
+import '../styles/design-system.css';
+
+const glassTiers = [
+  {
+    title: 'Tier 1 — Base Glass',
+    cls: 'glass-tier-1',
+    desc: 'Cards and panels with light frost and subtle depth.',
+  },
+  {
+    title: 'Tier 2 — Elevated Glass',
+    cls: 'glass-tier-2',
+    desc: 'Modals and primary widgets with stronger blur and contrast.',
+  },
+  {
+    title: 'Tier 3 — Overlay Glass',
+    cls: 'glass-tier-3',
+    desc: 'Tooltips and overlay surfaces with maximum depth treatment.',
+  },
+  {
+    title: 'Tier 4 — Nav Glass',
+    cls: 'glass-tier-4-nav',
+    desc: 'Reserved for fixed navigation surfaces only.',
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ramp2Swap glassmorphism design system showcase" />
+    <title>Design System | Ramp2Swap</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+  </head>
+  <body class="page">
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <main class="container content-layer">
+      <section class="glass glass-tier-2 on-glass section">
+        <img src="/logo_horizontal.png" alt="Ramp2Swap" style="max-width: 360px; width: 100%; height: auto;" />
+        <h1 class="heading-hero" style="margin-top: 16px;">Glass Design System</h1>
+        <p class="body" style="margin-top: 10px; max-width: 760px;">
+          Tiered glass surfaces, mint action glass, and ambient orbs are the foundation of this portal visual language.
+        </p>
+        <div style="margin-top: 16px;">
+          <a class="btn-primary btn-glass" href="#tiers">View Glass Tiers</a>
+        </div>
+      </section>
+
+      <section id="tiers" class="section" style="padding: 0; margin-top: 20px;">
+        <h2 class="heading-section">Glass Elevation Tiers</h2>
+        <div class="card-grid" style="margin-top: 16px;">
+          {glassTiers.map((tier) => (
+            <article class={`glass ${tier.cls} glass-interactive card on-glass`}>
+              <p class="heading-card">{tier.title}</p>
+              <p class="body" style="margin-top: 8px;">{tier.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section" style="padding: 0; margin-top: 20px;">
+        <h2 class="heading-section">Mint Glass Action Surface</h2>
+        <div class="swap-layout" style="margin-top: 16px;">
+          <article class="glass glass-tier-1 glass-interactive card on-glass">
+            <p class="heading-card">Context Panel</p>
+            <p class="body" style="margin-top: 8px;">
+              Standard content panel using neutral glass. Hover state raises border and glow.
+            </p>
+          </article>
+
+          <article class="glass glass-mint glass-interactive card on-glass">
+            <p class="ui-label">Swap Widget</p>
+            <input class="swap-amount-input input-glass" value="1250.00" />
+            <p class="data-small" style="margin-top: 8px;">Primary interaction remains 26px on every breakpoint.</p>
+            <div style="margin-top: 12px;">
+              <button class="btn-primary btn-glass" type="button">Confirm Swap</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" style="padding: 0; margin-top: 20px; margin-bottom: 12px;">
+        <h2 class="heading-section">Interaction States</h2>
+        <div class="card-grid" style="margin-top: 16px;">
+          <article class="glass glass-tier-1 glass-interactive card on-glass">
+            <p class="heading-card">Hover</p>
+            <p class="body-small" style="margin-top: 8px;">Move cursor here to see +opacity, white border shift, and mint edge ring.</p>
+          </article>
+
+          <article class="glass glass-tier-2 card on-glass">
+            <label class="ui-label" for="glass-email">Focus Input</label>
+            <input id="glass-email" class="input input-glass" placeholder="focus to view ring" />
+          </article>
+
+          <article class="glass glass-tier-1 card on-glass">
+            <p class="ui-label">Pressed Button</p>
+            <button class="btn-primary btn-glass" type="button" style="margin-top: 8px;">Press Me</button>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

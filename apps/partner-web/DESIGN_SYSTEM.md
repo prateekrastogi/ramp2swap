@@ -8,7 +8,7 @@ This document is the source of truth for the portal visual language and typograp
 - Do not introduce one-off styles that bypass system tokens/classes.
 
 ## Required Pre-Change Checklist
-- Confirm no new color values are added outside approved palette.
+- Confirm no new color values are added outside approved palette and approved glass tokens.
 - Confirm no new font families or font weights outside system scale.
 - Confirm responsive typography matches desktop/tablet/mobile rules in this document.
 - Confirm mint usage remains accent-only and limited per section.
@@ -25,6 +25,19 @@ This document is the source of truth for the portal visual language and typograp
 5. If system changes are intentional, update both:
    - `src/styles/design-system.css`
    - `DESIGN_SYSTEM.md`
+
+## Automated Guardrails (Enforced)
+- Local validation command:
+  - `npm run check:design-system --workspace apps/partner-web`
+- CI enforcement:
+  - `.github/workflows/deploy-partner-web.yml` runs the same check before deploy.
+- Build and deploy are guarded:
+  - `apps/partner-web/package.json` runs `check:design-system` before `build` and `deploy`.
+- Validation blocks:
+  - raw color literals outside `src/styles/design-system.css`
+  - forbidden font families (Inter, Space Grotesk, Clash Display, Neue Haas, Helvetica Neue)
+  - missing required design-system sections/classes
+  - missing page-level import of `src/styles/design-system.css`
 
 ## Color Palette Rules (Strict)
 Use only the colors below. Do not add new hex/rgb values.
@@ -46,6 +59,84 @@ Use only the colors below. Do not add new hex/rgb values.
 - `#00C484` hover/pressed state for mint actions
 - `rgba(0,229,160,0.12)` mint-tint background for mint labels
 - `rgba(0,229,160,0.06)` ultra subtle mint wash
+
+### Approved Glass Extension Tokens
+- `rgba(255,255,255,0.06)` glass top edge / nav border
+- `rgba(255,255,255,0.07)` tier-1 glass border
+- `rgba(255,255,255,0.08)` tier-2 inset light edge
+- `rgba(255,255,255,0.10)` tier-2 border / tier-3 inset edge
+- `rgba(255,255,255,0.12)` tier-3 border
+- `rgba(255,255,255,0.14)` hover border on interactive glass
+- `rgba(0,120,255,0.07)` ambient blue orb (background only)
+
+## Glassmorphism System (Strict)
+Glass requires a vivid background. Ambient orbs are mandatory and load-bearing, not decorative.
+
+### Ambient Layer (Non-Negotiable)
+Use persistent fixed orbs behind all glass surfaces:
+- Orb 1 mint (top-right): `700x700`, `rgba(0,229,160,0.12)` radial, blur `80px`
+- Orb 2 blue (bottom-left): `500x500`, `rgba(0,120,255,0.07)` radial, blur `100px`
+- Orb 3 deep mint (center): `300x300`, `rgba(0,229,160,0.04)` radial, blur `60px`
+
+Classes:
+- `.ambient-layer`
+- `.ambient-orb--mint-top`
+- `.ambient-orb--blue-bottom`
+- `.ambient-orb--mint-center`
+- `.content-layer` (keeps UI above ambient layer)
+
+### Glass Elevation Tiers
+- Tier 1 `.glass-tier-1` (cards/panels): `rgba(15,20,25,0.55)`, blur `20px`, saturate `140%`
+- Tier 2 `.glass-tier-2` (modals/swap widget): `rgba(15,20,25,0.72)`, blur `40px`, saturate `160%`
+- Tier 3 `.glass-tier-3` (dropdowns/tooltips): `rgba(20,28,36,0.85)`, blur `60px`, saturate `180%`
+- Tier 4 `.glass-tier-4-nav` (fixed nav only): `rgba(10,13,15,0.70)`, blur `20px`, saturate `120%`
+
+Premium detail:
+- All glass tiers keep inner top-edge light via inset shadow.
+
+### Mint Glass Variant
+Use `.glass-mint` for action surfaces only (swap widget, confirmation panels):
+- Background `rgba(0,229,160,0.04)`
+- Border `rgba(0,229,160,0.15)`
+- Blur `40px`, saturate `160%`
+- Includes top edge highlight (`::before`) with mint gradient.
+
+### Interactive Glass States
+- Hover `.glass-interactive:hover`:
+  - opacity shift (+0.08 via per-tier hover background)
+  - border `rgba(255,255,255,0.14)`
+  - mint edge ring `rgba(0,229,160,0.1)`
+  - transition `all 0.25s ease`
+- Focus `.input-glass:focus-visible`:
+  - border `rgba(0,229,160,0.35)`
+  - ring `0 0 0 3px rgba(0,229,160,0.08)`
+  - inset `rgba(0,229,160,0.06)`
+  - blur `40px`, saturate `180%`
+- Active `.btn-glass:active`:
+  - background `rgba(0,229,160,0.85)`
+  - `transform: translateY(1px)`
+  - reduced shadow
+
+### Responsive Blur Performance Rules
+- Desktop (1280+): Tier1 `20px`, Tier2 `40px`, Tier3 `60px`, Nav `20px`
+- Tablet (768–1279): Tier1 `16px`, Tier2 `32px`, Tier3 `48px`, Nav `16px`
+- Mobile (<768): Tier1 `12px`, Tier2 `24px`, Tier3 `36px`, Nav `12px`
+
+### Saturate Mapping Rule
+- `blur(12px) -> saturate(120%)`
+- `blur(20px) -> saturate(140%)`
+- `blur(40px) -> saturate(160%)`
+- `blur(60px) -> saturate(180%)`
+
+### Typography on Glass
+- On glass surfaces, body weight is increased for legibility:
+  - `DM Sans 300 -> 400`
+  - `DM Sans 400 -> 500`
+- Heading tracking is loosened on glass:
+  - hero: `-2px -> -1.5px`
+  - section: `-1.5px -> -1px`
+- Never use text-shadow on glass.
+- Use `.on-glass` container class to apply these adjustments.
 
 ## Typography System (Free Fonts)
 - Display/Headings: `Syne`
@@ -116,6 +207,7 @@ Use only the colors below. Do not add new hex/rgb values.
 - Never use mint for long body text.
 - Never make mint the dominant background of a section.
 - Prefer one mint-emphasis element per section.
+- Do not apply one uniform glass style to every surface. Use tiered elevation classes.
 
 ## Typography Discipline
 - Do not swap in Inter, Space Grotesk, Clash Display, Neue Haas, Helvetica Neue, or decorative ligature-heavy editorial fonts.
@@ -127,4 +219,4 @@ Use only the colors below. Do not add new hex/rgb values.
 
 ## Canonical Files
 - Tokens and primitives: `src/styles/design-system.css`
-- Reference usage: `src/pages/index.astro`
+- Reference usage: `src/pages/design-system.astro`
