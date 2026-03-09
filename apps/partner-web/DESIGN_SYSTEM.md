@@ -69,6 +69,64 @@ Use only the colors below. Do not add new hex/rgb values.
 - `rgba(255,255,255,0.14)` hover border on interactive glass
 - `rgba(0,120,255,0.07)` ambient blue orb (background only)
 
+## Logo System (Strict)
+Two approved logo variants:
+- Logomark: square mint mark only
+- Horizontal logo: logomark + `ramp2swap` wordmark
+
+### Placement + sizing rules by surface
+
+Desktop (1280+):
+- Navbar: horizontal logo, mark `32px` / wordmark `20px`, left aligned, `48px` from left edge
+- Footer: horizontal logo, mark `28px` / wordmark `17px`, left aligned, first footer element, opacity `100%`
+- Splash/loading: logomark only, `48px`, centered both axes, subtle pulse
+- Favicon: logomark only, `32x32` + `16x16`, obsidian background + mint mark
+
+Tablet (768–1279):
+- Navbar: horizontal logo, mark `28px` / wordmark `18px`, left aligned, `32px` from edge
+- Footer: horizontal logo, mark `24px` / wordmark `15px`, top-left before footer columns
+- Auth/onboarding: logomark only, `40px`, top-center, `32px` from top
+
+Mobile (<768):
+- Navbar: logomark only, `32px`, left aligned, `20px` from edge
+- Footer: horizontal logo, mark `24px` / wordmark `14px`, centered
+- Splash/loading: logomark only, `44px`, centered
+- Embedded widget: horizontal logo, mark `20px` / wordmark `12px`, bottom-centered, opacity `60%` with “Powered by ramp2swap”
+
+### Sizing reference matrix
+- Desktop nav: mark `32px`, wordmark `20px`, total `~140px`
+- Tablet nav: mark `28px`, wordmark `18px`, total `~125px`
+- Mobile nav: mark `32px`, total `32px`
+- Desktop footer: mark `28px`, wordmark `17px`, total `~120px`
+- Tablet footer: mark `24px`, wordmark `15px`, total `~105px`
+- Mobile footer: mark `24px`, wordmark `14px`, total `~100px`
+- Widget: mark `20px`, wordmark `12px`, total `~88px`
+- Favicon: mark `32px`
+- Splash: mark `48px` desktop/tablet, `44px` mobile
+
+### Clearspace rule
+- Minimum clearspace on all sides = current mark height.
+- If mark is `32px`, no element gets closer than `32px`.
+- Mobile nav exception behavior: `20px` edge padding is the enforced clearspace boundary; do not reduce it further.
+
+### Non-negotiable logo constraints
+- Never stretch or recolor logos.
+- Approved polarity only:
+  - mint on obsidian
+  - obsidian on mint (reversed, light background only)
+- Never use wordmark without mark, except mark-only contexts:
+  - favicon
+  - splash/loading
+  - mobile nav
+- Mobile nav must be mark-only.
+
+### CSS implementation classes
+- Containers: `.brand-nav`, `.brand-footer`, `.brand-splash`, `.brand-auth`, `.brand-widget`
+- Assets: `.logo-horizontal`, `.logo-mark`
+- Context sizes: `.logo-nav-horizontal`, `.logo-footer-horizontal`, `.logo-widget-horizontal`, `.logo-mark-nav`, `.logo-mark-splash`, `.logo-mark-auth`
+- Visibility helpers: `.mobile-nav-horizontal-only`, `.mobile-nav-mark-only`
+- Clearspace helpers: `.logo-clearspace-32`, `.logo-clearspace-28`, `.logo-clearspace-24`, `.logo-clearspace-20`
+
 ## Glassmorphism System (Strict)
 Glass requires a vivid background. Ambient orbs are mandatory and load-bearing, not decorative.
 
@@ -208,6 +266,7 @@ Use `.glass-mint` for action surfaces only (swap widget, confirmation panels):
 - Never make mint the dominant background of a section.
 - Prefer one mint-emphasis element per section.
 - Do not apply one uniform glass style to every surface. Use tiered elevation classes.
+- Do not break logo context rules across breakpoints.
 
 ## Typography Discipline
 - Do not swap in Inter, Space Grotesk, Clash Display, Neue Haas, Helvetica Neue, or decorative ligature-heavy editorial fonts.

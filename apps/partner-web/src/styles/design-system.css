@@ -337,6 +337,143 @@ body {
   z-index: 1;
 }
 
+/* ------------------------------------------------------------------
+   Branding / logo system
+   ------------------------------------------------------------------ */
+
+.brand-shell {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.brand-nav {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 48px;
+  padding-right: 32px;
+}
+
+.brand-footer {
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 48px;
+  padding-right: 32px;
+}
+
+.brand-splash {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+}
+
+.brand-auth {
+  min-height: 180px;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  padding-top: 32px;
+}
+
+.brand-widget {
+  min-height: 110px;
+  display: grid;
+  align-content: end;
+  justify-items: center;
+  padding-bottom: 16px;
+}
+
+.brand-row {
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo-horizontal {
+  display: block;
+  width: auto;
+  max-width: 100%;
+}
+
+.logo-mark {
+  display: block;
+  width: auto;
+  max-width: 100%;
+}
+
+/* Desktop defaults (1280+) */
+.logo-nav-horizontal {
+  height: 32px;
+}
+
+.logo-footer-horizontal {
+  height: 28px;
+  opacity: 1;
+}
+
+.logo-widget-horizontal {
+  height: 20px;
+  opacity: 0.6;
+}
+
+.logo-mark-nav {
+  height: 32px;
+}
+
+.logo-mark-splash {
+  height: 48px;
+  animation: logo-pulse 2.2s ease-in-out infinite;
+}
+
+.logo-mark-auth {
+  height: 40px;
+}
+
+/* Mobile nav uses mark-only; hidden above mobile */
+.mobile-nav-mark-only {
+  display: none;
+}
+
+.mobile-nav-horizontal-only {
+  display: inline-flex;
+}
+
+/* Clearspace rule: minimum clearspace equals mark height */
+.logo-clearspace-32 {
+  padding: 32px;
+}
+
+.logo-clearspace-28 {
+  padding: 28px;
+}
+
+.logo-clearspace-24 {
+  padding: 24px;
+}
+
+.logo-clearspace-20 {
+  padding: 20px;
+}
+
+@keyframes logo-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+
+  50% {
+    transform: scale(1.035);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+}
+
 /* Shared glass behavior */
 .glass {
   position: relative;
@@ -507,6 +644,34 @@ body {
   .glass-tier-4-nav {
     backdrop-filter: blur(16px) saturate(120%);
   }
+
+  .brand-nav {
+    height: 68px;
+    padding-left: 32px;
+    padding-right: 24px;
+  }
+
+  .brand-footer {
+    min-height: 84px;
+    padding-left: 32px;
+    padding-right: 24px;
+  }
+
+  .logo-nav-horizontal {
+    height: 28px;
+  }
+
+  .logo-footer-horizontal {
+    height: 24px;
+  }
+
+  .logo-mark-auth {
+    height: 40px;
+  }
+
+  .logo-mark-splash {
+    height: 48px;
+  }
 }
 
 /* Mobile tier: <768 */
@@ -572,5 +737,42 @@ body {
 
   .glass-tier-4-nav {
     backdrop-filter: blur(12px) saturate(120%);
+  }
+
+  .brand-nav {
+    height: 56px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .brand-footer {
+    min-height: 82px;
+    justify-content: center;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .mobile-nav-mark-only {
+    display: inline-flex;
+  }
+
+  .mobile-nav-horizontal-only {
+    display: none;
+  }
+
+  .logo-mark-nav {
+    height: 32px;
+  }
+
+  .logo-footer-horizontal {
+    height: 24px;
+  }
+
+  .logo-mark-splash {
+    height: 44px;
+  }
+
+  .logo-widget-horizontal {
+    height: 20px;
   }
 }

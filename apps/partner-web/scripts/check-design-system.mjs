@@ -88,6 +88,15 @@ for (const requiredClass of [
   '.swap-layout',
   '.swap-amount-input',
   '.on-glass .body',
+  '.brand-nav',
+  '.brand-footer',
+  '.brand-splash',
+  '.brand-widget',
+  '.logo-nav-horizontal',
+  '.logo-footer-horizontal',
+  '.logo-mark-nav',
+  '.mobile-nav-mark-only',
+  '.mobile-nav-horizontal-only',
 ]) {
   check(css.includes(requiredClass), `[Missing rule] design-system.css must include ${requiredClass}`);
 }
@@ -97,6 +106,7 @@ for (const requiredDocSection of [
   '## Non-Negotiable Rule',
   '## Required Pre-Change Checklist',
   '## Change Protocol (Every Time)',
+  '## Logo System (Strict)',
   '## Glassmorphism System (Strict)',
   '## Responsive Type Scale',
 ]) {
