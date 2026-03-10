@@ -882,6 +882,20 @@ body {
   max-width: 760px;
 }
 
+.transaction-feed-copy {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.earnings-payouts-copy {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .performance-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1102,6 +1116,7 @@ body {
 .sidebar {
   position: sticky;
   top: 0;
+  z-index: 30;
   height: 100vh;
   width: 260px;
   padding: 0 12px 12px;
@@ -1415,6 +1430,10 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  appearance: none;
   cursor: pointer;
 }
 
@@ -1536,6 +1555,7 @@ body {
 
   .sidebar {
     width: 72px;
+    overflow: visible;
   }
 
   .sidebar-logo-horizontal {
@@ -1617,12 +1637,20 @@ body {
 /* Mobile tier: <768 */
 @media (max-width: 767px) {
   .dashboard-main {
-    padding: 92px 20px 28px;
+    padding: 32px 20px 28px;
   }
 
   .dashboard-section-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .transaction-feed-copy {
+    white-space: normal;
+  }
+
+  .earnings-payouts-copy {
+    white-space: normal;
   }
 
   .performance-metrics-grid {

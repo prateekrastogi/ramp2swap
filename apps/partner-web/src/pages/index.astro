@@ -27,16 +27,16 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
     </div>
 
     <header class="mobile-topbar content-layer">
-      <label for="sidebar-mobile" class="hamburger-btn" aria-label="Open navigation">
+      <button class="hamburger-btn" id="mobile-sidebar-toggle" type="button" aria-label="Open navigation">
         <svg class="hamburger-icon" viewBox="0 0 24 24" aria-hidden="true">
           <line class="hamburger-line hamburger-line-top" x1="5" y1="7" x2="19" y2="7"></line>
           <line class="hamburger-line hamburger-line-mid" x1="5" y1="12" x2="19" y2="12"></line>
           <line class="hamburger-line hamburger-line-bottom" x1="5" y1="17" x2="19" y2="17"></line>
         </svg>
-      </label>
-      <label for="sidebar-mobile" class="mobile-topbar-logo-toggle" aria-label="Toggle navigation">
+      </button>
+      <button class="mobile-topbar-logo-toggle" id="mobile-logo-toggle" type="button" aria-label="Toggle navigation">
         <img class="logo-mark mobile-topbar-mark" src="/logo.png" alt="Ramp2Swap mark" />
-      </label>
+      </button>
     </header>
 
     <label for="sidebar-mobile" class="mobile-overlay" aria-hidden="true"></label>
@@ -186,7 +186,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
               <div class="stack-12">
                 <p class="ui-label">Transaction Feed</p>
                 <h2 class="heading-card dashboard-section-title">Live Processing Status</h2>
-                <p class="body dashboard-section-copy">
+                <p class="body dashboard-section-copy transaction-feed-copy">
                   Every ramp transaction attributed to your referral links, with anonymized user references and current processing status.
                 </p>
               </div>
@@ -236,7 +236,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
               <div class="stack-12">
                 <p class="ui-label">Earnings & Payouts</p>
                 <h2 class="heading-card dashboard-section-title">Commission and Withdrawal Status</h2>
-                <p class="body dashboard-section-copy">
+                <p class="body dashboard-section-copy earnings-payouts-copy">
                   Review your commission rate, compare pending versus available balance, and track payout history before requesting withdrawal.
                 </p>
               </div>
@@ -312,7 +312,11 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
         collapseControl.checked = false;
       }
 
+      const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+      const mobileLogoToggle = document.getElementById('mobile-logo-toggle');
       const sidebarBrandToggle = document.getElementById('sidebar-brand-toggle');
+      const sidebarElement = document.querySelector('.sidebar');
+      const mobileTopbar = document.querySelector('.mobile-topbar');
       const mobileControl = document.getElementById('sidebar-mobile');
       const pinControl = document.getElementById('sidebar-pin');
       const navViewTriggers = document.querySelectorAll('[data-view-target]');
@@ -339,6 +343,49 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
           }
         });
       }
+
+      if (mobileSidebarToggle instanceof HTMLButtonElement && mobileControl instanceof HTMLInputElement) {
+        mobileSidebarToggle.addEventListener('click', (event) => {
+          event.stopPropagation();
+          mobileControl.checked = !mobileControl.checked;
+        });
+      }
+
+      if (mobileLogoToggle instanceof HTMLButtonElement && mobileControl instanceof HTMLInputElement) {
+        mobileLogoToggle.addEventListener('click', (event) => {
+          event.stopPropagation();
+          mobileControl.checked = !mobileControl.checked;
+        });
+      }
+
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Node) || !(sidebarElement instanceof HTMLElement)) {
+          return;
+        }
+
+        const clickedInsideSidebar = sidebarElement.contains(target);
+        const clickedMobileTopbar = mobileTopbar instanceof HTMLElement && mobileTopbar.contains(target);
+
+        if (
+          pinControl instanceof HTMLInputElement &&
+          pinControl.checked &&
+          window.matchMedia('(min-width: 768px) and (max-width: 1279px)').matches &&
+          !clickedInsideSidebar
+        ) {
+          pinControl.checked = false;
+        }
+
+        if (
+          mobileControl instanceof HTMLInputElement &&
+          mobileControl.checked &&
+          window.matchMedia('(max-width: 767px)').matches &&
+          !clickedInsideSidebar &&
+          !clickedMobileTopbar
+        ) {
+          mobileControl.checked = false;
+        }
+      });
 
       if (navViewTriggers.length > 0 && dashboardViews.length > 0) {
         const setActiveView = (viewName) => {
