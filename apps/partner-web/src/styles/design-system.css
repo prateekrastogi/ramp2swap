@@ -1485,6 +1485,10 @@ body {
   font-size: 16px;
 }
 
+.nav-icon-text {
+  font-variant-emoji: text;
+}
+
 .nav-text {
   white-space: nowrap;
   font-family: var(--font-body);
