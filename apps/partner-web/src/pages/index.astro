@@ -1,5 +1,6 @@
 ---
 import '../styles/design-system.css';
+import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { transactionFeedItems } from '../data/transaction-feed-mock';
@@ -52,7 +53,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             <a class="nav-item nav-item-active" href="#overview" data-label="Overview" data-view-target="overview"><span class="nav-icon">◫</span><span class="nav-text">Overview</span></a>
             <a class="nav-item" href="#link-generator" data-label="Link Generator" data-view-target="link-generator"><span class="nav-icon">⛓</span><span class="nav-text">Link Generator</span></a>
             <a class="nav-item" href="#transaction-feed" data-label="Transaction Feed" data-view-target="transaction-feed"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
-            <a class="nav-item" href="#" data-label="Earnings & Payouts"><span class="nav-icon">$</span><span class="nav-text">Earnings & Payouts</span></a>
+            <a class="nav-item" href="#earnings-payouts" data-label="Earnings & Payouts" data-view-target="earnings-payouts"><span class="nav-icon">$</span><span class="nav-text">Earnings & Payouts</span></a>
             <a class="nav-item" href="#" data-label="Analytics"><span class="nav-icon">◔</span><span class="nav-text">Analytics</span></a>
             <a class="nav-item" href="#" data-label="Branding Kit"><span class="nav-icon">▣</span><span class="nav-text">Branding Kit</span></a>
           </section>
@@ -84,7 +85,6 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                   Core referral performance metrics for the current reporting window.
                 </p>
               </div>
-              <span class="chip">Mock Data</span>
             </div>
 
             <div class="performance-metrics-grid">
@@ -231,6 +231,78 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                 </table>
               </div>
             </article>
+          </section>
+
+          <section id="earnings-payouts" class="earnings-payouts-shell" data-dashboard-view="earnings-payouts" hidden>
+            <div class="dashboard-section-header">
+              <div class="stack-12">
+                <p class="ui-label">Earnings & Payouts</p>
+                <h2 class="heading-card dashboard-section-title">Commission and Withdrawal Status</h2>
+                <p class="body dashboard-section-copy">
+                  Review your commission rate, compare pending versus available balance, and track payout history before requesting withdrawal.
+                </p>
+              </div>
+            </div>
+
+            <div class="earnings-payouts-grid">
+              <article class="card glass glass-tier-2 glass-mint on-glass earnings-summary-card">
+                <div class="widget-header">
+                  <p class="heading-card">Commission Snapshot</p>
+                  <span class="badge-active">Action Surface</span>
+                </div>
+
+                <div class="kpi-grid earnings-kpi-grid">
+                  <div class="kpi-card">
+                    <p class="ui-label">Commission Rate</p>
+                    <p class="data-large">{earningsSummary.commissionRate}</p>
+                  </div>
+                  <div class="kpi-card">
+                    <p class="ui-label">Pending Balance</p>
+                    <p class="data-large">{earningsSummary.pendingBalance}</p>
+                  </div>
+                  <div class="kpi-card">
+                    <p class="ui-label">Available Balance</p>
+                    <p class="data-large">{earningsSummary.availableBalance}</p>
+                  </div>
+                  <div class="kpi-card">
+                    <p class="ui-label">Total Paid Out</p>
+                    <p class="data-large">{earningsSummary.totalPaidOut}</p>
+                  </div>
+                </div>
+
+                <div class="row-12">
+                  <button class="btn-primary btn-glass" type="button">Request Withdrawal</button>
+                </div>
+              </article>
+
+              <article class="card glass glass-tier-1 on-glass payout-history-card">
+                <div class="widget-header">
+                  <p class="heading-card">Payout History</p>
+                  <span class="chip">{payoutHistoryEntries.length} entries</span>
+                </div>
+
+                <div class="payout-history-list">
+                  {payoutHistoryEntries.map((entry) => (
+                    <article class="payout-history-row">
+                      <div class="payout-history-head">
+                        <div class="stack-8">
+                          <p class="heading-card">{entry.amount}</p>
+                          <p class="data-small">{entry.destination}</p>
+                        </div>
+                        <span class={`status ${entry.status === 'paid' ? 'status-completed' : 'status-pending'}`}>
+                          {entry.status}
+                        </span>
+                      </div>
+
+                      <div class="row-12 payout-history-meta">
+                        <span class="data-small">{entry.date}</span>
+                        <span class="chip">{entry.id}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </article>
+            </div>
           </section>
         </div>
       </section>
