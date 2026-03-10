@@ -2229,6 +2229,9 @@ body {
   .nav-item::before,
   .sidebar-profile::after {
     display: none;
+    content: none;
+    opacity: 0;
+    pointer-events: none;
   }
 
   #sidebar-mobile:checked~.dashboard-shell .sidebar {
