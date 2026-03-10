@@ -99,7 +99,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
 
             <div class="performance-metrics-grid">
               {performanceSnapshotMetrics.map((metric) => (
-                <article class={`card performance-metric-card glass glass-interactive ${metric.accent === 'mint' ? 'glass-tier-2 performance-metric-card-highlight' : 'glass-tier-1'} on-glass`}>
+                <article class={`card performance-metric-card glass glass-interactive ${metric.accent === 'mint' ? 'glass-tier-2 glass-highlight-soft performance-metric-card-highlight' : 'glass-tier-1'} on-glass`}>
                   <div class="performance-metric-card-top">
                     <p class="ui-label">{metric.label}</p>
                     <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>{metric.delta}</span>
@@ -346,7 +346,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                 </div>
               </article>
 
-              <article class="card glass glass-tier-2 glass-interactive on-glass analytics-breakdown-card analytics-top-links-card">
+              <article class="card glass glass-tier-2 glass-interactive glass-highlight-soft analytics-top-links-card on-glass">
                 <div class="stack-12">
                   <p class="heading-card">Top Performing Links</p>
                   <div class="progress-list">

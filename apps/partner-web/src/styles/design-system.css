@@ -926,7 +926,7 @@ body {
   align-content: space-between;
 }
 
-.performance-metric-card-highlight {
+.glass-highlight-soft {
   contain: paint;
   background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
   border-color: var(--white-a-10);
@@ -939,7 +939,7 @@ body {
     inset 0 1px 0 var(--mint-tint-strong);
 }
 
-.performance-metric-card-highlight::before {
+.glass-highlight-soft::before {
   content: '';
   position: absolute;
   top: 0;
@@ -947,6 +947,10 @@ body {
   right: 14%;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+}
+
+.performance-metric-card-highlight {
+  position: relative;
 }
 
 .performance-metric-card-top {
@@ -1079,26 +1083,8 @@ body {
 
 .analytics-top-links-card {
   min-height: 318px;
-  contain: paint;
-  background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
-  border-color: var(--white-a-10);
-  background-clip: padding-box;
-  backface-visibility: hidden;
+  position: relative;
   backdrop-filter: none;
-  transform: translateZ(0);
-  box-shadow:
-    0 8px 48px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 var(--mint-tint-strong);
-}
-
-.analytics-top-links-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 14%;
-  right: 14%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
 }
 
 .analytics-chart-card {
@@ -1813,8 +1799,7 @@ body {
     backdrop-filter: blur(16px) saturate(120%);
   }
 
-  .performance-metric-card-highlight,
-  .analytics-top-links-card {
+  .glass-highlight-soft {
     background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
     border-color: var(--white-a-10);
     box-shadow:
@@ -1841,8 +1826,7 @@ body {
       inset 0 1px 0 var(--mint-tint-strong);
   }
 
-  .performance-metric-card-highlight::before,
-  .analytics-top-links-card::before,
+  .glass-highlight-soft::before,
   .revenue-summary-card.glass-mint::before {
     background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
   }
@@ -2089,8 +2073,7 @@ body {
     backdrop-filter: blur(12px) saturate(120%);
   }
 
-  .performance-metric-card-highlight,
-  .analytics-top-links-card {
+  .glass-highlight-soft {
     background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
     border-color: var(--white-a-10);
     box-shadow:
@@ -2117,8 +2100,7 @@ body {
       inset 0 1px 0 var(--mint-tint-strong);
   }
 
-  .performance-metric-card-highlight::before,
-  .analytics-top-links-card::before,
+  .glass-highlight-soft::before,
   .revenue-summary-card.glass-mint::before {
     background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
   }
