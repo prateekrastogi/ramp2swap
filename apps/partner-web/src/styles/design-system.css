@@ -828,6 +828,82 @@ body {
   min-height: 100vh;
 }
 
+.dashboard-main {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 36px 32px 48px;
+}
+
+.overview-shell {
+  display: grid;
+  gap: 22px;
+}
+
+.overview-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.overview-copy {
+  max-width: 760px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.overview-card {
+  min-height: 220px;
+  display: grid;
+  gap: 18px;
+  align-content: space-between;
+}
+
+.overview-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.overview-value {
+  font-size: clamp(24px, 2.1vw, 34px);
+  line-height: 1.05;
+}
+
+.overview-detail {
+  max-width: 24ch;
+}
+
+.overview-delta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  max-width: 100%;
+  border: 1px solid var(--white-a-07);
+  border-radius: 999px;
+  background: var(--obsidian-700);
+  color: var(--slate-300);
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  white-space: normal;
+}
+
+.overview-delta-accent {
+  border-color: var(--mint-border-soft);
+  background: var(--mint-tint-faint);
+  color: var(--mint-500);
+}
+
 .sidebar {
   position: sticky;
   top: 0;
@@ -1162,6 +1238,14 @@ body {
 
 /* Tablet tier: 768-1279 */
 @media (max-width: 1279px) {
+  .dashboard-main {
+    padding: 28px 24px 40px;
+  }
+
+  .overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .heading-card {
     font-size: 17px;
     letter-spacing: -0.3px;
@@ -1329,6 +1413,29 @@ body {
 
 /* Mobile tier: <768 */
 @media (max-width: 767px) {
+  .dashboard-main {
+    padding: 92px 20px 28px;
+  }
+
+  .overview-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .overview-card {
+    min-height: 0;
+  }
+
+  .overview-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   body {
     font-size: 15px;
     font-weight: 400;

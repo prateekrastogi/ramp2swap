@@ -1,5 +1,6 @@
 ---
 import '../styles/design-system.css';
+import { overviewMetrics } from '../data/overview-mock';
 ---
 
 <!doctype html>
@@ -70,7 +71,32 @@ import '../styles/design-system.css';
         </div>
       </aside>
 
-      <section class="dashboard-content" aria-label="Dashboard content area"></section>
+      <section class="dashboard-content" aria-label="Dashboard content area">
+        <div class="dashboard-main">
+          <section class="overview-shell">
+            <div class="overview-header">
+              <div class="stack-12">
+                <p class="ui-label">Overview</p>
+                <h1 class="heading-section">Performance Snapshot</h1>
+                <p class="body overview-copy">
+                  Core referral performance metrics for the current reporting window.
+                </p>
+
+            <div class="overview-grid">
+              {overviewMetrics.map((metric) => (
+                <article class={`card overview-card glass ${metric.accent === 'mint' ? 'glass-tier-2 glass-mint' : 'glass-tier-1'} on-glass`}>
+                  <div class="overview-card-top">
+                    <p class="ui-label">{metric.label}</p>
+                    <span class={`overview-delta ${metric.accent === 'mint' ? 'overview-delta-accent' : ''}`}>{metric.delta}</span>
+                  </div>
+                  <p class="data-large overview-value">{metric.value}</p>
+                  <p class="body-small overview-detail">{metric.detail}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </div>
+      </section>
     </main>
 
     <script>
