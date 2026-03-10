@@ -1,7 +1,7 @@
 ---
 import '../styles/design-system.css';
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
-import { overviewMetrics } from '../data/overview-mock';
+import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { transactionFeedItems } from '../data/transaction-feed-mock';
 ---
 
@@ -51,7 +51,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
           <section class="nav-section">
             <a class="nav-item nav-item-active" href="#overview" data-label="Overview" data-view-target="overview"><span class="nav-icon">◫</span><span class="nav-text">Overview</span></a>
             <a class="nav-item" href="#link-generator" data-label="Link Generator" data-view-target="link-generator"><span class="nav-icon">⛓</span><span class="nav-text">Link Generator</span></a>
-            <a class="nav-item" href="#transaction-feed" data-label="Transactions" data-view-target="transaction-feed"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
+            <a class="nav-item" href="#transaction-feed" data-label="Transaction Feed" data-view-target="transaction-feed"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
             <a class="nav-item" href="#" data-label="Earnings & Payouts"><span class="nav-icon">$</span><span class="nav-text">Earnings & Payouts</span></a>
             <a class="nav-item" href="#" data-label="Analytics"><span class="nav-icon">◔</span><span class="nav-text">Analytics</span></a>
             <a class="nav-item" href="#" data-label="Branding Kit"><span class="nav-icon">▣</span><span class="nav-text">Branding Kit</span></a>
@@ -76,34 +76,37 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
       <section class="dashboard-content" aria-label="Dashboard content area">
         <div class="dashboard-main">
           <section id="overview" class="overview-shell" data-dashboard-view="overview">
-            <div class="overview-header">
+            <div class="dashboard-section-header">
               <div class="stack-12">
                 <p class="ui-label">Overview</p>
-                <h1 class="heading-card link-generator-title">Partner Performance Snapshot</h1>
-                <p class="body overview-copy">
+                <h1 class="heading-card dashboard-section-title">Partner Performance Snapshot</h1>
+                <p class="body dashboard-section-copy">
                   Core referral performance metrics for the current reporting window.
                 </p>
+              </div>
+              <span class="chip">Mock Data</span>
+            </div>
 
-            <div class="overview-grid">
-              {overviewMetrics.map((metric) => (
-                <article class={`card overview-card glass ${metric.accent === 'mint' ? 'glass-tier-2 glass-mint' : 'glass-tier-1'} on-glass`}>
-                  <div class="overview-card-top">
+            <div class="performance-metrics-grid">
+              {performanceSnapshotMetrics.map((metric) => (
+                <article class={`card performance-metric-card glass ${metric.accent === 'mint' ? 'glass-tier-2 glass-mint' : 'glass-tier-1'} on-glass`}>
+                  <div class="performance-metric-card-top">
                     <p class="ui-label">{metric.label}</p>
-                    <span class={`overview-delta ${metric.accent === 'mint' ? 'overview-delta-accent' : ''}`}>{metric.delta}</span>
+                    <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>{metric.delta}</span>
                   </div>
-                  <p class="data-large overview-value">{metric.value}</p>
-                  <p class="body-small overview-detail">{metric.detail}</p>
+                  <p class="data-large performance-metric-value">{metric.value}</p>
+                  <p class="body-small performance-metric-detail">{metric.detail}</p>
                 </article>
               ))}
             </div>
           </section>
 
           <section id="link-generator" class="link-generator-shell" data-dashboard-view="link-generator" hidden>
-            <div class="overview-header">
+            <div class="dashboard-section-header">
               <div class="stack-12">
                 <p class="ui-label">Link Generator</p>
-                <h2 class="heading-card link-generator-title">Generate Referral Links</h2>
-                <p class="body overview-copy">
+                <h2 class="heading-card dashboard-section-title">Generate Referral Links</h2>
+                <p class="body dashboard-section-copy">
                   Create partner-specific referral URLs, append campaign tags, and manage active links.
                 </p>
               </div>
@@ -180,11 +183,11 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
           </section>
 
           <section id="transaction-feed" class="transaction-feed-shell" data-dashboard-view="transaction-feed" hidden>
-            <div class="overview-header">
+            <div class="dashboard-section-header">
               <div class="stack-12">
                 <p class="ui-label">Transaction Feed</p>
-                <h2 class="heading-card link-generator-title">Live Processing Status</h2>
-                <p class="body overview-copy">
+                <h2 class="heading-card dashboard-section-title">Live Processing Status</h2>
+                <p class="body dashboard-section-copy">
                   Every ramp transaction attributed to your referral links, with anonymized user references and current processing status.
                 </p>
               </div>
@@ -193,7 +196,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
 
             <article class="card glass glass-tier-1 on-glass transaction-feed-card">
               <div class="widget-header">
-                <p class="heading-card">Live Transaction Feed</p>
+                <p class="heading-card">Referral Stream</p>
                 <span class="chip">{transactionFeedItems.length} recent entries</span>
               </div>
 

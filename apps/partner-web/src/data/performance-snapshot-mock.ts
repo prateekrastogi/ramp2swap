@@ -1,4 +1,4 @@
-export type OverviewMetric = {
+export type PerformanceSnapshotMetric = {
   id: string;
   label: string;
   value: string;
@@ -7,8 +7,8 @@ export type OverviewMetric = {
   accent?: 'mint';
 };
 
-// Mock overview data lives here so backend wiring can replace it cleanly later.
-export const overviewMetrics: OverviewMetric[] = [
+// Mock performance snapshot data lives here so backend wiring can replace it cleanly later.
+export const performanceSnapshotMetrics: PerformanceSnapshotMetric[] = [
   {
     id: 'total-clicks',
     label: 'Total Clicks',
