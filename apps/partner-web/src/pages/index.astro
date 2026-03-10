@@ -1,5 +1,6 @@
 ---
 import '../styles/design-system.css';
+import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { overviewMetrics } from '../data/overview-mock';
 ---
 
@@ -47,8 +48,8 @@ import { overviewMetrics } from '../data/overview-mock';
 
         <nav class="sidebar-nav" aria-label="Primary navigation">
           <section class="nav-section">
-            <a class="nav-item nav-item-active" href="#" data-label="Overview"><span class="nav-icon">◫</span><span class="nav-text">Overview</span></a>
-            <a class="nav-item" href="#" data-label="Link Generator"><span class="nav-icon">⛓</span><span class="nav-text">Link Generator</span></a>
+            <a class="nav-item nav-item-active" href="#overview" data-label="Overview" data-view-target="overview"><span class="nav-icon">◫</span><span class="nav-text">Overview</span></a>
+            <a class="nav-item" href="#link-generator" data-label="Link Generator" data-view-target="link-generator"><span class="nav-icon">⛓</span><span class="nav-text">Link Generator</span></a>
             <a class="nav-item" href="#" data-label="Transactions"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
             <a class="nav-item" href="#" data-label="Earnings & Payouts"><span class="nav-icon">$</span><span class="nav-text">Earnings & Payouts</span></a>
             <a class="nav-item" href="#" data-label="Analytics"><span class="nav-icon">◔</span><span class="nav-text">Analytics</span></a>
@@ -73,11 +74,11 @@ import { overviewMetrics } from '../data/overview-mock';
 
       <section class="dashboard-content" aria-label="Dashboard content area">
         <div class="dashboard-main">
-          <section class="overview-shell">
+          <section id="overview" class="overview-shell" data-dashboard-view="overview">
             <div class="overview-header">
               <div class="stack-12">
                 <p class="ui-label">Overview</p>
-                <h1 class="heading-section">Performance Snapshot</h1>
+                <h1 class="heading-card link-generator-title">Partner Performance Snapshot</h1>
                 <p class="body overview-copy">
                   Core referral performance metrics for the current reporting window.
                 </p>
@@ -95,6 +96,86 @@ import { overviewMetrics } from '../data/overview-mock';
               ))}
             </div>
           </section>
+
+          <section id="link-generator" class="link-generator-shell" data-dashboard-view="link-generator" hidden>
+            <div class="overview-header">
+              <div class="stack-12">
+                <p class="ui-label">Link Generator</p>
+                <h2 class="heading-card link-generator-title">Generate Referral Links</h2>
+                <p class="body overview-copy">
+                  Create partner-specific referral URLs, append campaign tags, and manage active links.
+                </p>
+              </div>
+              <span class="chip">Campaign Links</span>
+            </div>
+
+            <div class="link-generator-grid">
+              <article class="card glass glass-tier-2 glass-mint on-glass link-generator-card">
+                <div class="widget-header">
+                  <p class="heading-card">Primary Link Builder</p>
+                  <span class="badge-active">Core Flow</span>
+                </div>
+
+                <div class="link-form-grid" data-link-generator data-base-url={linkGeneratorDraft.baseUrl}>
+                  <div class="stack-12">
+                    <label class="ui-label" for="partner-id">Partner ID</label>
+                    <input id="partner-id" class="input input-glass" data-link-partner-id value={linkGeneratorDraft.partnerId} />
+                  </div>
+
+                  <div class="stack-12">
+                    <label class="ui-label" for="campaign-tag">Campaign Tag</label>
+                    <input id="campaign-tag" class="input input-glass" data-link-campaign-tag value={linkGeneratorDraft.campaignTag} />
+                  </div>
+
+                  <div class="stack-12 link-output-block">
+                    <label class="ui-label" for="generated-link">Generated Referral URL</label>
+                    <div class="link-output-shell">
+                      <input
+                        id="generated-link"
+                        class="input input-glass link-output-input"
+                        data-generated-link
+                        value={linkGeneratorDraft.generatedUrl}
+                        readonly
+                      />
+                      <div class="link-output-actions">
+                        <button class="btn-primary btn-glass" type="button" data-copy-generated-link>Copy Link</button>
+                        <button class="btn-secondary" type="button" data-download-qr>Download QR</button>
+                      </div>
+                    </div>
+                    <p class="data-small link-generator-feedback" data-link-feedback aria-live="polite"></p>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card glass glass-tier-1 on-glass link-campaigns-card">
+                <div class="widget-header">
+                  <p class="heading-card">Saved Campaign Links</p>
+                  <span class="chip">{savedCampaignLinks.length} active</span>
+                </div>
+
+                <div class="link-campaign-list">
+                  {savedCampaignLinks.map((link) => (
+                    <article class="link-campaign-row">
+                      <div class="link-campaign-head">
+                        <div class="stack-8">
+                          <p class="heading-card">{link.name}</p>
+                          <p class="data-small">{link.tag}</p>
+                        </div>
+                        <span class="link-inline-stat">{link.clicks} clicks</span>
+                      </div>
+
+                      <p class="link-url">{link.url}</p>
+
+                      <div class="link-campaign-meta">
+                        <span class="link-inline-stat">{link.conversions} conversions</span>
+                        <button class="btn-secondary link-inline-btn" type="button" data-copy-text={link.url}>Copy</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </article>
+            </div>
+          </section>
         </div>
       </section>
     </main>
@@ -108,6 +189,8 @@ import { overviewMetrics } from '../data/overview-mock';
       const sidebarBrandToggle = document.getElementById('sidebar-brand-toggle');
       const mobileControl = document.getElementById('sidebar-mobile');
       const pinControl = document.getElementById('sidebar-pin');
+      const navViewTriggers = document.querySelectorAll('[data-view-target]');
+      const dashboardViews = document.querySelectorAll('[data-dashboard-view]');
 
       if (
         sidebarBrandToggle instanceof HTMLButtonElement &&
@@ -128,6 +211,132 @@ import { overviewMetrics } from '../data/overview-mock';
           if (collapseControl instanceof HTMLInputElement) {
             collapseControl.checked = !collapseControl.checked;
           }
+        });
+      }
+
+      if (navViewTriggers.length > 0 && dashboardViews.length > 0) {
+        const setActiveView = (viewName) => {
+          navViewTriggers.forEach((trigger) => {
+            const isActive = trigger.getAttribute('data-view-target') === viewName;
+            trigger.classList.toggle('nav-item-active', isActive);
+          });
+
+          dashboardViews.forEach((view) => {
+            view.hidden = view.getAttribute('data-dashboard-view') !== viewName;
+          });
+
+          if (mobileControl instanceof HTMLInputElement && window.matchMedia('(max-width: 767px)').matches) {
+            mobileControl.checked = false;
+          }
+        };
+
+        navViewTriggers.forEach((trigger) => {
+          trigger.addEventListener('click', (event) => {
+            const target = trigger.getAttribute('data-view-target');
+            if (!target) return;
+            event.preventDefault();
+            setActiveView(target);
+          });
+        });
+      }
+
+      const linkGenerator = document.querySelector('[data-link-generator]');
+      if (linkGenerator instanceof HTMLElement) {
+        const partnerIdInput = linkGenerator.querySelector('[data-link-partner-id]');
+        const campaignTagInput = linkGenerator.querySelector('[data-link-campaign-tag]');
+        const generatedLinkInput = linkGenerator.querySelector('[data-generated-link]');
+        const copyGeneratedLinkButton = linkGenerator.querySelector('[data-copy-generated-link]');
+        const downloadQrButton = linkGenerator.querySelector('[data-download-qr]');
+        const feedbackNode = linkGenerator.querySelector('[data-link-feedback]');
+        const baseUrl = linkGenerator.dataset.baseUrl ?? '';
+
+        const setFeedback = (message) => {
+          if (feedbackNode instanceof HTMLElement) {
+            feedbackNode.textContent = message;
+          }
+        };
+
+        const buildGeneratedUrl = () => {
+          if (
+            !(partnerIdInput instanceof HTMLInputElement) ||
+            !(campaignTagInput instanceof HTMLInputElement) ||
+            !(generatedLinkInput instanceof HTMLInputElement)
+          ) {
+            return '';
+          }
+
+          const url = new URL(baseUrl);
+          const partnerId = partnerIdInput.value.trim();
+          const campaignTag = campaignTagInput.value.trim();
+          if (partnerId) url.searchParams.set('pid', partnerId);
+          if (campaignTag) {
+            url.searchParams.set('cmp', campaignTag);
+          } else {
+            url.searchParams.delete('cmp');
+          }
+          generatedLinkInput.value = url.toString();
+          return generatedLinkInput.value;
+        };
+
+        const copyText = async (text, successMessage) => {
+          try {
+            await navigator.clipboard.writeText(text);
+            setFeedback(successMessage);
+          } catch {
+            setFeedback('Clipboard permission unavailable');
+          }
+        };
+
+        buildGeneratedUrl();
+
+        [partnerIdInput, campaignTagInput].forEach((input) => {
+          if (input instanceof HTMLInputElement) {
+            input.addEventListener('input', () => {
+              buildGeneratedUrl();
+              setFeedback('');
+            });
+          }
+        });
+
+        if (copyGeneratedLinkButton instanceof HTMLButtonElement) {
+          copyGeneratedLinkButton.addEventListener('click', async () => {
+            const url = buildGeneratedUrl();
+            if (!url) return;
+            await copyText(url, 'Referral link copied');
+          });
+        }
+
+        if (downloadQrButton instanceof HTMLButtonElement) {
+          downloadQrButton.addEventListener('click', async () => {
+            const url = buildGeneratedUrl();
+            if (!url) return;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=${encodeURIComponent(url)}`;
+            try {
+              const response = await fetch(qrUrl);
+              if (!response.ok) throw new Error('QR request failed');
+              const qrBlob = await response.blob();
+              const objectUrl = URL.createObjectURL(qrBlob);
+              const downloadAnchor = document.createElement('a');
+              downloadAnchor.href = objectUrl;
+              downloadAnchor.download = 'ramp2swap-referral-qr.png';
+              document.body.appendChild(downloadAnchor);
+              downloadAnchor.click();
+              downloadAnchor.remove();
+              URL.revokeObjectURL(objectUrl);
+              setFeedback('QR download started');
+            } catch {
+              window.open(qrUrl, '_blank', 'noopener,noreferrer');
+              setFeedback('QR opened in a new tab');
+            }
+          });
+        }
+
+        document.querySelectorAll('[data-copy-text]').forEach((button) => {
+          button.addEventListener('click', async () => {
+            const text = button.getAttribute('data-copy-text');
+            if (!text) return;
+            await copyText(text, 'Campaign link copied');
+          });
         });
       }
     </script>
