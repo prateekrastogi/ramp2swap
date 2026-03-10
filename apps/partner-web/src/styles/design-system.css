@@ -2,7 +2,7 @@
   Ramp2Swap Partner Portal Design System
   -------------------------------------
   Single source of truth for tokens and UI primitives.
-  Constraint: Use only approved Obsidian/Slate/Mint colors.
+  Constraint: Use only approved Obsidian/Slate/Mint colors and approved system-state colors.
   Typography: Syne (display), DM Mono (data), DM Sans (body/UI).
   Enforcement:
   1) Do not add ad-hoc colors, fonts, or responsive type values outside this file.
@@ -38,6 +38,12 @@
   --mint-ring-edge: rgba(0, 229, 160, 0.06);
   --mint-border-hover: rgba(0, 229, 160, 0.1);
   --mint-press-bg: rgba(0, 229, 160, 0.85);
+
+  /* System state colors: functional only, never decorative */
+  --state-amber: #F59E0B;
+  --state-red: #EF4444;
+  --state-amber-tint: rgba(245, 158, 11, 0.12);
+  --state-red-tint: rgba(239, 68, 68, 0.12);
 
   /* Glass neutrals + ambient blue token */
   --white-a-06: rgba(255, 255, 255, 0.06);
@@ -280,15 +286,15 @@ body {
 }
 
 .status-pending {
-  border: 1px solid var(--white-a-10);
-  background: var(--obsidian-700);
-  color: var(--slate-300);
+  border: 1px solid var(--state-amber);
+  background: var(--state-amber-tint);
+  color: var(--state-amber);
 }
 
 .status-failed {
-  border: 1px solid var(--white-a-12);
-  background: var(--obsidian-700);
-  color: var(--slate-500);
+  border: 1px solid var(--state-red);
+  background: var(--state-red-tint);
+  color: var(--state-red);
 }
 
 .chart-placeholder {
@@ -849,6 +855,12 @@ body {
   margin-top: 28px;
 }
 
+.transaction-feed-shell {
+  display: grid;
+  gap: 22px;
+  margin-top: 28px;
+}
+
 .overview-header {
   display: flex;
   align-items: flex-end;
@@ -929,6 +941,15 @@ body {
 .link-campaigns-card {
   display: grid;
   gap: 18px;
+}
+
+.transaction-feed-card {
+  display: grid;
+  gap: 18px;
+}
+
+.transaction-table-wrap {
+  background: rgba(15, 20, 25, 0.32);
 }
 
 .link-form-grid {

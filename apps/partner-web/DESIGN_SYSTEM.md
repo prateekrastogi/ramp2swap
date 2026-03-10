@@ -40,7 +40,7 @@ This document is the source of truth for the portal visual language and typograp
   - missing page-level import of `src/styles/design-system.css`
 
 ## Color Palette Rules (Strict)
-Use only the colors below. Do not add new hex/rgb values.
+Use only the colors below. Do not add new hex/rgb values outside these approved palette and system-state entries.
 
 ### 60% Obsidian (base and spatial hierarchy)
 - `#0A0D0F` page canvas and deepest backgrounds
@@ -68,6 +68,16 @@ Use only the colors below. Do not add new hex/rgb values.
 - `rgba(255,255,255,0.12)` tier-3 border
 - `rgba(255,255,255,0.14)` hover border on interactive glass
 - `rgba(0,120,255,0.07)` ambient blue orb (background only)
+
+### Approved System State Colors
+These are system colors, not brand colors. They appear only when the UI needs to communicate state and must never be used decoratively.
+
+- `#F59E0B` amber: pending transactions and warnings only
+- `#EF4444` red: errors and failed states only
+
+Usage rule:
+- Keep these limited to status chips, warnings, validation, and failure indicators.
+- Do not use amber/red for navigation, decorative highlights, card accents, or marketing emphasis.
 
 ## Logo System (Strict)
 Two approved logo variants:

@@ -2,6 +2,7 @@
 import '../styles/design-system.css';
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { overviewMetrics } from '../data/overview-mock';
+import { transactionFeedItems } from '../data/transaction-feed-mock';
 ---
 
 <!doctype html>
@@ -50,7 +51,7 @@ import { overviewMetrics } from '../data/overview-mock';
           <section class="nav-section">
             <a class="nav-item nav-item-active" href="#overview" data-label="Overview" data-view-target="overview"><span class="nav-icon">◫</span><span class="nav-text">Overview</span></a>
             <a class="nav-item" href="#link-generator" data-label="Link Generator" data-view-target="link-generator"><span class="nav-icon">⛓</span><span class="nav-text">Link Generator</span></a>
-            <a class="nav-item" href="#" data-label="Transactions"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
+            <a class="nav-item" href="#transaction-feed" data-label="Transactions" data-view-target="transaction-feed"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
             <a class="nav-item" href="#" data-label="Earnings & Payouts"><span class="nav-icon">$</span><span class="nav-text">Earnings & Payouts</span></a>
             <a class="nav-item" href="#" data-label="Analytics"><span class="nav-icon">◔</span><span class="nav-text">Analytics</span></a>
             <a class="nav-item" href="#" data-label="Branding Kit"><span class="nav-icon">▣</span><span class="nav-text">Branding Kit</span></a>
@@ -176,6 +177,57 @@ import { overviewMetrics } from '../data/overview-mock';
                 </div>
               </article>
             </div>
+          </section>
+
+          <section id="transaction-feed" class="transaction-feed-shell" data-dashboard-view="transaction-feed" hidden>
+            <div class="overview-header">
+              <div class="stack-12">
+                <p class="ui-label">Transaction Feed</p>
+                <h2 class="heading-card link-generator-title">Referral Transactions</h2>
+                <p class="body overview-copy">
+                  Every ramp transaction attributed to your referral links, with anonymized user references and current processing status.
+                </p>
+              </div>
+              <span class="chip">Anonymized Users</span>
+            </div>
+
+            <article class="card glass glass-tier-1 on-glass transaction-feed-card">
+              <div class="widget-header">
+                <p class="heading-card">Live Transaction Feed</p>
+                <span class="chip">{transactionFeedItems.length} recent entries</span>
+              </div>
+
+              <div class="table-wrap transaction-table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Transaction</th>
+                      <th>Status</th>
+                      <th>Amount</th>
+                      <th>Pair</th>
+                      <th>Timestamp</th>
+                      <th>User</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactionFeedItems.map((tx) => (
+                      <tr>
+                        <td>{tx.id}</td>
+                        <td>
+                          <span class={`status ${tx.status === 'completed' ? 'status-completed' : tx.status === 'pending' ? 'status-pending' : 'status-failed'}`}>
+                            {tx.status}
+                          </span>
+                        </td>
+                        <td>{tx.amount}</td>
+                        <td>{tx.pair}</td>
+                        <td>{tx.timestamp}</td>
+                        <td>{tx.user}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </article>
           </section>
         </div>
       </section>
