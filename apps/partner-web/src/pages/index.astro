@@ -138,7 +138,8 @@ import { overviewMetrics } from '../data/overview-mock';
                         readonly
                       />
                       <div class="link-output-actions">
-                        <button class="btn-primary btn-glass" type="button" data-copy-generated-link>Copy Link</button>
+                        <button class="btn-primary btn-glass" type="button" data-generate-link>Generate Link</button>
+                        <button class="btn-secondary" type="button" data-copy-generated-link>Copy Link</button>
                         <button class="btn-secondary" type="button" data-download-qr>Download QR</button>
                       </div>
                     </div>
@@ -245,6 +246,7 @@ import { overviewMetrics } from '../data/overview-mock';
         const partnerIdInput = linkGenerator.querySelector('[data-link-partner-id]');
         const campaignTagInput = linkGenerator.querySelector('[data-link-campaign-tag]');
         const generatedLinkInput = linkGenerator.querySelector('[data-generated-link]');
+        const generateLinkButton = linkGenerator.querySelector('[data-generate-link]');
         const copyGeneratedLinkButton = linkGenerator.querySelector('[data-copy-generated-link]');
         const downloadQrButton = linkGenerator.querySelector('[data-download-qr]');
         const feedbackNode = linkGenerator.querySelector('[data-link-feedback]');
@@ -292,11 +294,17 @@ import { overviewMetrics } from '../data/overview-mock';
         [partnerIdInput, campaignTagInput].forEach((input) => {
           if (input instanceof HTMLInputElement) {
             input.addEventListener('input', () => {
-              buildGeneratedUrl();
               setFeedback('');
             });
           }
         });
+
+        if (generateLinkButton instanceof HTMLButtonElement) {
+          generateLinkButton.addEventListener('click', () => {
+            buildGeneratedUrl();
+            setFeedback('Referral link generated');
+          });
+        }
 
         if (copyGeneratedLinkButton instanceof HTMLButtonElement) {
           copyGeneratedLinkButton.addEventListener('click', async () => {
