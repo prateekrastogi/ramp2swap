@@ -1,4 +1,4 @@
-export type AnalyticsRangeKey = '7D' | '30D' | '90D';
+export type AnalyticsRangeKey = '10D' | '30D' | '90D';
 
 export type AnalyticsSummary = {
   conversionRate: string;
@@ -13,10 +13,10 @@ export type AnalyticsBreakdownItem = {
 
 // Mock analytics data is isolated here for later API replacement.
 export const analyticsSummaries: Record<AnalyticsRangeKey, AnalyticsSummary> = {
-  '7D': {
+  '10D': {
     conversionRate: '5.92%',
-    timeRangeLabel: 'Last 7 days',
-    bars: [46, 61, 58, 72, 69, 77, 64],
+    timeRangeLabel: 'Last 10 days',
+    bars: [46, 61, 58, 72, 69, 77, 64, 71, 74, 68],
   },
   '30D': {
     conversionRate: '6.48%',

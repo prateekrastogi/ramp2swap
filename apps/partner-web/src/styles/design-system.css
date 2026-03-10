@@ -1749,6 +1749,12 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .analytics-chart-card,
+  .analytics-breakdown-card {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
   .settings-grid,
   .settings-feature-grid {
     grid-template-columns: 1fr;
@@ -1806,6 +1812,52 @@ body {
   .glass-tier-4-nav {
     backdrop-filter: blur(16px) saturate(120%);
   }
+
+  .performance-metric-card-highlight,
+  .analytics-top-links-card {
+    background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
+    border-color: var(--white-a-10);
+    box-shadow:
+      0 8px 48px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 var(--mint-tint-strong);
+  }
+
+  .analytics-top-links-card {
+    backdrop-filter: none;
+    border-color: var(--mint-border-soft);
+    box-shadow:
+      0 8px 48px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--mint-ring-edge),
+      inset 0 1px 0 var(--mint-tint-strong);
+  }
+
+  .revenue-summary-card.glass-mint {
+    background: var(--mint-tint-faint);
+    border-color: var(--mint-border-soft);
+    backdrop-filter: blur(40px) saturate(160%);
+    box-shadow:
+      0 8px 48px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--mint-ring-edge),
+      inset 0 1px 0 var(--mint-tint-strong);
+  }
+
+  .performance-metric-card-highlight::before,
+  .analytics-top-links-card::before,
+  .revenue-summary-card.glass-mint::before {
+    background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+  }
+
+  .analytics-top-links-card::before {
+    left: 10%;
+    right: 10%;
+  }
+
+  .analytics-top-links-card .progress-fill {
+    background: linear-gradient(90deg, var(--mint-tint-strong), var(--mint-tint-soft));
+    border-right: 1px solid var(--mint-500);
+    box-shadow: 0 0 24px var(--mint-ring-soft);
+  }
+
 
   .brand-nav {
     height: 68px;
@@ -1948,6 +2000,12 @@ body {
     gap: 14px;
   }
 
+  .analytics-chart-card,
+  .analytics-breakdown-card {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
   .link-form-grid {
     grid-template-columns: 1fr;
   }
@@ -2030,6 +2088,52 @@ body {
   .glass-tier-4-nav {
     backdrop-filter: blur(12px) saturate(120%);
   }
+
+  .performance-metric-card-highlight,
+  .analytics-top-links-card {
+    background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
+    border-color: var(--white-a-10);
+    box-shadow:
+      0 8px 48px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 var(--mint-tint-strong);
+  }
+
+  .analytics-top-links-card {
+    backdrop-filter: none;
+    border-color: var(--mint-border-soft);
+    box-shadow:
+      0 8px 48px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--mint-ring-edge),
+      inset 0 1px 0 var(--mint-tint-strong);
+  }
+
+  .revenue-summary-card.glass-mint {
+    background: var(--mint-tint-faint);
+    border-color: var(--mint-border-soft);
+    backdrop-filter: blur(40px) saturate(160%);
+    box-shadow:
+      0 8px 48px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--mint-ring-edge),
+      inset 0 1px 0 var(--mint-tint-strong);
+  }
+
+  .performance-metric-card-highlight::before,
+  .analytics-top-links-card::before,
+  .revenue-summary-card.glass-mint::before {
+    background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+  }
+
+  .analytics-top-links-card::before {
+    left: 10%;
+    right: 10%;
+  }
+
+  .analytics-top-links-card .progress-fill {
+    background: linear-gradient(90deg, var(--mint-tint-strong), var(--mint-tint-soft));
+    border-right: 1px solid var(--mint-500);
+    box-shadow: 0 0 24px var(--mint-ring-soft);
+  }
+
 
   .brand-nav {
     height: 56px;
