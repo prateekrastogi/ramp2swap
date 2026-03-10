@@ -6,7 +6,7 @@
   Typography: Syne (display), DM Mono (data), DM Sans (body/UI).
   Enforcement:
   1) Do not add ad-hoc colors, fonts, or responsive type values outside this file.
-  2) Update DESIGN_SYSTEM.md before changing system rules.
+  2) Update DESIGN_SYSTEM.md if system rules change.
   3) After any UI edit, run: npm run build --workspace apps/partner-web
 */
 

@@ -288,4 +288,4 @@ Use `.glass-mint` for action surfaces only (swap widget, confirmation panels):
 
 ## Canonical Files
 - Tokens and primitives: `src/styles/design-system.css`
-- Reference usage: `src/pages/design-system.astro`
+- Live dashboard usage: `src/pages/index.astro`
