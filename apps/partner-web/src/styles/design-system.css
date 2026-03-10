@@ -1012,7 +1012,7 @@ body {
   gap: 18px;
 }
 
-.earnings-summary-card,
+.revenue-summary-card,
 .payout-history-card {
   display: grid;
   gap: 18px;
