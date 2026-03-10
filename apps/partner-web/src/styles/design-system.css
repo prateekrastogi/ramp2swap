@@ -747,6 +747,7 @@ body {
 
 /* Mint glass variant — action surfaces only */
 .glass-mint {
+  overflow: hidden;
   background: var(--mint-tint-faint);
   backdrop-filter: blur(40px) saturate(160%);
   border: 1px solid var(--mint-border-soft);
@@ -867,6 +868,12 @@ body {
   margin-top: 28px;
 }
 
+.analytics-shell {
+  display: grid;
+  gap: 22px;
+  margin-top: 28px;
+}
+
 .dashboard-section-header {
   display: flex;
   align-items: flex-end;
@@ -907,6 +914,29 @@ body {
   display: grid;
   gap: 18px;
   align-content: space-between;
+}
+
+.performance-metric-card-highlight {
+  contain: paint;
+  background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
+  border-color: var(--white-a-10);
+  background-clip: padding-box;
+  backface-visibility: hidden;
+  backdrop-filter: none;
+  transform: translateZ(0);
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 var(--mint-tint-strong);
+}
+
+.performance-metric-card-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
 }
 
 .performance-metric-card-top {
@@ -978,6 +1008,38 @@ body {
   gap: 18px;
 }
 
+.analytics-chart-card,
+.analytics-breakdown-card {
+  display: grid;
+  gap: 18px;
+}
+
+.analytics-range-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.analytics-range-button {
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--obsidian-600);
+  border-radius: 999px;
+  background: var(--obsidian-700);
+  color: var(--slate-300);
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.analytics-range-button-active {
+  border-color: var(--mint-border-soft);
+  background: var(--mint-tint-soft);
+  color: var(--mint-500);
+}
+
 .transaction-table-wrap {
   background: rgba(15, 20, 25, 0.32);
 }
@@ -987,6 +1049,70 @@ body {
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
   gap: 16px;
   align-items: start;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.analytics-chart-card {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.analytics-breakdown-card {
+  grid-column: 2;
+}
+
+.analytics-top-links-card {
+  min-height: 318px;
+  contain: paint;
+  background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
+  border-color: var(--white-a-10);
+  background-clip: padding-box;
+  backface-visibility: hidden;
+  backdrop-filter: none;
+  transform: translateZ(0);
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 var(--mint-tint-strong);
+}
+
+.analytics-top-links-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+}
+
+.analytics-chart-card {
+  min-height: 318px;
+}
+
+.analytics-top-links-card .body-small {
+  color: var(--slate-100);
+  font-weight: 400;
+}
+
+.analytics-top-links-card .data-small {
+  color: var(--slate-100);
+}
+
+.analytics-top-links-card .progress-track {
+  background: rgba(15, 20, 25, 0.55);
+  border-color: var(--mint-border-soft);
+}
+
+.analytics-top-links-card .progress-fill {
+  background: linear-gradient(90deg, var(--mint-tint-strong), var(--mint-tint-soft));
+  border-right: 1px solid var(--mint-500);
+  box-shadow: 0 0 18px var(--mint-ring-soft);
 }
 
 .earnings-kpi-grid {
@@ -1016,6 +1142,10 @@ body {
 }
 
 .payout-history-meta {
+  justify-content: space-between;
+}
+
+.analytics-progress-head {
   justify-content: space-between;
 }
 
@@ -1465,6 +1595,10 @@ body {
   }
 
   .earnings-payouts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-grid {
     grid-template-columns: 1fr;
   }
 

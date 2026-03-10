@@ -1,5 +1,10 @@
 ---
 import '../styles/design-system.css';
+import {
+  analyticsSummaries,
+  geographicBreakdown,
+  topPerformingLinks,
+} from '../data/analytics-mock';
 import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
@@ -54,7 +59,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             <a class="nav-item" href="#link-generator" data-label="Link Generator" data-view-target="link-generator"><span class="nav-icon">⛓</span><span class="nav-text">Link Generator</span></a>
             <a class="nav-item" href="#transaction-feed" data-label="Transaction Feed" data-view-target="transaction-feed"><span class="nav-icon">⇄</span><span class="nav-text">Transaction Feed</span></a>
             <a class="nav-item" href="#earnings-payouts" data-label="Earnings & Payouts" data-view-target="earnings-payouts"><span class="nav-icon">$</span><span class="nav-text">Earnings & Payouts</span></a>
-            <a class="nav-item" href="#" data-label="Analytics"><span class="nav-icon">◔</span><span class="nav-text">Analytics</span></a>
+            <a class="nav-item" href="#analytics" data-label="Analytics" data-view-target="analytics"><span class="nav-icon">◔</span><span class="nav-text">Analytics</span></a>
             <a class="nav-item" href="#" data-label="Branding Kit"><span class="nav-icon">▣</span><span class="nav-text">Branding Kit</span></a>
           </section>
         </nav>
@@ -89,7 +94,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
 
             <div class="performance-metrics-grid">
               {performanceSnapshotMetrics.map((metric) => (
-                <article class={`card performance-metric-card glass ${metric.accent === 'mint' ? 'glass-tier-2 glass-mint' : 'glass-tier-1'} on-glass`}>
+                <article class={`card performance-metric-card glass ${metric.accent === 'mint' ? 'glass-tier-2 performance-metric-card-highlight' : 'glass-tier-1'} on-glass`}>
                   <div class="performance-metric-card-top">
                     <p class="ui-label">{metric.label}</p>
                     <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>{metric.delta}</span>
@@ -298,6 +303,79 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                       </div>
                     </article>
                   ))}
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section id="analytics" class="analytics-shell" data-dashboard-view="analytics" hidden>
+            <div class="dashboard-section-header">
+              <div class="stack-12">
+                <p class="ui-label">Analytics</p>
+                <h2 class="heading-card dashboard-section-title">Traffic and Conversion Insights</h2>
+                <p class="body dashboard-section-copy">
+                  Analyze click momentum, conversion rate, top performing links, and user geography across your referral campaigns.
+                </p>
+              </div>
+            </div>
+
+            <div class="analytics-grid">
+              <article class="card glass glass-tier-1 on-glass analytics-chart-card" data-analytics-chart>
+                <div class="widget-header">
+                  <p class="heading-card">Clicks Over Time</p>
+                  <div class="analytics-range-toggle" role="tablist" aria-label="Analytics range">
+                    <button class="analytics-range-button" type="button" data-range-toggle="7D">7D</button>
+                    <button class="analytics-range-button analytics-range-button-active" type="button" data-range-toggle="30D">30D</button>
+                    <button class="analytics-range-button" type="button" data-range-toggle="90D">90D</button>
+                  </div>
+                </div>
+
+                <div class="chart-placeholder">
+                  <p class="data-small" data-analytics-range-label>{analyticsSummaries['30D'].timeRangeLabel}</p>
+                  <div class="chart-bars" data-analytics-bars>
+                    {analyticsSummaries['30D'].bars.map((height) => (
+                      <div class="bar" style={`height: ${height}%;`}></div>
+                    ))}
+                  </div>
+                  <p class="body-small" data-analytics-conversion-rate>Conversion Rate: {analyticsSummaries['30D'].conversionRate}</p>
+                </div>
+              </article>
+
+              <article class="card glass glass-tier-2 on-glass analytics-breakdown-card analytics-top-links-card">
+                <div class="stack-12">
+                  <p class="heading-card">Top Performing Links</p>
+                  <div class="progress-list">
+                    {topPerformingLinks.map((item) => (
+                      <div class="progress-row">
+                        <div class="row-12 analytics-progress-head">
+                          <span class="body-small">{item.label}</span>
+                          <span class="data-small">{item.pct}%</span>
+                        </div>
+                        <div class="progress-track">
+                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </article>
+
+              <article class="card glass glass-tier-1 on-glass analytics-breakdown-card analytics-geo-card">
+                <div class="stack-12">
+                  <p class="heading-card">Geographic Breakdown</p>
+                  <div class="progress-list">
+                    {geographicBreakdown.map((item) => (
+                      <div class="progress-row">
+                        <div class="row-12 analytics-progress-head">
+                          <span class="body-small">{item.label}</span>
+                          <span class="data-small">{item.pct}%</span>
+                        </div>
+                        <div class="progress-track">
+                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </article>
             </div>
@@ -516,6 +594,50 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             const text = button.getAttribute('data-copy-text');
             if (!text) return;
             await copyText(text, 'Campaign link copied');
+          });
+        });
+      }
+
+      const analyticsChart = document.querySelector('[data-analytics-chart]');
+      if (analyticsChart instanceof HTMLElement) {
+        const analyticsRangeLabel = analyticsChart.querySelector('[data-analytics-range-label]');
+        const analyticsBarsContainer = analyticsChart.querySelector('[data-analytics-bars]');
+        const analyticsConversionRate = analyticsChart.querySelector('[data-analytics-conversion-rate]');
+        const analyticsRangeButtons = analyticsChart.querySelectorAll('[data-range-toggle]');
+        const analyticsRangeData = {
+          '7D': { label: 'Last 7 days', conversionRate: '5.92%', bars: [46, 61, 58, 72, 69, 77, 64] },
+          '30D': { label: 'Last 30 days', conversionRate: '6.48%', bars: [42, 60, 55, 72, 65, 84, 68, 76, 58, 80] },
+          '90D': { label: 'Last 90 days', conversionRate: '7.11%', bars: [28, 36, 41, 52, 49, 63, 58, 67, 61, 74] },
+        };
+
+        const setAnalyticsRange = (rangeKey) => {
+          const range = analyticsRangeData[rangeKey];
+          if (!range) return;
+
+          analyticsRangeButtons.forEach((button) => {
+            button.classList.toggle('analytics-range-button-active', button.getAttribute('data-range-toggle') === rangeKey);
+          });
+
+          if (analyticsRangeLabel instanceof HTMLElement) {
+            analyticsRangeLabel.textContent = range.label;
+          }
+
+          if (analyticsConversionRate instanceof HTMLElement) {
+            analyticsConversionRate.textContent = `Conversion Rate: ${range.conversionRate}`;
+          }
+
+          if (analyticsBarsContainer instanceof HTMLElement) {
+            analyticsBarsContainer.innerHTML = range.bars
+              .map((height) => `<div class="bar" style="height: ${height}%;"></div>`)
+              .join('');
+          }
+        };
+
+        analyticsRangeButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const rangeKey = button.getAttribute('data-range-toggle');
+            if (!rangeKey) return;
+            setAnalyticsRange(rangeKey);
           });
         });
       }
