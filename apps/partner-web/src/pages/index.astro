@@ -8,6 +8,12 @@ import {
 import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
+import {
+  complianceSettings,
+  notificationSettings,
+  payoutSettings,
+  profileSettings,
+} from '../data/settings-mock';
 import { transactionFeedItems } from '../data/transaction-feed-mock';
 ---
 
@@ -47,7 +53,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
     <label for="sidebar-mobile" class="mobile-overlay" aria-hidden="true"></label>
 
     <main class="dashboard-shell content-layer">
-      <aside class="sidebar glass on-glass">
+      <aside class="sidebar glass glass-tier-4-nav on-glass">
         <button class="sidebar-brand" id="sidebar-brand-toggle" type="button" aria-label="Toggle navigation">
           <img class="logo-horizontal sidebar-logo-horizontal" src="/logo_horizontal.png" alt="Ramp2Swap" />
           <img class="logo-mark sidebar-logo-mark" src="/logo.png" alt="Ramp2Swap mark" />
@@ -65,17 +71,16 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
         </nav>
 
         <div class="sidebar-bottom">
-          <a class="nav-item" href="#" data-label="Settings"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></a>
+          <a class="nav-item" href="#settings" data-label="Settings" data-view-target="settings"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></a>
           <a class="nav-item" href="#" data-label="Help"><span class="nav-icon">i</span><span class="nav-text">Help</span></a>
 
-          <a class="sidebar-profile" href="#" data-label="Profile">
+          <div class="sidebar-profile" data-label="Profile">
             <span class="sidebar-avatar"></span>
             <span class="profile-copy">
               <span class="profile-name">Partner Account</span>
               <span class="profile-role">PRO PLAN</span>
             </span>
-            <span class="profile-chevron">›</span>
-          </a>
+          </div>
         </div>
       </aside>
 
@@ -94,7 +99,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
 
             <div class="performance-metrics-grid">
               {performanceSnapshotMetrics.map((metric) => (
-                <article class={`card performance-metric-card glass ${metric.accent === 'mint' ? 'glass-tier-2 performance-metric-card-highlight' : 'glass-tier-1'} on-glass`}>
+                <article class={`card performance-metric-card glass glass-interactive ${metric.accent === 'mint' ? 'glass-tier-2 performance-metric-card-highlight' : 'glass-tier-1'} on-glass`}>
                   <div class="performance-metric-card-top">
                     <p class="ui-label">{metric.label}</p>
                     <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>{metric.delta}</span>
@@ -118,7 +123,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             </div>
 
             <div class="link-generator-grid">
-              <article class="card glass glass-tier-2 glass-mint on-glass link-generator-card">
+              <article class="card glass glass-tier-2 glass-mint glass-interactive on-glass link-generator-card">
                 <div class="widget-header">
                   <p class="heading-card">Primary Link Builder</p>
                   <span class="badge-active">Core Flow</span>
@@ -156,7 +161,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                 </div>
               </article>
 
-              <article class="card glass glass-tier-1 on-glass link-campaigns-card">
+              <article class="card glass glass-tier-1 glass-interactive on-glass link-campaigns-card">
                 <div class="widget-header">
                   <p class="heading-card">Saved Campaign Links</p>
                   <span class="chip">{savedCampaignLinks.length} active</span>
@@ -197,7 +202,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
               </div>
             </div>
 
-            <article class="card glass glass-tier-1 on-glass transaction-feed-card">
+            <article class="card glass glass-tier-1 glass-interactive on-glass transaction-feed-card">
               <div class="widget-header">
                 <p class="heading-card">Referral Stream</p>
                 <span class="chip">{transactionFeedItems.length} recent entries</span>
@@ -248,7 +253,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             </div>
 
             <div class="earnings-payouts-grid">
-              <article class="card glass glass-tier-2 glass-mint on-glass earnings-summary-card">
+              <article class="card glass glass-tier-2 glass-mint glass-interactive on-glass earnings-summary-card">
                 <div class="widget-header">
                   <p class="heading-card">Commission Snapshot</p>
                   <span class="badge-active">Action Surface</span>
@@ -278,7 +283,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                 </div>
               </article>
 
-              <article class="card glass glass-tier-1 on-glass payout-history-card">
+              <article class="card glass glass-tier-1 glass-interactive on-glass payout-history-card">
                 <div class="widget-header">
                   <p class="heading-card">Payout History</p>
                   <span class="chip">{payoutHistoryEntries.length} entries</span>
@@ -320,7 +325,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             </div>
 
             <div class="analytics-grid">
-              <article class="card glass glass-tier-1 on-glass analytics-chart-card" data-analytics-chart>
+              <article class="card glass glass-tier-1 glass-interactive on-glass analytics-chart-card" data-analytics-chart>
                 <div class="widget-header">
                   <p class="heading-card">Clicks Over Time</p>
                   <div class="analytics-range-toggle" role="tablist" aria-label="Analytics range">
@@ -341,7 +346,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                 </div>
               </article>
 
-              <article class="card glass glass-tier-2 on-glass analytics-breakdown-card analytics-top-links-card">
+              <article class="card glass glass-tier-2 glass-interactive on-glass analytics-breakdown-card analytics-top-links-card">
                 <div class="stack-12">
                   <p class="heading-card">Top Performing Links</p>
                   <div class="progress-list">
@@ -360,7 +365,7 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                 </div>
               </article>
 
-              <article class="card glass glass-tier-1 on-glass analytics-breakdown-card analytics-geo-card">
+              <article class="card glass glass-tier-1 glass-interactive on-glass analytics-breakdown-card analytics-geo-card">
                 <div class="stack-12">
                   <p class="heading-card">Geographic Breakdown</p>
                   <div class="progress-list">
@@ -378,6 +383,208 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
                   </div>
                 </div>
               </article>
+            </div>
+          </section>
+
+          <section id="settings" class="settings-shell" data-dashboard-view="settings" hidden>
+            <div class="dashboard-section-header">
+              <div class="stack-12">
+                <p class="ui-label">Settings</p>
+                <h2 class="heading-card dashboard-section-title">Partner Settings Control Center</h2>
+                <p class="body dashboard-section-copy">
+                  Manage identity, compliance, payout configuration, and notification preferences for your partner account.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-grid">
+              <aside class="card glass glass-tier-3 glass-interactive on-glass settings-nav-card">
+                <div class="stack-12">
+                  <button class="settings-nav-button settings-nav-button-active" type="button" data-settings-target="profile">
+                    <span class="settings-nav-copy">
+                      <span class="heading-card">Profile & Identity</span>
+                      <span class="body-small">Name, email, timezone, and language preferences.</span>
+                    </span>
+                  </button>
+
+                  <button class="settings-nav-button" type="button" data-settings-target="kyb">
+                    <span class="settings-nav-copy">
+                      <span class="heading-card">KYB & Compliance</span>
+                      <span class="body-small">Verification status, documents, tier, and tax forms.</span>
+                    </span>
+                  </button>
+
+                  <button class="settings-nav-button" type="button" data-settings-target="payouts">
+                    <span class="settings-nav-copy">
+                      <span class="heading-card">Payout Configuration</span>
+                      <span class="body-small">Wallet routing, thresholds, and payout schedule.</span>
+                    </span>
+                  </button>
+
+                  <button class="settings-nav-button" type="button" data-settings-target="notifications">
+                    <span class="settings-nav-copy">
+                      <span class="heading-card">Notifications</span>
+                      <span class="body-small">Conversion alerts, summaries, and threshold notices.</span>
+                    </span>
+                  </button>
+                </div>
+              </aside>
+
+              <div class="settings-panel-stack">
+                <section class="settings-panel" data-settings-panel="profile">
+                  <article class="card glass glass-tier-3 glass-interactive on-glass settings-feature-card">
+                    <div class="widget-header">
+                      <p class="heading-card">Profile & Identity</p>
+                    </div>
+                    <div class="settings-feature-grid">
+                      <div class="settings-field-card">
+                        <p class="ui-label">Display Name</p>
+                        <p class="data-large settings-field-value">{profileSettings.displayName}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Email Address</p>
+                        <p class="body settings-field-body">{profileSettings.email}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Profile Photo</p>
+                        <p class="body settings-field-body">{profileSettings.profilePhotoLabel}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Timezone</p>
+                        <p class="body settings-field-body">{profileSettings.timezone}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Language</p>
+                        <p class="body settings-field-body">{profileSettings.language}</p>
+                      </div>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="settings-panel" data-settings-panel="kyb" hidden>
+                  <article class="card glass glass-tier-3 glass-interactive on-glass settings-feature-card">
+                    <div class="widget-header">
+                      <p class="heading-card">KYB & Compliance</p>
+                      <span class={`status ${complianceSettings.kybStatus === 'verified' ? 'status-completed' : complianceSettings.kybStatus === 'pending' ? 'status-pending' : 'status-failed'}`}>
+                        {complianceSettings.kybStatus}
+                      </span>
+                    </div>
+
+                    <div class="settings-feature-grid">
+                      <div class="settings-field-card">
+                        <p class="ui-label">Compliance Tier</p>
+                        <p class="data-large settings-field-value">{complianceSettings.complianceTier}</p>
+                      </div>
+                      <div class="settings-field-card settings-field-card-wide">
+                        <p class="ui-label">Uploaded Documents</p>
+                        <div class="settings-list">
+                          {complianceSettings.documents.map((document) => (
+                            <div class="settings-list-row">
+                              <span class="body-small">{document.name}</span>
+                              <span class={`status ${document.status === 'uploaded' ? 'status-completed' : 'status-pending'}`}>
+                                {document.status === 'uploaded' ? 'uploaded' : 'needs update'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Tax Information</p>
+                        <p class="body settings-field-body">{complianceSettings.taxForm}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Resubmission Control</p>
+                        <div class="row-12">
+                          <button class="btn-secondary" type="button">Resubmit Documents</button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="settings-panel" data-settings-panel="payouts" hidden>
+                  <article class="card glass glass-tier-3 glass-interactive on-glass settings-feature-card">
+                    <div class="widget-header">
+                      <p class="heading-card">Payout Configuration</p>
+                    </div>
+
+                    <div class="settings-feature-grid">
+                      <div class="settings-field-card">
+                        <p class="ui-label">Preferred Asset</p>
+                        <p class="data-large settings-field-value">{payoutSettings.walletAsset}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Wallet Address</p>
+                        <p class="body settings-field-body">{payoutSettings.walletAddress}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Payout Network</p>
+                        <p class="body settings-field-body">{payoutSettings.network}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Minimum Threshold</p>
+                        <p class="body settings-field-body">{payoutSettings.minimumThreshold}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Auto-Payout</p>
+                        <p class="body settings-field-body">{payoutSettings.autoPayoutSchedule}</p>
+                      </div>
+                      <div class="settings-field-card">
+                        <p class="ui-label">Payout History</p>
+                        <div class="row-12">
+                          <button class="btn-secondary" type="button">{payoutSettings.payoutHistoryLabel}</button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="settings-panel" data-settings-panel="notifications" hidden>
+                  <article class="card glass glass-tier-3 glass-interactive on-glass settings-feature-card">
+                    <div class="widget-header">
+                      <p class="heading-card">Notifications</p>
+                    </div>
+
+                    <div class="settings-notification-list">
+                      <div class="settings-notification-row">
+                        <div class="stack-8">
+                          <p class="heading-card">New Conversions</p>
+                          <p class="body-small">Email alert whenever a referred user completes a ramp transaction.</p>
+                        </div>
+                        <span class={`settings-toggle ${notificationSettings.newConversions ? 'settings-toggle-active' : ''}`}>{notificationSettings.newConversions ? 'On' : 'Off'}</span>
+                      </div>
+                      <div class="settings-notification-row">
+                        <div class="stack-8">
+                          <p class="heading-card">Payout Received</p>
+                          <p class="body-small">Get notified once a payout batch lands in your configured wallet.</p>
+                        </div>
+                        <span class={`settings-toggle ${notificationSettings.payoutReceived ? 'settings-toggle-active' : ''}`}>{notificationSettings.payoutReceived ? 'On' : 'Off'}</span>
+                      </div>
+                      <div class="settings-notification-row">
+                        <div class="stack-8">
+                          <p class="heading-card">Weekly Summary</p>
+                          <p class="body-small">Receive a compact weekly digest of clicks, conversions, and commission earned.</p>
+                        </div>
+                        <span class={`settings-toggle ${notificationSettings.weeklySummary ? 'settings-toggle-active' : ''}`}>{notificationSettings.weeklySummary ? 'On' : 'Off'}</span>
+                      </div>
+                      <div class="settings-notification-row">
+                        <div class="stack-8">
+                          <p class="heading-card">KYB Status Changes</p>
+                          <p class="body-small">Immediate update if your compliance review status changes.</p>
+                        </div>
+                        <span class={`settings-toggle ${notificationSettings.kybStatusChange ? 'settings-toggle-active' : ''}`}>{notificationSettings.kybStatusChange ? 'On' : 'Off'}</span>
+                      </div>
+                      <div class="settings-notification-row">
+                        <div class="stack-8">
+                          <p class="heading-card">High-Value Transaction Threshold</p>
+                          <p class="body-small">Notify when a single attributed transaction crosses {notificationSettings.highValueThreshold}.</p>
+                        </div>
+                        <span class="settings-threshold">{notificationSettings.highValueThreshold}</span>
+                      </div>
+                    </div>
+                  </article>
+                </section>
+              </div>
             </div>
           </section>
         </div>
@@ -399,6 +606,8 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
       const pinControl = document.getElementById('sidebar-pin');
       const navViewTriggers = document.querySelectorAll('[data-view-target]');
       const dashboardViews = document.querySelectorAll('[data-dashboard-view]');
+      const settingsViewTriggers = document.querySelectorAll('[data-settings-target]');
+      const settingsPanels = document.querySelectorAll('[data-settings-panel]');
 
       if (
         sidebarBrandToggle instanceof HTMLButtonElement &&
@@ -487,6 +696,27 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             if (!target) return;
             event.preventDefault();
             setActiveView(target);
+          });
+        });
+      }
+
+      if (settingsViewTriggers.length > 0 && settingsPanels.length > 0) {
+        const setActiveSettingsPanel = (panelName) => {
+          settingsViewTriggers.forEach((trigger) => {
+            const isActive = trigger.getAttribute('data-settings-target') === panelName;
+            trigger.classList.toggle('settings-nav-button-active', isActive);
+          });
+
+          settingsPanels.forEach((panel) => {
+            panel.hidden = panel.getAttribute('data-settings-panel') !== panelName;
+          });
+        };
+
+        settingsViewTriggers.forEach((trigger) => {
+          trigger.addEventListener('click', () => {
+            const target = trigger.getAttribute('data-settings-target');
+            if (!target) return;
+            setActiveSettingsPanel(target);
           });
         });
       }
