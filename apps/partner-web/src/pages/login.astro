@@ -1,0 +1,100 @@
+---
+import '../styles/design-system.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ramp2Swap partner portal login" />
+    <title>Partner Login | Ramp2Swap</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+  </head>
+  <body class="page login-page">
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <main class="login-shell content-layer">
+      <section class="login-panels" aria-label="Partner portal login">
+        <article class="card glass glass-tier-4-nav on-glass login-showcase-panel">
+          <div class="login-showcase-shell">
+            <div class="login-showcase-main stack-16">
+              <img class="logo-mark login-showcase-logo" src="/logo.png" alt="Ramp2Swap mark" />
+              <div class="login-asset-row" aria-label="Supported assets">
+                <img class="login-asset-icon" src="/usd.svg" alt="USD" />
+                <img class="login-asset-icon" src="/usdt.svg" alt="USDT" />
+                <img class="login-asset-icon" src="/usdc.svg" alt="USDC" />
+                <img class="login-asset-icon" src="/bitcoin.svg" alt="Bitcoin" />
+                <img class="login-asset-icon" src="/ethereum.svg" alt="Ethereum" />
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card glass glass-tier-3 on-glass login-form-panel">
+          <div class="login-form-shell">
+            <div class="stack-12">
+              <h2 class="heading-card heading-section login-form-title">Partner Login</h2>
+            </div>
+
+            <form class="login-form stack-16" data-login-flow>
+              <section class="login-step-shell stack-16" data-login-step="email">
+                <div class="stack-12">
+                  <label class="ui-label" for="partner-email">Email Address</label>
+                  <input id="partner-email" class="input input-glass" data-login-email-input type="email" placeholder="partner@company.com" />
+                </div>
+
+                <button class="btn-primary btn-glass login-submit" type="button" data-login-continue>Continue</button>
+              </section>
+
+              <section class="login-step-shell stack-16" data-login-step="password" hidden>
+                <div class="stack-12">
+                  <label class="ui-label" for="partner-otp">Email OTP</label>
+                  <input id="partner-otp" class="input input-glass" type="text" inputmode="numeric" placeholder="Enter the OTP sent to your email" />
+                </div>
+
+                <button class="btn-primary btn-glass login-submit" type="submit">Verify OTP</button>
+              </section>
+            </form>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const loginFlow = document.querySelector('[data-login-flow]');
+      if (loginFlow instanceof HTMLFormElement) {
+        const emailStep = loginFlow.querySelector('[data-login-step="email"]');
+        const passwordStep = loginFlow.querySelector('[data-login-step="password"]');
+        const emailInput = loginFlow.querySelector('[data-login-email-input]');
+        const continueButton = loginFlow.querySelector('[data-login-continue]');
+
+        const showEmailStep = () => {
+          if (emailStep instanceof HTMLElement) emailStep.hidden = false;
+          if (passwordStep instanceof HTMLElement) passwordStep.hidden = true;
+        };
+
+        const showPasswordStep = () => {
+          if (!(emailInput instanceof HTMLInputElement)) return;
+          const emailValue = emailInput.value.trim();
+          if (!emailValue) {
+            emailInput.reportValidity();
+            emailInput.focus();
+            return;
+          }
+
+          if (emailStep instanceof HTMLElement) emailStep.hidden = true;
+          if (passwordStep instanceof HTMLElement) passwordStep.hidden = false;
+        };
+
+        if (continueButton instanceof HTMLButtonElement) {
+          continueButton.addEventListener('click', showPasswordStep);
+        }
+      }
+    </script>
+  </body>
+</html>
