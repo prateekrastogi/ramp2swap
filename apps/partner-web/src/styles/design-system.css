@@ -982,6 +982,7 @@ body {
 .overview-shell {
   display: grid;
   gap: 22px;
+  margin-top: 28px;
 }
 
 .link-generator-shell {
