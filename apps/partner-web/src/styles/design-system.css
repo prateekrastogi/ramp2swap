@@ -1859,6 +1859,7 @@ body {
 #sidebar-collapse:checked~.dashboard-shell .nav-item,
 #sidebar-collapse:checked~.dashboard-shell .sidebar-profile {
   justify-content: center;
+  gap: 0;
   padding-left: 0;
   padding-right: 0;
 }
@@ -1869,6 +1870,10 @@ body {
   height: 40px;
   margin-left: auto;
   margin-right: auto;
+}
+
+#sidebar-collapse:checked~.dashboard-shell .sidebar-logout {
+  display: none;
 }
 
 #sidebar-collapse:checked~.dashboard-shell .nav-item:hover::after,
@@ -2126,12 +2131,17 @@ body {
   .nav-item,
   .sidebar-profile {
     justify-content: center;
+    gap: 0;
     padding-left: 0;
     padding-right: 0;
     width: 40px;
     height: 40px;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .sidebar-logout {
+    display: none;
   }
 
   .sidebar .nav-item:hover::after,
@@ -2169,8 +2179,13 @@ body {
     width: auto;
     height: 48px;
     justify-content: flex-start;
+    gap: 10px;
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  #sidebar-pin:checked~.dashboard-shell .sidebar .sidebar-logout {
+    display: inline-flex;
   }
 
   #sidebar-pin:checked~.dashboard-shell .sidebar .nav-item::after,
