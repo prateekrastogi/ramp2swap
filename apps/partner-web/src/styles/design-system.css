@@ -1682,6 +1682,39 @@ body {
   min-width: 0;
 }
 
+.sidebar-logout {
+  position: relative;
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--white-a-07);
+  border-radius: 999px;
+  background: rgba(15, 20, 25, 0.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate-500);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex: 0 0 auto;
+}
+
+.sidebar-logout svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sidebar-logout:hover {
+  border-color: var(--mint-border-soft);
+  color: var(--slate-100);
+  background: var(--mint-tint-faint);
+}
+
 .profile-name {
   color: var(--slate-100);
   font-family: var(--font-body);
@@ -1757,6 +1790,46 @@ body {
   display: none;
 }
 
+.sidebar-logout::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 42px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--white-a-10);
+  background: rgba(20, 28, 36, 0.92);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: var(--slate-100);
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.sidebar-logout::before {
+  content: '';
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 4px solid var(--white-a-10);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-logout:hover::after,
+.sidebar-logout:hover::before {
+  opacity: 1;
+}
+
 #sidebar-collapse:checked~.dashboard-shell {
   grid-template-columns: 72px 1fr;
 }
@@ -1776,7 +1849,8 @@ body {
 
 #sidebar-collapse:checked~.dashboard-shell .sidebar-section-label,
 #sidebar-collapse:checked~.dashboard-shell .nav-text,
-#sidebar-collapse:checked~.dashboard-shell .profile-copy {
+#sidebar-collapse:checked~.dashboard-shell .profile-copy,
+#sidebar-collapse:checked~.dashboard-shell .sidebar-logout {
   opacity: 0;
   width: 0;
   overflow: hidden;
@@ -2042,7 +2116,8 @@ body {
 
   .sidebar-section-label,
   .nav-text,
-  .profile-copy {
+  .profile-copy,
+  .sidebar-logout {
     opacity: 0;
     width: 0;
     overflow: hidden;
@@ -2083,7 +2158,8 @@ body {
 
   #sidebar-pin:checked~.dashboard-shell .sidebar .sidebar-section-label,
   #sidebar-pin:checked~.dashboard-shell .sidebar .nav-text,
-  #sidebar-pin:checked~.dashboard-shell .sidebar .profile-copy {
+  #sidebar-pin:checked~.dashboard-shell .sidebar .profile-copy,
+  #sidebar-pin:checked~.dashboard-shell .sidebar .sidebar-logout {
     opacity: 1;
     width: auto;
   }
@@ -2409,7 +2485,8 @@ body {
 
   .sidebar-section-label,
   .nav-text,
-  .profile-copy {
+  .profile-copy,
+  .sidebar-logout {
     opacity: 1;
     width: auto;
   }
@@ -2425,7 +2502,9 @@ body {
 
   .nav-item::after,
   .nav-item::before,
-  .sidebar-profile::after {
+  .sidebar-profile::after,
+  .sidebar-logout::after,
+  .sidebar-logout::before {
     display: none;
     content: none;
     opacity: 0;
