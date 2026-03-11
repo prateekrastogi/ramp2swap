@@ -169,6 +169,18 @@ Use `.glass-mint` for action surfaces only (swap widget, confirmation panels):
 - Blur `40px`, saturate `160%`
 - Includes top edge highlight (`::before`) with mint gradient.
 
+### Soft Highlight Glass Variant
+Use `.glass-highlight-soft` for highlighted analytics or metric surfaces that need mint emphasis without becoming full action surfaces:
+- Background `linear-gradient(180deg, rgba(0,229,160,0.04), rgba(15,20,25,0.72) 42%)`
+- Border `rgba(255,255,255,0.10)` by default
+- Centered fading mint top highlight line
+- Chrome-safe no-blur surface handling is allowed for this variant when needed
+
+Usage rule:
+- This is for premium emphasis cards such as highlighted KPIs or ranked insight panels.
+- Do not use it as a replacement for `.glass-mint` on primary CTA/action panels.
+- Keep it limited to a small number of spotlight surfaces per screen.
+
 ### Interactive Glass States
 - Hover `.glass-interactive:hover`:
   - opacity shift (+0.08 via per-tier hover background)
