@@ -2230,6 +2230,19 @@ body {
     height: 52px;
   }
 
+  .transaction-table-wrap {
+    overflow-x: hidden;
+  }
+
+  .transaction-table-wrap .table {
+    min-width: 0;
+  }
+
+  .transaction-table-wrap .table th:nth-child(n + 4),
+  .transaction-table-wrap .table td:nth-child(n + 4) {
+    display: none;
+  }
+
   .dashboard-main {
     padding: 32px 20px 28px;
   }
