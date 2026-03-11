@@ -889,7 +889,7 @@ body {
 
 .login-showcase-logo {
   display: block;
-  height: clamp(56px, 4vw, 74px);
+  height: 192px;
   width: auto;
   margin: 0 auto;
 }
@@ -1857,7 +1857,7 @@ body {
   }
 
   .login-showcase-logo {
-    height: 64px;
+    height: 168px;
   }
 
   .login-asset-icon {
@@ -2136,7 +2136,7 @@ body {
   }
 
   .login-showcase-logo {
-    height: 52px;
+    height: 156px;
   }
 
   .login-form-meta {
