@@ -15,6 +15,25 @@ import {
   profileSettings,
 } from '../data/settings-mock';
 import { transactionFeedItems } from '../data/transaction-feed-mock';
+
+const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
+  analyticsSummaries[rangeKey].points
+    .map(
+      (point) => `
+        <button
+          class="bar-button"
+          type="button"
+          data-bar-label="${point.label}"
+          data-bar-clicks="${point.clicks}"
+          data-bar-conversion="${point.conversionRate}"
+          aria-label="${point.label}: ${point.clicks} clicks, ${point.conversionRate} conversion rate"
+          style="height: ${point.height}%"
+        >
+          <span class="bar-fill"></span>
+        </button>
+      `,
+    )
+    .join('');
 ---
 
 <!doctype html>
@@ -331,7 +350,11 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
             </div>
 
             <div class="analytics-grid">
-              <article class="card glass glass-tier-1 glass-interactive on-glass analytics-chart-card" data-analytics-chart>
+              <article
+                class="card glass glass-tier-1 glass-interactive on-glass analytics-chart-card"
+                data-analytics-chart
+                data-analytics-ranges={JSON.stringify(analyticsSummaries)}
+              >
                 <div class="widget-header">
                   <p class="heading-card">Clicks Over Time</p>
                   <div class="analytics-range-toggle" role="tablist" aria-label="Analytics range">
@@ -343,12 +366,11 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
 
                 <div class="chart-placeholder">
                   <p class="data-small" data-analytics-range-label>{analyticsSummaries['30D'].timeRangeLabel}</p>
-                  <div class="chart-bars" data-analytics-bars>
-                    {analyticsSummaries['30D'].bars.map((height) => (
-                      <div class="bar" style={`height: ${height}%;`}></div>
-                    ))}
-                  </div>
-                  <p class="body-small" data-analytics-conversion-rate>Conversion Rate: {analyticsSummaries['30D'].conversionRate}</p>
+                  <div
+                    class="chart-bars"
+                    data-analytics-bars
+                    set:html={renderAnalyticsBars('30D')}
+                  ></div>
                 </div>
               </article>
 
@@ -838,13 +860,27 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
       if (analyticsChart instanceof HTMLElement) {
         const analyticsRangeLabel = analyticsChart.querySelector('[data-analytics-range-label]');
         const analyticsBarsContainer = analyticsChart.querySelector('[data-analytics-bars]');
-        const analyticsConversionRate = analyticsChart.querySelector('[data-analytics-conversion-rate]');
         const analyticsRangeButtons = analyticsChart.querySelectorAll('[data-range-toggle]');
-        const analyticsRangeData = {
-          '10D': { label: 'Last 10 days', conversionRate: '5.92%', bars: [46, 61, 58, 72, 69, 77, 64, 71, 74, 68] },
-          '30D': { label: 'Last 30 days', conversionRate: '6.48%', bars: [42, 60, 55, 72, 65, 84, 68, 76, 58, 80] },
-          '90D': { label: 'Last 90 days', conversionRate: '7.11%', bars: [28, 36, 41, 52, 49, 63, 58, 67, 61, 74] },
-        };
+        const analyticsRangeData = JSON.parse(analyticsChart.dataset.analyticsRanges ?? '{}');
+
+        const renderAnalyticsBars = (points) =>
+          points
+            .map(
+              (point) => `
+                <button
+                  class="bar-button"
+                  type="button"
+                  data-bar-label="${point.label}"
+                  data-bar-clicks="${point.clicks}"
+                  data-bar-conversion="${point.conversionRate}"
+                  aria-label="${point.label}: ${point.clicks} clicks, ${point.conversionRate} conversion rate"
+                  style="height: ${point.height}%"
+                >
+                  <span class="bar-fill"></span>
+                </button>
+              `,
+            )
+            .join('');
 
         const setAnalyticsRange = (rangeKey) => {
           const range = analyticsRangeData[rangeKey];
@@ -855,17 +891,11 @@ import { transactionFeedItems } from '../data/transaction-feed-mock';
           });
 
           if (analyticsRangeLabel instanceof HTMLElement) {
-            analyticsRangeLabel.textContent = range.label;
-          }
-
-          if (analyticsConversionRate instanceof HTMLElement) {
-            analyticsConversionRate.textContent = `Conversion Rate: ${range.conversionRate}`;
+            analyticsRangeLabel.textContent = range.timeRangeLabel;
           }
 
           if (analyticsBarsContainer instanceof HTMLElement) {
-            analyticsBarsContainer.innerHTML = range.bars
-              .map((height) => `<div class="bar" style="height: ${height}%;"></div>`)
-              .join('');
+            analyticsBarsContainer.innerHTML = renderAnalyticsBars(range.points);
           }
         };
 
