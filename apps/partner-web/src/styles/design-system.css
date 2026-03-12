@@ -2608,11 +2608,16 @@ body {
     width: auto;
   }
 
+  .sidebar-logout {
+    display: inline-flex;
+  }
+
   .nav-item,
   .sidebar-profile {
     width: auto;
     height: 48px;
     justify-content: flex-start;
+    gap: 10px;
     padding-left: 16px;
     padding-right: 16px;
   }
