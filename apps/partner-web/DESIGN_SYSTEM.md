@@ -95,7 +95,7 @@ Desktop (1280+):
 Tablet (768–1279):
 - Navbar: horizontal logo, mark `28px` / wordmark `18px`, left aligned, `32px` from edge
 - Footer: horizontal logo, mark `24px` / wordmark `15px`, top-left before footer columns
-- Auth/onboarding: logomark only, `40px`, top-center, `32px` from top
+- Auth/onboarding: vertical logo, `192px` desktop, `168px` tablet, top-center within showcase panel
 
 Mobile (<768):
 - Navbar: logomark only, `32px`, left aligned, `20px` from edge
@@ -113,6 +113,7 @@ Mobile (<768):
 - Widget: mark `20px`, wordmark `12px`, total `~88px`
 - Favicon: mark `32px`
 - Splash: mark `48px` desktop/tablet, `44px` mobile
+- Auth/onboarding vertical logo: `192px` desktop, `168px` tablet, `156px` mobile
 
 ### Clearspace rule
 - Minimum clearspace on all sides = current mark height.
@@ -129,6 +130,7 @@ Mobile (<768):
   - splash/loading
   - mobile nav
 - Mobile nav must be mark-only.
+- Auth/onboarding may use the approved vertical logo asset inside the showcase panel only.
 
 ### CSS implementation classes
 - Containers: `.brand-nav`, `.brand-footer`, `.brand-splash`, `.brand-auth`, `.brand-widget`
@@ -136,6 +138,7 @@ Mobile (<768):
 - Context sizes: `.logo-nav-horizontal`, `.logo-footer-horizontal`, `.logo-widget-horizontal`, `.logo-mark-nav`, `.logo-mark-splash`, `.logo-mark-auth`
 - Visibility helpers: `.mobile-nav-horizontal-only`, `.mobile-nav-mark-only`
 - Clearspace helpers: `.logo-clearspace-32`, `.logo-clearspace-28`, `.logo-clearspace-24`, `.logo-clearspace-20`
+- Auth showcase implementation: `.login-showcase-logo` with `/logo_verticle.png`
 
 ## Glassmorphism System (Strict)
 Glass requires a vivid background. Ambient orbs are mandatory and load-bearing, not decorative.

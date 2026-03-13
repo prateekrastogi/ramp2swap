@@ -46,6 +46,17 @@ for (const pageFile of pageFiles) {
   );
 }
 
+const loginPage = join(srcRoot, 'pages', 'login.astro');
+const loginContent = readFileSync(loginPage, 'utf8');
+check(
+  loginContent.includes('/logo_verticle.png'),
+  `[Logo system] ${relative(root, loginPage)} must use the documented auth vertical logo asset (/logo_verticle.png)`
+);
+check(
+  loginContent.includes('login-showcase-logo'),
+  `[Logo system] ${relative(root, loginPage)} must use the documented auth logo class (.login-showcase-logo)`
+);
+
 const forbiddenFonts = [
   /(^|[^a-z])Inter([^a-z]|$)/i,
   /Space\s+Grotesk/i,
