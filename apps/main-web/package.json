@@ -6,7 +6,7 @@
 		"node": ">=22.12.0"
 	},
 	"scripts": {
-		"dev": "astro dev --port 1234",
+		"dev": "ASTRO_DISABLE_CLOUDFLARE_ADAPTER=true astro dev --port 1234",
 		"build": "astro build",
 		"preview": "astro build && wrangler dev --config ./wrangler.deploy.jsonc",
 		"astro": "astro",

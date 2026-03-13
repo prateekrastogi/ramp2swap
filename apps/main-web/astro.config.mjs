@@ -4,15 +4,17 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 
 const platformProxyEnabled = process.env.CLOUDFLARE_PLATFORM_PROXY === 'true';
+const disableCloudflareAdapter = process.env.ASTRO_DISABLE_CLOUDFLARE_ADAPTER === 'true';
 
 // https://astro.build/config
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   server: {
     host: true,
     port: 1234
   },
-  ...(command === 'build'
-    ? {
+  ...(disableCloudflareAdapter
+    ? {}
+    : {
         output: 'server',
         adapter: cloudflare({
           inspectorPort: 9231,
@@ -21,6 +23,5 @@ export default defineConfig(({ command }) => ({
           },
           imageService: 'cloudflare'
         })
-      }
-    : {})
-}));
+      })
+});

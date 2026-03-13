@@ -46,9 +46,9 @@ jobs:
         shell: bash
         run: |
           if [ "${GITHUB_REF_NAME}" = "staging" ]; then
-            CLOUDFLARE_ENV=staging npm run deploy --workspace apps/partner-web
+            npm run deploy --workspace apps/partner-web -- --env staging
           else
-            npm run deploy --workspace apps/partner-web
+            npm run deploy --workspace apps/partner-web -- --env ""
           fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
