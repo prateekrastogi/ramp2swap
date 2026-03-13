@@ -6,18 +6,17 @@ import cloudflare from '@astrojs/cloudflare';
 const platformProxyEnabled = process.env.CLOUDFLARE_PLATFORM_PROXY === 'true';
 
 // https://astro.build/config
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   server: {
     host: true,
     port: 1234
   },
-  adapter:
-    command === 'build'
-      ? cloudflare({
-          platformProxy: {
-            enabled: platformProxyEnabled
-          },
-          imageService: 'cloudflare'
-        })
-      : undefined
-}));
+  output: 'server',
+  adapter: cloudflare({
+    inspectorPort: 9231,
+    platformProxy: {
+      enabled: platformProxyEnabled
+    },
+    imageService: 'cloudflare'
+  })
+});

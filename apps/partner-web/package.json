@@ -6,17 +6,17 @@
 		"dev": "astro dev",
 		"check:design-system": "node ./scripts/check-design-system.mjs",
 		"build": "npm run check:design-system && astro build",
-		"preview": "astro build && wrangler dev",
+		"preview": "npm run check:design-system && astro build && wrangler dev ./dist/server/entry.mjs --assets ./dist/client",
 		"astro": "astro",
-		"deploy": "npm run check:design-system && astro build && wrangler deploy",
+		"deploy": "npm run check:design-system && astro build && wrangler deploy ./dist/server/entry.mjs --assets ./dist/client",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^12.6.12",
-		"astro": "^5.17.1"
+		"@astrojs/cloudflare": "^13.1.1",
+		"astro": "^6.0.4"
 	},
 	"devDependencies": {
-		"@types/node": "^25.3.5",
-		"wrangler": "^4.71.0"
+		"@types/node": "^25.5.0",
+		"wrangler": "^4.73.0"
 	}
 }
