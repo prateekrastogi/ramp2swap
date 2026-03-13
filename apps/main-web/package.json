@@ -10,7 +10,6 @@
 		"build": "astro build",
 		"preview": "astro build && wrangler dev --config ./wrangler.deploy.jsonc",
 		"astro": "astro",
-		"generate-types": "wrangler types",
 		"deploy": "astro build && wrangler deploy --config ./wrangler.deploy.jsonc",
 		"cf-typegen": "wrangler types"
 	},
