@@ -6,9 +6,9 @@
 		"dev": "astro dev",
 		"check:design-system": "node ./scripts/check-design-system.mjs",
 		"build": "npm run check:design-system && astro build",
-		"preview": "npm run check:design-system && astro build && wrangler dev --config ./wrangler.jsonc ./dist/server/entry.mjs --assets ./dist/client",
+		"preview": "npm run check:design-system && astro build && wrangler dev --config ./dist/server/wrangler.json",
 		"astro": "astro",
-		"deploy": "npm run check:design-system && astro build && wrangler deploy --config ./wrangler.jsonc ./dist/server/entry.mjs --assets ./dist/client",
+		"deploy": "npm run check:design-system && astro build && wrangler deploy --config ./dist/server/wrangler.json",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
