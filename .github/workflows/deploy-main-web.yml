@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           if [ "${GITHUB_REF_NAME}" = "staging" ]; then
-            npm run deploy --workspace apps/main-web -- --env staging
+            CLOUDFLARE_ENV=staging npm run deploy --workspace apps/main-web
           else
             npm run deploy --workspace apps/main-web
           fi
