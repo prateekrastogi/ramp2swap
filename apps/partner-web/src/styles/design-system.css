@@ -2320,13 +2320,24 @@ body {
   .login-panels {
     width: min(92vw, 560px);
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 0;
     min-height: auto;
   }
 
   .login-showcase-panel,
   .login-form-panel {
     min-height: auto;
+  }
+
+  .login-showcase-panel {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-width: 0;
+  }
+
+  .login-form-panel {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 
   .login-showcase-shell,
