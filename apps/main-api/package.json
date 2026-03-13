@@ -1,0 +1,16 @@
+{
+  "name": "main-api",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 7878",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+  },
+  "dependencies": {
+    "hono": "^4.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "wrangler": "^4.73.0"
+  }
+}

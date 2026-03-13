@@ -1,0 +1,46 @@
+name: Deploy Main API
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'apps/main-api/**'
+      - '.github/workflows/deploy-main-api.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main-api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy to Cloudflare Workers
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
+            npm run deploy --workspace apps/main-api -- --env staging
+          else
+            npm run deploy --workspace apps/main-api
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
