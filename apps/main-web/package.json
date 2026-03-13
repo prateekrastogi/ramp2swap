@@ -1,0 +1,25 @@
+{
+	"name": "main-web",
+	"type": "module",
+	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"dev": "astro dev --port 1234",
+		"build": "astro build",
+		"preview": "astro build && wrangler dev ./dist/_worker.js/index.js --assets ./dist",
+		"astro": "astro",
+		"generate-types": "wrangler types",
+		"deploy": "astro build && wrangler deploy ./dist/_worker.js/index.js --assets ./dist",
+		"cf-typegen": "wrangler types"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^13.1.1",
+		"astro": "^6.0.4"
+	},
+	"devDependencies": {
+		"@types/node": "^25.5.0",
+		"wrangler": "^4.73.0"
+	}
+}

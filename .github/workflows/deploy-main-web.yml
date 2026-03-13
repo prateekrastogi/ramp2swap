@@ -1,0 +1,52 @@
+name: Deploy Main Web
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'apps/main-web/**'
+      - '.github/workflows/deploy-main-web.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Rollup Linux native binary (npm optional-deps workaround)
+        shell: bash
+        run: |
+          ROLLUP_LINUX_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/rollup'].optionalDependencies['@rollup/rollup-linux-x64-gnu']")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_LINUX_VERSION}"
+
+      - name: Deploy to Cloudflare Workers
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "staging" ]; then
+            npm run deploy --workspace apps/main-web -- --env staging
+          else
+            npm run deploy --workspace apps/main-web
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
