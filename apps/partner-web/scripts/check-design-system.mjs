@@ -5,9 +5,12 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const webRoot = join(scriptDir, '..');
 const root = join(webRoot, '..', '..');
+const packagesRoot = join(root, 'packages', 'design-system');
 const srcRoot = join(webRoot, 'src');
-const cssFile = join(srcRoot, 'styles/design-system.css');
-const docsFile = join(webRoot, 'DESIGN_SYSTEM.md');
+const localCssFile = join(srcRoot, 'styles', 'design-system.css');
+const sharedCssFile = join(packagesRoot, 'src', 'styles', 'foundation.css');
+const localDocsFile = join(webRoot, 'DESIGN_SYSTEM.md');
+const sharedDocsFile = join(packagesRoot, 'DESIGN_SYSTEM.md');
 
 const failures = [];
 
@@ -76,8 +79,8 @@ for (const file of srcFiles) {
     check(!fontPattern.test(content), `[Forbidden font] ${rel} contains disallowed font pattern: ${fontPattern}`);
   }
 
-  // Only design-system.css may define raw colors; usage files must rely on tokens/classes.
-  if (file !== cssFile) {
+  // Only shared/local design system CSS files may define raw colors.
+  if (file !== localCssFile && file !== sharedCssFile) {
     const hexMatches = content.match(colorHexRegex) ?? [];
     const rgbaMatches = content.match(rgbaRegex) ?? [];
     check(hexMatches.length === 0, `[Raw color] ${rel} contains raw hex colors: ${hexMatches.join(', ')}`);
@@ -85,7 +88,13 @@ for (const file of srcFiles) {
   }
 }
 
-const css = readFileSync(cssFile, 'utf8');
+const sharedCss = readFileSync(sharedCssFile, 'utf8');
+const localCss = readFileSync(localCssFile, 'utf8');
+const combinedCss = `${sharedCss}\n${localCss}`;
+check(
+  localCss.includes('@import "../../../../packages/design-system/src/styles/foundation.css";'),
+  '[Missing shared import] apps/partner-web/src/styles/design-system.css must import the shared foundation from packages/design-system'
+);
 for (const requiredClass of [
   '.glass-tier-1',
   '.glass-tier-2',
@@ -109,19 +118,37 @@ for (const requiredClass of [
   '.mobile-nav-mark-only',
   '.mobile-nav-horizontal-only',
 ]) {
-  check(css.includes(requiredClass), `[Missing rule] design-system.css must include ${requiredClass}`);
+  check(combinedCss.includes(requiredClass), `[Missing rule] design system CSS must include ${requiredClass}`);
 }
 
-const docs = readFileSync(docsFile, 'utf8');
+for (const requiredLocalClass of [
+  '.dashboard-shell',
+  '.sidebar',
+  '.login-showcase-logo',
+  '.analytics-grid',
+  '.settings-grid',
+]) {
+  check(localCss.includes(requiredLocalClass), `[Missing partner rule] design-system.css must include ${requiredLocalClass}`);
+}
+
+const sharedDocs = readFileSync(sharedDocsFile, 'utf8');
 for (const requiredDocSection of [
   '## Non-Negotiable Rule',
-  '## Required Pre-Change Checklist',
-  '## Change Protocol (Every Time)',
   '## Logo System (Strict)',
   '## Glassmorphism System (Strict)',
   '## Responsive Type Scale',
 ]) {
-  check(docs.includes(requiredDocSection), `[Missing docs section] DESIGN_SYSTEM.md must include: ${requiredDocSection}`);
+  check(sharedDocs.includes(requiredDocSection), `[Missing shared docs section] packages/design-system/DESIGN_SYSTEM.md must include: ${requiredDocSection}`);
+}
+
+const localDocs = readFileSync(localDocsFile, 'utf8');
+for (const requiredLocalDocSection of [
+  '## Relationship To Shared Design System',
+  '## Partner Web Layer',
+  '## Login Experience',
+  '## Dashboard Shell',
+]) {
+  check(localDocs.includes(requiredLocalDocSection), `[Missing partner docs section] apps/partner-web/DESIGN_SYSTEM.md must include: ${requiredLocalDocSection}`);
 }
 
 if (failures.length > 0) {

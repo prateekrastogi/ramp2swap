@@ -1,0 +1,10 @@
+{
+  "name": "@ramp2swap/design-system",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./styles/foundation.css": "./src/styles/foundation.css",
+    "./DESIGN_SYSTEM.md": "./DESIGN_SYSTEM.md"
+  }
+}
