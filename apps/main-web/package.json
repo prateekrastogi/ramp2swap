@@ -8,10 +8,10 @@
 	"scripts": {
 		"dev": "astro dev --port 1234",
 		"build": "astro build",
-		"preview": "astro build && wrangler dev --config ./dist/server/wrangler.json",
+		"preview": "astro build && wrangler dev",
 		"astro": "astro",
 		"generate-types": "wrangler types",
-		"deploy": "astro build && wrangler deploy --config ./dist/server/wrangler.json",
+		"deploy": "astro build && wrangler deploy",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
