@@ -7,10 +7,11 @@
 	},
 	"scripts": {
 		"dev": "ASTRO_DISABLE_CLOUDFLARE_ADAPTER=true astro dev --port 1234",
-		"build": "astro build",
-		"preview": "astro build && wrangler dev --config ./wrangler.deploy.jsonc",
+		"check:design-system": "node ./scripts/check-design-system.mjs",
+		"build": "npm run check:design-system && astro build",
+		"preview": "npm run check:design-system && astro build && wrangler dev --config ./wrangler.deploy.jsonc",
 		"astro": "astro",
-		"deploy": "astro build && wrangler deploy --config ./wrangler.deploy.jsonc",
+		"deploy": "npm run check:design-system && astro build && wrangler deploy --config ./wrangler.deploy.jsonc",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {

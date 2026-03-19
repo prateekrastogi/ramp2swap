@@ -1,17 +1,156 @@
 ---
+import '../styles/design-system.css';
 
+const sampleMetrics = [
+  { label: 'Live corridors', value: '24', note: 'Fiat-to-crypto routes active now' },
+  { label: 'Settlement speed', value: '< 90s', note: 'Median completion in sandboxed demo flow' },
+  { label: 'Success rate', value: '99.2%', note: 'Completed swaps over the past 24 hours' },
+];
+
+const sampleFeatures = [
+  {
+    eyebrow: 'Onramp',
+    title: 'Localized fiat entry with guided steps',
+    copy: 'Users can move from card or bank rails into supported assets through a clean, low-friction path.',
+  },
+  {
+    eyebrow: 'Swap',
+    title: 'Unified token flow with fewer handoffs',
+    copy: 'The interface keeps source, destination, and status visible so the core action feels fast and trustworthy.',
+  },
+  {
+    eyebrow: 'Trust',
+    title: 'Brand-safe surfaces across every breakpoint',
+    copy: 'Shared typography, glass tiers, and logo rules keep the main web and partner portal visually aligned.',
+  },
+];
 ---
 
+<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ramp2Swap main web app" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Ramp2Swap</title>
+    <link rel="icon" type="image/svg+xml" href="/Ramp2Swap.svg" />
+  </head>
+  <body class="page">
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <div class="main-app content-layer">
+      <header class="main-header glass glass-tier-4-nav on-glass" aria-label="Primary header">
+        <div class="brand-nav main-header-nav">
+          <a class="brand-row main-header-brand" href="/" aria-label="Ramp2Swap home">
+            <img
+              class="logo-horizontal logo-nav-horizontal mobile-nav-horizontal-only main-header-logo"
+              src="/Horizontal_Logo.svg"
+              alt="Ramp2Swap"
+            />
+            <img class="logo-mark logo-mark-nav mobile-nav-mark-only" src="/Ramp2Swap.svg" alt="Ramp2Swap mark" />
+          </a>
+
+          <button class="btn-primary btn-glass main-header-cta" type="button">
+            <span class="main-header-cta-desktop">Connect Wallet</span>
+            <span class="main-header-cta-mobile">Connect</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="main-stage" aria-label="Main web preview">
+        <section class="card glass glass-tier-2 on-glass hero-panel">
+          <div class="stack-12 hero-copy">
+            <p class="ui-label">Main Web</p>
+            <h1 class="heading-section">Ramp in fast. Swap cleanly. Stay on-brand.</h1>
+            <p class="body">
+              The main web shell now uses the same premium glass family as partner-web, with responsive header sizing
+              tuned for touch targets and logo legibility across mobile, tablet, and desktop.
+            </p>
+          </div>
+
+          <div class="hero-meta">
+            <div class="card glass glass-tier-1 on-glass hero-stat">
+              <p class="ui-label">Header Surface</p>
+              <p class="data-large">Sidebar-matched</p>
+            </div>
+            <div class="card glass glass-tier-1 on-glass hero-stat">
+              <p class="ui-label">Primary CTA</p>
+              <p class="data-large">44-48px</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="sample-section">
+          <div class="sample-section-header stack-12">
+            <p class="ui-label">Sample Metrics</p>
+            <h2 class="heading-card">Sticky header scroll preview</h2>
+            <p class="body-small">These cards are here to create realistic depth so we can inspect the navbar behavior while scrolling.</p>
+          </div>
+
+          <div class="sample-metric-grid">
+            {sampleMetrics.map((metric) => (
+              <article class="card glass glass-tier-1 on-glass sample-card">
+                <p class="ui-label">{metric.label}</p>
+                <p class="data-large">{metric.value}</p>
+                <p class="body-small">{metric.note}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="sample-section">
+          <div class="sample-section-header stack-12">
+            <p class="ui-label">Sample Content</p>
+            <h2 class="heading-card">Long-form layout blocks</h2>
+          </div>
+
+          <div class="sample-feature-stack">
+            {sampleFeatures.map((feature) => (
+              <article class="card glass glass-tier-1 on-glass sample-feature-card">
+                <div class="stack-12">
+                  <p class="ui-label">{feature.eyebrow}</p>
+                  <h3 class="heading-card">{feature.title}</h3>
+                  <p class="body">{feature.copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="sample-section sample-section-last">
+          <div class="sample-section-header stack-12">
+            <p class="ui-label">Scroll Tail</p>
+            <h2 class="heading-card">Footer-distance check</h2>
+            <p class="body-small">
+              This extra section gives us a deeper scroll range so the connected header can be reviewed at the top,
+              mid-page, and near the bottom of the viewport.
+            </p>
+          </div>
+
+          <div class="sample-metric-grid">
+            <article class="card glass glass-tier-1 on-glass sample-card">
+              <p class="ui-label">Header mode</p>
+              <p class="data-large">Sticky</p>
+              <p class="body-small">Should remain anchored to the top edge while content moves underneath.</p>
+            </article>
+            <article class="card glass glass-tier-1 on-glass sample-card">
+              <p class="ui-label">Surface</p>
+              <p class="data-large">Tier 4</p>
+              <p class="body-small">Uses the shared nav glass rule from the design system.</p>
+            </article>
+            <article class="card glass glass-tier-1 on-glass sample-card">
+              <p class="ui-label">CTA</p>
+              <p class="data-large">Pill only</p>
+              <p class="body-small">The button stays rounded while the header remains connected edge to edge.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
 </html>
