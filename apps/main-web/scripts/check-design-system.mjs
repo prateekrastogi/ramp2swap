@@ -11,6 +11,7 @@ const localCssFile = join(srcRoot, 'styles', 'design-system.css');
 const sharedCssFile = join(packagesRoot, 'src', 'styles', 'foundation.css');
 const localDocsFile = join(webRoot, 'DESIGN_SYSTEM.md');
 const sharedDocsFile = join(packagesRoot, 'DESIGN_SYSTEM.md');
+const lifiConfigFile = join(srcRoot, 'lib', 'lifi-config.ts');
 
 const failures = [];
 
@@ -89,13 +90,23 @@ for (const file of srcFiles) {
     check(!fontPattern.test(content), `[Forbidden font] ${rel} contains disallowed font pattern: ${fontPattern}`);
   }
 
-  if (file !== localCssFile && file !== sharedCssFile) {
+  if (file !== localCssFile && file !== sharedCssFile && file !== lifiConfigFile) {
     const hexMatches = content.match(colorHexRegex) ?? [];
     const rgbaMatches = content.match(rgbaRegex) ?? [];
     check(hexMatches.length === 0, `[Raw color] ${rel} contains raw hex colors: ${hexMatches.join(', ')}`);
     check(rgbaMatches.length === 0, `[Raw color] ${rel} contains raw rgb/rgba colors: ${rgbaMatches.join(', ')}`);
   }
 }
+
+const lifiConfig = readFileSync(lifiConfigFile, 'utf8');
+check(
+  lifiConfig.includes("appearance: 'dark'"),
+  '[Widget theme] apps/main-web/src/lib/lifi-config.ts must keep the widget in dark appearance mode'
+);
+check(
+  lifiConfig.includes("integrator = 'ramp2swap'"),
+  '[Widget config] apps/main-web/src/lib/lifi-config.ts must use the shared ramp2swap integrator name'
+);
 
 const sharedCss = readFileSync(sharedCssFile, 'utf8');
 const localCss = readFileSync(localCssFile, 'utf8');

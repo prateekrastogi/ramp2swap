@@ -35,12 +35,22 @@ Use only the colors below. Do not add new hex/rgb values outside these approved 
 - `#7A98B3` secondary/supporting text
 - `#3D5269` muted text, placeholders, disabled text
 - `#243040` subtle fills and neutral hover states
+- `#C0CDD9` platinum accent for premium tier indicators, enterprise badges, and partner-logo emphasis only
 
 ### 10% Mint
 - `#00E5A0` primary action, active state, key confirmed callout
 - `#00C484` hover/pressed state for mint actions
 - `rgba(0,229,160,0.12)` mint-tint background for mint labels
 - `rgba(0,229,160,0.06)` ultra subtle mint wash
+
+### Platinum Usage Rule
+- Platinum is a premium/status accent, not an action color.
+- Use it sparingly for rare hierarchy signals:
+  - premium tier indicators
+  - enterprise badges
+  - partner-logo emphasis
+- Never use platinum for primary CTAs, active controls, or transactional confirmation states.
+- Mint remains the only action accent in the system.
 
 ### Approved Glass Extension Tokens
 - `rgba(255,255,255,0.06)` glass top edge / nav border

@@ -16,6 +16,9 @@
   --slate-300: #7A98B3;
   --slate-500: #3D5269;
   --slate-700: #243040;
+  --platinum-500: #C0CDD9;
+  --platinum-tint-soft: rgba(192, 205, 217, 0.12);
+  --platinum-tint-faint: rgba(192, 205, 217, 0.06);
 
   --mint-500: #00E5A0;
   --mint-600: #00C484;
