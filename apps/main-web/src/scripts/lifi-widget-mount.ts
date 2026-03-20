@@ -1,14 +1,15 @@
 import { LiFiWidget } from '@lifi/widget';
 import { createElement } from 'react';
-import { hydrateRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
 
 const rootElement = document.getElementById('lifi-widget-root');
 
 if (rootElement) {
   const runtime = getLiFiWidgetRuntimeConfig();
+  const root = createRoot(rootElement);
 
-  hydrateRoot(rootElement, createElement(LiFiWidget, {
+  root.render(createElement(LiFiWidget, {
     integrator: runtime.integrator,
     config: runtime.config,
   }));
