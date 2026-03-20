@@ -13,6 +13,7 @@ const HEADER_CONNECT_MOBILE = 'Connect';
 const HEADER_CONNECTED = 'Connected';
 const walletSearchHostTags = new Set(['WUI-SEARCH-BAR', 'WUI-INPUT-TEXT', 'W3M-ALL-WALLETS-VIEW']);
 const patchedWalletSearchBars = new WeakSet<Element>();
+const reownSearchPatchFlag = '__ramp2swapSearchFocusPatched';
 
 function isAddressLikeLabel(label: string) {
   return label.includes('...') && !label.includes(' ');
@@ -60,6 +61,20 @@ function getSearchInputFromBar(searchBar: Element | null | undefined) {
   return inputTextShadowRoot?.querySelector('input[type="search"]') ?? null;
 }
 
+function focusReownSearchInput(searchInput: HTMLInputElement | null | undefined) {
+  if (!searchInput) {
+    return;
+  }
+
+  searchInput.focus({ preventScroll: true });
+  searchInput.click();
+
+  if (typeof searchInput.setSelectionRange === 'function') {
+    const caret = searchInput.value.length;
+    searchInput.setSelectionRange(caret, caret);
+  }
+}
+
 function findShadowSearchInput() {
   const allWalletsSearchInput = findAllWalletsSearchInput();
   if (allWalletsSearchInput) {
@@ -87,13 +102,7 @@ function focusWalletSearchInput() {
     return;
   }
 
-  searchInput.focus({ preventScroll: true });
-  searchInput.click();
-
-  if (typeof searchInput.setSelectionRange === 'function') {
-    const caret = searchInput.value.length;
-    searchInput.setSelectionRange(caret, caret);
-  }
+  focusReownSearchInput(searchInput);
 }
 
 function focusWalletSearchInputWithRetries(attempts = 6) {
@@ -128,18 +137,7 @@ function bindWalletSearchBar(searchBar: Element) {
   }
 
   const focusFromBar = () => {
-    const searchInput = getSearchInputFromBar(searchBar);
-    if (!searchInput) {
-      return;
-    }
-
-    searchInput.focus({ preventScroll: true });
-    searchInput.click();
-
-    if (typeof searchInput.setSelectionRange === 'function') {
-      const caret = searchInput.value.length;
-      searchInput.setSelectionRange(caret, caret);
-    }
+    focusReownSearchInput(getSearchInputFromBar(searchBar));
   };
 
   searchBar.addEventListener('pointerdown', focusFromBar, true);
@@ -154,6 +152,75 @@ function bindWalletSearchBars() {
     if (element.tagName === 'WUI-SEARCH-BAR') {
       bindWalletSearchBar(element);
     }
+  });
+}
+
+function patchReownSearchElement(tagName: string, patch: (elementClass: CustomElementConstructor) => void) {
+  customElements.whenDefined(tagName).then(() => {
+    const elementClass = customElements.get(tagName);
+    if (!elementClass || (elementClass as Record<string, unknown>)[reownSearchPatchFlag]) {
+      return;
+    }
+
+    patch(elementClass);
+    (elementClass as Record<string, unknown>)[reownSearchPatchFlag] = true;
+  });
+}
+
+function patchReownSearchFocus() {
+  patchReownSearchElement('wui-search-bar', (elementClass) => {
+    const prototype = elementClass.prototype as HTMLElement & {
+      connectedCallback?: () => void;
+      inputComponentRef?: { value?: { inputElementRef?: { value?: HTMLInputElement | null } } };
+      type?: string;
+    };
+    const originalConnectedCallback = prototype.connectedCallback;
+
+    prototype.connectedCallback = function connectedCallback() {
+      originalConnectedCallback?.call(this);
+
+      const focusInnerInput = (event?: Event) => {
+        if (event) {
+          event.stopPropagation();
+        }
+
+        const input = this.inputComponentRef?.value?.inputElementRef?.value;
+        focusReownSearchInput(input ?? null);
+      };
+
+      this.addEventListener('pointerdown', focusInnerInput, true);
+      this.addEventListener('touchstart', focusInnerInput, true);
+      this.addEventListener('click', focusInnerInput, true);
+    };
+  });
+
+  patchReownSearchElement('wui-input-text', (elementClass) => {
+    const prototype = elementClass.prototype as HTMLElement & {
+      connectedCallback?: () => void;
+      inputElementRef?: { value?: HTMLInputElement | null };
+      type?: string;
+    };
+    const originalConnectedCallback = prototype.connectedCallback;
+
+    prototype.connectedCallback = function connectedCallback() {
+      originalConnectedCallback?.call(this);
+
+      const focusInnerInput = (event?: Event) => {
+        if (this.type !== 'search') {
+          return;
+        }
+
+        if (event) {
+          event.stopPropagation();
+        }
+
+        focusReownSearchInput(this.inputElementRef?.value ?? null);
+      };
+
+      this.addEventListener('pointerdown', focusInnerInput, true);
+      this.addEventListener('touchstart', focusInnerInput, true);
+      this.addEventListener('click', focusInnerInput, true);
+    };
   });
 }
 
@@ -236,6 +303,8 @@ if (rootElement) {
 
   syncHeaderWalletState();
 }
+
+patchReownSearchFocus();
 
 const walletModalObserver = new MutationObserver(() => {
   bindWalletSearchBars();
