@@ -81,6 +81,33 @@ const forbiddenFonts = [
 
 const colorHexRegex = /#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/g;
 const rgbaRegex = /rgba?\([^\)]*\)/g;
+const allowedLiFiHexColors = new Set([
+  '#00E5A0',
+  '#7A98B3',
+  '#0F1419',
+  '#141C24',
+  '#E8F0F7',
+  '#243040',
+  '#1E2C3A',
+  '#3D5269',
+  '#0A0D0F',
+  '#C0CDD9',
+]);
+const allowedLiFiRgbValues = new Set([
+  'rgba(255, 255, 255, 0.10)',
+  'rgba(0, 0, 0, 0.42)',
+  'rgba(255, 255, 255, 0.08)',
+  'rgba(15, 20, 25, 0.82)',
+  'rgba(255, 255, 255, 0.06)',
+  'rgba(20, 28, 36, 0.86)',
+  'rgba(255, 255, 255, 0.07)',
+  'rgba(0, 0, 0, 0.28)',
+  'rgba(0, 0, 0, 0.26)',
+  'rgba(0, 229, 160, 0.12)',
+  'rgba(0, 229, 160, 0.06)',
+  'rgba(0, 229, 160, 0.15)',
+  'rgba(192, 205, 217, 0.18)',
+]);
 
 for (const file of srcFiles) {
   const rel = relative(root, file);
@@ -90,7 +117,20 @@ for (const file of srcFiles) {
     check(!fontPattern.test(content), `[Forbidden font] ${rel} contains disallowed font pattern: ${fontPattern}`);
   }
 
-  if (file !== localCssFile && file !== sharedCssFile && file !== lifiConfigFile) {
+  if (file === lifiConfigFile) {
+    const hexMatches = content.match(colorHexRegex) ?? [];
+    const rgbaMatches = content.match(rgbaRegex) ?? [];
+    const disallowedHexMatches = hexMatches.filter((match) => !allowedLiFiHexColors.has(match));
+    const disallowedRgbMatches = rgbaMatches.filter((match) => !allowedLiFiRgbValues.has(match));
+    check(
+      disallowedHexMatches.length === 0,
+      `[Widget color drift] ${rel} contains disallowed hex colors: ${disallowedHexMatches.join(', ')}`
+    );
+    check(
+      disallowedRgbMatches.length === 0,
+      `[Widget color drift] ${rel} contains disallowed rgb/rgba colors: ${disallowedRgbMatches.join(', ')}`
+    );
+  } else if (file !== localCssFile && file !== sharedCssFile) {
     const hexMatches = content.match(colorHexRegex) ?? [];
     const rgbaMatches = content.match(rgbaRegex) ?? [];
     check(hexMatches.length === 0, `[Raw color] ${rel} contains raw hex colors: ${hexMatches.join(', ')}`);
@@ -106,6 +146,35 @@ check(
 check(
   lifiConfig.includes("integrator = 'ramp2swap'"),
   '[Widget config] apps/main-web/src/lib/lifi-config.ts must use the shared ramp2swap integrator name'
+);
+check(
+  lifiConfig.includes("variant: 'compact'"),
+  '[Widget config] apps/main-web/src/lib/lifi-config.ts must keep the widget in compact variant mode'
+);
+check(
+  lifiConfig.includes("hiddenUI: ['appearance', 'poweredBy']"),
+  '[Widget config] apps/main-web/src/lib/lifi-config.ts must hide appearance switching and the powered-by footer'
+);
+check(
+  lifiConfig.includes("connectWallet: 'Connect Wallet'"),
+  '[Widget copy] apps/main-web/src/lib/lifi-config.ts must preserve the Connect Wallet label casing'
+);
+check(
+  lifiConfig.includes("main: '#00E5A0'"),
+  '[Widget action color] apps/main-web/src/lib/lifi-config.ts must keep mint as the widget primary action color'
+);
+check(
+  lifiConfig.includes("backgroundColor: 'rgba(15, 20, 25, 0.82)'"),
+  '[Widget glass] apps/main-web/src/lib/lifi-config.ts must keep the approved obsidian glass container background'
+);
+check(
+  lifiConfig.includes("color: '#C0CDD9'"),
+  '[Widget premium accent] apps/main-web/src/lib/lifi-config.ts must use platinum for the widget header wallet text/icon treatment'
+);
+check(
+  !lifiConfig.includes("contained: {\n                background: '#C0CDD9'") &&
+    !lifiConfig.includes("contained: {\r\n                background: '#C0CDD9'"),
+  '[Widget premium accent] Platinum must not replace the mint contained CTA background in apps/main-web/src/lib/lifi-config.ts'
 );
 
 const sharedCss = readFileSync(sharedCssFile, 'utf8');
@@ -162,6 +231,7 @@ for (const requiredLocalDocSection of [
   '## Relationship To Shared Design System',
   '## Main Web Layer',
   '## Header Experience',
+  '## Widget Stage',
   '## Brand Assets And Favicon',
 ]) {
   check(localDocs.includes(requiredLocalDocSection), `[Missing main-web docs section] apps/main-web/DESIGN_SYSTEM.md must include: ${requiredLocalDocSection}`);

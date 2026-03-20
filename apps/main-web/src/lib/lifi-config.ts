@@ -29,12 +29,15 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
           boxShadow: 'none',
         },
         container: {
+          width: '100%',
+          minWidth: 0,
+          maxWidth: 'min(100%, 440px)',
           border: '1px solid rgba(255, 255, 255, 0.10)',
           borderRadius: '24px',
           boxShadow: '0 18px 54px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
           backgroundColor: 'rgba(15, 20, 25, 0.82)',
           backdropFilter: 'blur(32px) saturate(160%)',
-          maxHeight: 760,
+          maxHeight: 'min(760px, calc(100vh - 148px))',
         },
         palette: {
           primary: {
@@ -115,7 +118,7 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
           MuiButton: {
             styleOverrides: {
               root: {
-                borderRadius: '999px',
+                borderRadius: '10px',
                 fontFamily: 'var(--font-body)',
                 fontWeight: 500,
                 textTransform: 'none',
