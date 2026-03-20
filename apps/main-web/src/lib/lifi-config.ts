@@ -13,9 +13,21 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
     config: {
       appearance: 'dark',
       integrator,
+      languageResources: {
+        en: {
+          button: {
+            connectWallet: 'Connect Wallet',
+          },
+        },
+      },
       variant: 'compact',
-      hiddenUI: ['appearance'],
+      hiddenUI: ['appearance', 'poweredBy'],
       theme: {
+        header: {
+          background: 'transparent',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          boxShadow: 'none',
+        },
         container: {
           border: '1px solid rgba(255, 255, 255, 0.10)',
           borderRadius: '24px',
@@ -61,6 +73,21 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
                 background: 'transparent',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
                 boxShadow: 'none',
+                '& .MuiButton-root': {
+                  color: '#C0CDD9',
+                  background: 'transparent',
+                  border: '0',
+                  boxShadow: 'none',
+                  paddingInline: 0,
+                  minWidth: 'auto',
+                },
+                '& .MuiButton-root:hover': {
+                  background: 'transparent',
+                },
+                '& .MuiButton-root .MuiButton-startIcon > *, & .MuiButton-root .MuiButton-endIcon > *': {
+                  color: '#C0CDD9',
+                  fill: '#C0CDD9',
+                },
               },
             },
           },
