@@ -7,9 +7,8 @@ on:
       - staging
     paths:
       - 'apps/main-web/**'
+      - 'packages/design-system/**'
       - '.github/workflows/deploy-main-web.yml'
-      - 'package.json'
-      - 'package-lock.json'
   workflow_dispatch:
 
 concurrency:
