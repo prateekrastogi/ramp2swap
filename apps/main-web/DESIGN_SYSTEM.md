@@ -17,8 +17,9 @@ This file is the main-web addendum to the shared Ramp2Swap design system.
 ## Required Pre-Change Checklist
 - Confirm shared tokens, typography, logo rules, and glass tiers still come from `packages/design-system`.
 - Confirm main-web additions do not redefine reusable brand primitives locally.
-- Confirm the header continues using the same premium glass family as the partner-web sidebar.
+- Confirm the header continues using the shared nav glass treatment.
 - Confirm the primary header action remains a pill-shaped `Connect Wallet` button with accessible touch sizing.
+- Confirm the homepage content remains header plus one centered LI.FI widget stage only.
 - Run `npm run build --workspace apps/main-web` after UI changes.
 
 ## Change Protocol (Every Time)
@@ -30,7 +31,7 @@ This file is the main-web addendum to the shared Ramp2Swap design system.
 
 ## Main Web Layer
 Main-web owns:
-- homepage composition and marketing layout
+- homepage composition around the centered LI.FI widget stage
 - the top navigation shell and its sticky behavior
 - page-level content arrangement below the shared brand primitives
 
@@ -42,10 +43,15 @@ Main-web does not own:
 - generic cards, buttons, inputs, tables, chips, and status styles
 
 ## Header Experience
-- The header uses the same stronger glass treatment family as the partner-web sidebar so both apps feel part of one system.
-- Desktop keeps a premium floating rail with generous spacing, the horizontal logo on the left, and a pill CTA on the right.
-- Tablet preserves the horizontal logo and slightly tightens spacing while keeping the CTA above the `44px` touch target floor.
+- The header uses the shared tier-4 nav glass treatment and stays visually separate from the widget stage.
+- Desktop and tablet keep the horizontal logo on the left and the pill CTA on the right.
 - Mobile keeps the right-aligned pill CTA at `44px` height and swaps to the approved mark-only nav treatment from the shared design system.
+
+## Widget Stage
+- The homepage body below the header is a single centered LI.FI widget stage.
+- The outer widget shell uses shared `.glass` + `.glass-tier-2` so the widget takes center stage without introducing a new visual system.
+- Do not add extra marketing, metrics, or placeholder scroll sections around the widget in this phase.
+- Widget customization is deferred; first implementation is focused on mounting the widget cleanly with one shared integrator config.
 
 ## Brand Assets And Favicon
 - Main-web navbar uses `/Horizontal_Logo.svg` for the horizontal brand asset.

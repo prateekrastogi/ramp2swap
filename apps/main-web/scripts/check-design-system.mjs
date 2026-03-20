@@ -59,6 +59,16 @@ check(
   homeContent.includes('Connect Wallet'),
   `[Header CTA] ${relative(root, homePage)} must include the Connect Wallet primary action`
 );
+check(
+  homeContent.includes('lifi-widget-root'),
+  `[Widget mount] ${relative(root, homePage)} must include the LI.FI widget SSR mount`
+);
+check(
+  !homeContent.includes('Sticky header scroll preview') &&
+    !homeContent.includes('Sample Metrics') &&
+    !homeContent.includes('Long-form layout blocks'),
+  `[Homepage cleanup] ${relative(root, homePage)} must remove the old placeholder and scroll-demo sections`
+);
 
 const forbiddenFonts = [
   /(^|[^a-z])Inter([^a-z]|$)/i,
@@ -119,7 +129,9 @@ for (const requiredLocalClass of [
   '.main-header',
   '.main-header-brand',
   '.main-header-cta',
-  '.hero-panel',
+  '.widget-stage',
+  '.widget-stage-shell',
+  '.widget-stage-frame',
 ]) {
   check(localCss.includes(requiredLocalClass), `[Missing main-web rule] design-system.css must include ${requiredLocalClass}`);
 }

@@ -8,6 +8,11 @@ const disableCloudflareAdapter = process.env.ASTRO_DISABLE_CLOUDFLARE_ADAPTER ==
 
 // https://astro.build/config
 export default defineConfig({
+  vite: {
+    optimizeDeps: {
+      include: ['@lifi/widget', '@lifi/wallet-management'],
+    },
+  },
   server: {
     host: true,
     port: 1234
