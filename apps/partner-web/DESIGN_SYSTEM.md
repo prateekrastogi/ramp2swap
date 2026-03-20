@@ -6,7 +6,6 @@ This file is the partner-web addendum to the shared Ramp2Swap design system.
 - High-level Ramp2Swap design language now lives in `packages/design-system`.
 - Shared rules and reusable primitives are defined in:
   - `packages/design-system/src/styles/foundation.css`
-  - `packages/design-system/assets/logo.png`
   - `packages/design-system/DESIGN_SYSTEM.md`
 - Partner-web specific rules stay here and in `src/styles/design-system.css`.
 
