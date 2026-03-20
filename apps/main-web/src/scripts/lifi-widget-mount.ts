@@ -16,6 +16,15 @@ function isAddressLikeLabel(label: string) {
   return label.includes('...') && !label.includes(' ');
 }
 
+function setHeaderLabels(desktopLabel: string, mobileLabel: string) {
+  if (headerConnectDesktopLabel) {
+    headerConnectDesktopLabel.textContent = desktopLabel;
+  }
+  if (headerConnectMobileLabel) {
+    headerConnectMobileLabel.textContent = mobileLabel;
+  }
+}
+
 function findWidgetConnectButton() {
   return Array.from(rootElement?.querySelectorAll('button') ?? []).find((button) => {
     const label = button.textContent?.trim().toLowerCase();
@@ -40,23 +49,13 @@ function setHeaderWalletState(state: 'connected' | 'disconnected') {
   if (state === 'connected') {
     headerConnectButton.setAttribute('aria-label', HEADER_CONNECTED);
     headerConnectButton.disabled = true;
-    if (headerConnectDesktopLabel) {
-      headerConnectDesktopLabel.textContent = HEADER_CONNECTED;
-    }
-    if (headerConnectMobileLabel) {
-      headerConnectMobileLabel.textContent = HEADER_CONNECTED;
-    }
+    setHeaderLabels(HEADER_CONNECTED, HEADER_CONNECTED);
     return;
   }
 
   headerConnectButton.setAttribute('aria-label', HEADER_CONNECT_DESKTOP);
   headerConnectButton.disabled = false;
-  if (headerConnectDesktopLabel) {
-    headerConnectDesktopLabel.textContent = HEADER_CONNECT_DESKTOP;
-  }
-  if (headerConnectMobileLabel) {
-    headerConnectMobileLabel.textContent = HEADER_CONNECT_MOBILE;
-  }
+  setHeaderLabels(HEADER_CONNECT_DESKTOP, HEADER_CONNECT_MOBILE);
 }
 
 function syncHeaderWalletState() {
