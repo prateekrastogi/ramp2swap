@@ -11,9 +11,150 @@ const headerConnectMobileLabel = document.getElementById('header-connect-wallet-
 const HEADER_CONNECT_DESKTOP = 'Connect Wallet';
 const HEADER_CONNECT_MOBILE = 'Connect';
 const HEADER_CONNECTED = 'Connected';
+const walletSearchHostTags = new Set(['WUI-SEARCH-BAR', 'WUI-INPUT-TEXT', 'W3M-ALL-WALLETS-VIEW']);
+const patchedWalletSearchBars = new WeakSet<Element>();
 
 function isAddressLikeLabel(label: string) {
   return label.includes('...') && !label.includes(' ');
+}
+
+function walkShadowDom(root: ParentNode, visitor: (node: Element) => boolean | void) {
+  const elements = Array.from(root.children);
+
+  for (const element of elements) {
+    if (visitor(element)) {
+      return true;
+    }
+
+    if (element.shadowRoot && walkShadowDom(element.shadowRoot, visitor)) {
+      return true;
+    }
+
+    if (walkShadowDom(element, visitor)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function findAllWalletsSearchInput() {
+  const modal = document.querySelector('w3m-modal');
+  const modalShadowRoot = modal?.shadowRoot;
+  const modalRouter = modalShadowRoot?.querySelector('w3m-router');
+  const routerShadowRoot = modalRouter?.shadowRoot;
+  const allWalletsView = routerShadowRoot?.querySelector('w3m-all-wallets-view');
+  const allWalletsShadowRoot = allWalletsView?.shadowRoot;
+  const searchBar = allWalletsShadowRoot?.querySelector('wui-search-bar');
+  const searchBarShadowRoot = searchBar?.shadowRoot;
+  const inputText = searchBarShadowRoot?.querySelector('wui-input-text');
+  const inputTextShadowRoot = inputText?.shadowRoot;
+
+  return inputTextShadowRoot?.querySelector('input[type="search"]') ?? null;
+}
+
+function getSearchInputFromBar(searchBar: Element | null | undefined) {
+  const searchBarShadowRoot = searchBar?.shadowRoot;
+  const inputText = searchBarShadowRoot?.querySelector('wui-input-text');
+  const inputTextShadowRoot = inputText?.shadowRoot;
+  return inputTextShadowRoot?.querySelector('input[type="search"]') ?? null;
+}
+
+function findShadowSearchInput() {
+  const allWalletsSearchInput = findAllWalletsSearchInput();
+  if (allWalletsSearchInput) {
+    return allWalletsSearchInput;
+  }
+
+  let searchInput: HTMLInputElement | null = null;
+
+  walkShadowDom(document, (element) => {
+    if (
+      element instanceof HTMLInputElement &&
+      (element.type === 'search' || element.placeholder.toLowerCase().includes('search wallet'))
+    ) {
+      searchInput = element;
+      return true;
+    }
+  });
+
+  return searchInput;
+}
+
+function focusWalletSearchInput() {
+  const searchInput = findShadowSearchInput();
+  if (!searchInput) {
+    return;
+  }
+
+  searchInput.focus({ preventScroll: true });
+  searchInput.click();
+
+  if (typeof searchInput.setSelectionRange === 'function') {
+    const caret = searchInput.value.length;
+    searchInput.setSelectionRange(caret, caret);
+  }
+}
+
+function focusWalletSearchInputWithRetries(attempts = 6) {
+  focusWalletSearchInput();
+
+  if (document.activeElement === findShadowSearchInput()) {
+    return;
+  }
+
+  if (attempts <= 0) {
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    focusWalletSearchInputWithRetries(attempts - 1);
+  });
+}
+
+function isWalletSearchTap(path: EventTarget[]) {
+  return path.some((target) => {
+    if (target instanceof HTMLInputElement) {
+      return target.type === 'search' || target.placeholder.toLowerCase().includes('search wallet');
+    }
+
+    return target instanceof HTMLElement && walletSearchHostTags.has(target.tagName);
+  });
+}
+
+function bindWalletSearchBar(searchBar: Element) {
+  if (patchedWalletSearchBars.has(searchBar)) {
+    return;
+  }
+
+  const focusFromBar = () => {
+    const searchInput = getSearchInputFromBar(searchBar);
+    if (!searchInput) {
+      return;
+    }
+
+    searchInput.focus({ preventScroll: true });
+    searchInput.click();
+
+    if (typeof searchInput.setSelectionRange === 'function') {
+      const caret = searchInput.value.length;
+      searchInput.setSelectionRange(caret, caret);
+    }
+  };
+
+  searchBar.addEventListener('pointerdown', focusFromBar, true);
+  searchBar.addEventListener('pointerup', focusFromBar, true);
+  searchBar.addEventListener('touchend', focusFromBar, true);
+  searchBar.addEventListener('click', focusFromBar, true);
+  patchedWalletSearchBars.add(searchBar);
+}
+
+function bindWalletSearchBars() {
+  walkShadowDom(document, (element) => {
+    if (element.tagName === 'WUI-SEARCH-BAR') {
+      bindWalletSearchBar(element);
+    }
+  });
 }
 
 function findWidgetConnectButton() {
@@ -95,6 +236,33 @@ if (rootElement) {
 
   syncHeaderWalletState();
 }
+
+const walletModalObserver = new MutationObserver(() => {
+  bindWalletSearchBars();
+});
+
+walletModalObserver.observe(document.documentElement, {
+  childList: true,
+  subtree: true,
+});
+
+bindWalletSearchBars();
+
+document.addEventListener('pointerdown', (event) => {
+  if (!isWalletSearchTap(event.composedPath())) {
+    return;
+  }
+
+  focusWalletSearchInputWithRetries();
+}, true);
+
+document.addEventListener('click', (event) => {
+  if (!isWalletSearchTap(event.composedPath())) {
+    return;
+  }
+
+  focusWalletSearchInputWithRetries();
+}, true);
 
 if (headerConnectButton instanceof HTMLButtonElement) {
   headerConnectButton.addEventListener('click', () => {
