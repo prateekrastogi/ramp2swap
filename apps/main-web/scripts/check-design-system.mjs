@@ -149,7 +149,7 @@ check(
 );
 check(
   lifiConfig.includes("const appName = 'Ramp2Swap'") &&
-    lifiConfig.includes("const appDescription = 'Cross-chain swaps made seamless.'") &&
+    lifiConfig.includes("const appDescription = 'One Interface. All of DeFi.'") &&
     lifiConfig.includes("const appUrl = 'https://ramp2swap.com'") &&
     lifiConfig.includes('icons: [appIconUrl]'),
   '[WalletConnect metadata] apps/main-web/src/lib/lifi-config.ts must define the approved Ramp2Swap wallet metadata for wallet apps'

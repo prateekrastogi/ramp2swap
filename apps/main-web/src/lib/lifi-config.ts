@@ -8,7 +8,7 @@ type LiFiWidgetRuntimeConfig = {
 export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
   const integrator = 'ramp2swap';
   const appName = 'Ramp2Swap';
-  const appDescription = 'Cross-chain swaps made seamless.';
+  const appDescription = 'One Interface. All of DeFi.';
   const appUrl = 'https://ramp2swap.com';
   const appIconUrl = `${appUrl}/logo.png`;
   const walletConnectProjectId = '5432e3507d41270bee46b7b85bbc2ef8';
