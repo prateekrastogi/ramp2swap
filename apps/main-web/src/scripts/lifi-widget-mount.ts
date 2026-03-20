@@ -10,7 +10,7 @@ const headerConnectMobileLabel = document.getElementById('header-connect-wallet-
 
 const HEADER_CONNECT_DESKTOP = 'Connect Wallet';
 const HEADER_CONNECT_MOBILE = 'Connect';
-const HEADER_DISCONNECT = 'Disconnect';
+const HEADER_CONNECTED = 'Connected';
 
 function isAddressLikeLabel(label: string) {
   return label.includes('...') && !label.includes(' ');
@@ -30,14 +30,6 @@ function findWidgetWalletTrigger() {
   });
 }
 
-function findDisconnectMenuButton() {
-  return Array.from(document.querySelectorAll('button')).find((button) => {
-    const hasDisconnectIcon = button.querySelector('[data-testid="PowerSettingsNewRoundedIcon"]');
-    const label = button.textContent?.trim().toLowerCase() ?? '';
-    return Boolean(hasDisconnectIcon) && label !== 'connect another wallet';
-  });
-}
-
 function setHeaderWalletState(state: 'connected' | 'disconnected') {
   if (!(headerConnectButton instanceof HTMLButtonElement)) {
     return;
@@ -46,17 +38,19 @@ function setHeaderWalletState(state: 'connected' | 'disconnected') {
   headerConnectButton.dataset.walletState = state;
 
   if (state === 'connected') {
-    headerConnectButton.setAttribute('aria-label', HEADER_DISCONNECT);
+    headerConnectButton.setAttribute('aria-label', HEADER_CONNECTED);
+    headerConnectButton.disabled = true;
     if (headerConnectDesktopLabel) {
-      headerConnectDesktopLabel.textContent = HEADER_DISCONNECT;
+      headerConnectDesktopLabel.textContent = HEADER_CONNECTED;
     }
     if (headerConnectMobileLabel) {
-      headerConnectMobileLabel.textContent = HEADER_DISCONNECT;
+      headerConnectMobileLabel.textContent = HEADER_CONNECTED;
     }
     return;
   }
 
   headerConnectButton.setAttribute('aria-label', HEADER_CONNECT_DESKTOP);
+  headerConnectButton.disabled = false;
   if (headerConnectDesktopLabel) {
     headerConnectDesktopLabel.textContent = HEADER_CONNECT_DESKTOP;
   }
@@ -77,26 +71,6 @@ function syncHeaderWalletState() {
   if (widgetWalletTrigger instanceof HTMLButtonElement) {
     setHeaderWalletState('connected');
   }
-}
-
-function waitForElement<T extends Element>(
-  finder: () => T | undefined,
-  onFound: (element: T) => void,
-  attempts = 18
-) {
-  const element = finder();
-  if (element) {
-    onFound(element);
-    return;
-  }
-
-  if (attempts <= 0) {
-    return;
-  }
-
-  window.setTimeout(() => {
-    waitForElement(finder, onFound, attempts - 1);
-  }, 120);
 }
 
 if (rootElement) {
@@ -124,19 +98,7 @@ if (rootElement) {
 
 if (headerConnectButton instanceof HTMLButtonElement) {
   headerConnectButton.addEventListener('click', () => {
-    if (headerConnectButton.dataset.walletState === 'connected') {
-      const widgetWalletTrigger = findWidgetWalletTrigger();
-      if (widgetWalletTrigger instanceof HTMLButtonElement) {
-        widgetWalletTrigger.click();
-        waitForElement(findDisconnectMenuButton, (disconnectButton) => {
-          if (disconnectButton instanceof HTMLButtonElement) {
-            disconnectButton.click();
-            window.setTimeout(() => {
-              syncHeaderWalletState();
-            }, 150);
-          }
-        });
-      }
+    if (headerConnectButton.dataset.walletState === 'connected' || headerConnectButton.disabled) {
       return;
     }
 
