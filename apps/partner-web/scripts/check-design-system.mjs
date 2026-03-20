@@ -56,8 +56,19 @@ check(
   `[Logo system] ${relative(root, loginPage)} must use the documented auth vertical logo asset (/logo_verticle.png)`
 );
 check(
+  loginContent.includes("packages/design-system/assets/logo.png"),
+  `[Brand asset] ${relative(root, loginPage)} must import the shared brand mark from packages/design-system/assets/logo.png`
+);
+check(
   loginContent.includes('login-showcase-logo'),
   `[Logo system] ${relative(root, loginPage)} must use the documented auth logo class (.login-showcase-logo)`
+);
+
+const partnerHomePage = join(srcRoot, 'pages', 'index.astro');
+const partnerHomeContent = readFileSync(partnerHomePage, 'utf8');
+check(
+  partnerHomeContent.includes("packages/design-system/assets/logo.png"),
+  `[Brand asset] ${relative(root, partnerHomePage)} must import the shared brand mark from packages/design-system/assets/logo.png`
 );
 
 const forbiddenFonts = [

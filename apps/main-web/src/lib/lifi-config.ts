@@ -1,4 +1,5 @@
 import type { WidgetConfig } from '@lifi/widget';
+import sharedLogoPng from '../../../../packages/design-system/assets/logo.png';
 
 type LiFiWidgetRuntimeConfig = {
   config: WidgetConfig;
@@ -7,12 +8,28 @@ type LiFiWidgetRuntimeConfig = {
 
 export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
   const integrator = 'ramp2swap';
+  const appName = 'Ramp2Swap';
+  const appDescription = 'Cross-chain swaps made seamless.';
+  const appUrl = 'https://ramp2swap.com';
+  const appIconUrl = `${appUrl}${sharedLogoPng}`;
+  const walletConnectProjectId = '5432e3507d41270bee46b7b85bbc2ef8';
 
   return {
     integrator,
     config: {
       appearance: 'dark',
       integrator,
+      walletConfig: {
+        walletConnect: {
+          projectId: walletConnectProjectId,
+          metadata: {
+            name: appName,
+            description: appDescription,
+            url: appUrl,
+            icons: [appIconUrl],
+          },
+        },
+      },
       languageResources: {
         en: {
           button: {

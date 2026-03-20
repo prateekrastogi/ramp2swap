@@ -148,6 +148,13 @@ check(
   '[Widget config] apps/main-web/src/lib/lifi-config.ts must use the shared ramp2swap integrator name'
 );
 check(
+  lifiConfig.includes("const appName = 'Ramp2Swap'") &&
+    lifiConfig.includes("const appDescription = 'Cross-chain swaps made seamless.'") &&
+    lifiConfig.includes("const appUrl = 'https://ramp2swap.com'") &&
+    lifiConfig.includes('icons: [appIconUrl]'),
+  '[WalletConnect metadata] apps/main-web/src/lib/lifi-config.ts must define the approved Ramp2Swap wallet metadata for wallet apps'
+);
+check(
   lifiConfig.includes("variant: 'compact'"),
   '[Widget config] apps/main-web/src/lib/lifi-config.ts must keep the widget in compact variant mode'
 );

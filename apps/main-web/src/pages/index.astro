@@ -4,12 +4,13 @@ import { WidgetSkeleton } from '@lifi/widget/skeleton';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
+import sharedLogoPng from '../../../../packages/design-system/assets/logo.png';
 
 const runtime = getLiFiWidgetRuntimeConfig();
 const widgetMarkup = renderToString(createElement(WidgetSkeleton, { config: runtime.config }));
 const siteName = 'Ramp2Swap';
 const siteDescription = 'Ramp2Swap';
-const shareImage = '/Ramp2Swap.svg';
+const shareImage = sharedLogoPng;
 ---
 
 <!doctype html>
