@@ -38,9 +38,15 @@ const widgetMarkup = renderToString(createElement(WidgetSkeleton, { config: runt
             <img class="logo-mark logo-mark-nav mobile-nav-mark-only" src="/Ramp2Swap.svg" alt="Ramp2Swap mark" />
           </a>
 
-          <button class="btn-primary btn-glass main-header-cta" type="button" id="header-connect-wallet">
-            <span class="main-header-cta-desktop">Connect Wallet</span>
-            <span class="main-header-cta-mobile">Connect</span>
+          <button
+            class="btn-primary btn-glass main-header-cta"
+            type="button"
+            id="header-connect-wallet"
+            data-wallet-state="disconnected"
+            aria-label="Connect Wallet"
+          >
+            <span class="main-header-cta-desktop" id="header-connect-wallet-label-desktop">Connect Wallet</span>
+            <span class="main-header-cta-mobile" id="header-connect-wallet-label-mobile">Connect</span>
           </button>
         </div>
       </header>
