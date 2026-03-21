@@ -161,6 +161,10 @@ check(
   '[Widget config] apps/main-web/src/lib/lifi-config.ts must use the shared ramp2swap integrator name'
 );
 check(
+  lifiConfig.includes('fee: 0.005'),
+  '[Widget fee] apps/main-web/src/lib/lifi-config.ts must keep the LI.FI integrator fee set to 0.5% (0.005)'
+);
+check(
   lifiConfig.includes("const appName = 'Ramp2Swap'") &&
     lifiConfig.includes("const appDescription = 'One Interface. All of DeFi.'") &&
     lifiConfig.includes("const appUrl = 'https://ramp2swap.com'") &&

@@ -17,6 +17,7 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
     integrator,
     config: {
       appearance: 'dark',
+      fee: 0.005,
       integrator,
       walletConfig: {
         walletConnect: {
