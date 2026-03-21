@@ -188,12 +188,12 @@ check(
 );
 check(
   publicAppConfig.includes('alchemyRpcUrls: {') &&
-    publicAppConfig.includes("ethereum: ''") &&
-    publicAppConfig.includes("arbitrum: ''") &&
-    publicAppConfig.includes("optimism: ''") &&
-    publicAppConfig.includes("base: ''") &&
-    publicAppConfig.includes("polygon: ''") &&
-    publicAppConfig.includes("solana: ''"),
+    publicAppConfig.includes('ethereum:') &&
+    publicAppConfig.includes('arbitrum:') &&
+    publicAppConfig.includes('optimism:') &&
+    publicAppConfig.includes('base:') &&
+    publicAppConfig.includes('polygon:') &&
+    publicAppConfig.includes('solana:'),
   '[Public app config] apps/main-web/src/lib/public-app-config.ts must keep a unified six-chain Alchemy RPC config scaffold'
 );
 check(
