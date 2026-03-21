@@ -1,4 +1,5 @@
-import type { WidgetConfig } from '@lifi/widget';
+import { ChainId, type WidgetConfig } from '@lifi/widget';
+import { publicAppConfig } from './public-app-config';
 
 type LiFiWidgetRuntimeConfig = {
   config: WidgetConfig;
@@ -7,11 +8,26 @@ type LiFiWidgetRuntimeConfig = {
 
 export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
   const integrator = 'ramp2swap';
-  const appName = 'Ramp2Swap';
-  const appDescription = 'One Interface. All of DeFi.';
-  const appUrl = 'https://ramp2swap.com';
-  const appIconUrl = `${appUrl}/logo.png`;
-  const walletConnectProjectId = '5432e3507d41270bee46b7b85bbc2ef8';
+  const {
+    appName,
+    appDescription,
+    appUrl,
+    appIconPath,
+    walletConnectProjectId,
+    alchemyRpcUrls,
+  } = publicAppConfig;
+  const appIconUrl = `${appUrl}${appIconPath}`;
+  const rpcUrls = Object.fromEntries(
+    [
+      [ChainId.ETH, alchemyRpcUrls.ethereum],
+      [ChainId.ARB, alchemyRpcUrls.arbitrum],
+      [ChainId.OPT, alchemyRpcUrls.optimism],
+      [ChainId.BAS, alchemyRpcUrls.base],
+      [ChainId.POL, alchemyRpcUrls.polygon],
+      [ChainId.SOL, alchemyRpcUrls.solana],
+    ].filter(([, rpcUrl]) => Boolean(rpcUrl))
+     .map(([chainId, rpcUrl]) => [chainId, [rpcUrl as string]])
+  );
 
   return {
     integrator,
@@ -19,6 +35,9 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
       appearance: 'dark',
       fee: 0.005,
       integrator,
+      sdkConfig: {
+        rpcUrls,
+      },
       walletConfig: {
         walletConnect: {
           projectId: walletConnectProjectId,

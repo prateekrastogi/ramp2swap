@@ -1,7 +1,6 @@
 type Runtime = import("@astrojs/cloudflare").Runtime<Env>;
 
 interface ImportMetaEnv {
-	readonly PUBLIC_LIFI_INTEGRATOR?: string;
 }
 
 interface ImportMeta {

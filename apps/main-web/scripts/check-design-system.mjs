@@ -12,6 +12,7 @@ const sharedCssFile = join(packagesRoot, 'src', 'styles', 'foundation.css');
 const localDocsFile = join(webRoot, 'DESIGN_SYSTEM.md');
 const sharedDocsFile = join(packagesRoot, 'DESIGN_SYSTEM.md');
 const lifiConfigFile = join(srcRoot, 'lib', 'lifi-config.ts');
+const publicAppConfigFile = join(srcRoot, 'lib', 'public-app-config.ts');
 
 const failures = [];
 
@@ -152,6 +153,7 @@ for (const file of srcFiles) {
 }
 
 const lifiConfig = readFileSync(lifiConfigFile, 'utf8');
+const publicAppConfig = readFileSync(publicAppConfigFile, 'utf8');
 check(
   lifiConfig.includes("appearance: 'dark'"),
   '[Widget theme] apps/main-web/src/lib/lifi-config.ts must keep the widget in dark appearance mode'
@@ -165,11 +167,34 @@ check(
   '[Widget fee] apps/main-web/src/lib/lifi-config.ts must keep the LI.FI integrator fee set to 0.5% (0.005)'
 );
 check(
-  lifiConfig.includes("const appName = 'Ramp2Swap'") &&
-    lifiConfig.includes("const appDescription = 'One Interface. All of DeFi.'") &&
-    lifiConfig.includes("const appUrl = 'https://ramp2swap.com'") &&
+  lifiConfig.includes('sdkConfig: {') &&
+    lifiConfig.includes('rpcUrls,') &&
+    lifiConfig.includes('ChainId.ETH') &&
+    lifiConfig.includes('ChainId.ARB') &&
+    lifiConfig.includes('ChainId.OPT') &&
+    lifiConfig.includes('ChainId.BAS') &&
+    lifiConfig.includes('ChainId.POL') &&
+    lifiConfig.includes('ChainId.SOL'),
+  '[Widget RPC config] apps/main-web/src/lib/lifi-config.ts must keep the six-chain private RPC scaffold for ETH, ARB, OPT, BASE, POL, and SOL'
+);
+check(
+  publicAppConfig.includes("appName: 'Ramp2Swap'") &&
+    publicAppConfig.includes("appDescription: 'One Interface. All of DeFi.'") &&
+    publicAppConfig.includes("appUrl: 'https://ramp2swap.com'") &&
+    publicAppConfig.includes("appIconPath: '/logo.png'") &&
+    publicAppConfig.includes("walletConnectProjectId: '5432e3507d41270bee46b7b85bbc2ef8'") &&
     lifiConfig.includes('icons: [appIconUrl]'),
-  '[WalletConnect metadata] apps/main-web/src/lib/lifi-config.ts must define the approved Ramp2Swap wallet metadata for wallet apps'
+  '[WalletConnect metadata] apps/main-web/src/lib/public-app-config.ts and apps/main-web/src/lib/lifi-config.ts must define the approved Ramp2Swap wallet metadata for wallet apps'
+);
+check(
+  publicAppConfig.includes('alchemyRpcUrls: {') &&
+    publicAppConfig.includes("ethereum: ''") &&
+    publicAppConfig.includes("arbitrum: ''") &&
+    publicAppConfig.includes("optimism: ''") &&
+    publicAppConfig.includes("base: ''") &&
+    publicAppConfig.includes("polygon: ''") &&
+    publicAppConfig.includes("solana: ''"),
+  '[Public app config] apps/main-web/src/lib/public-app-config.ts must keep a unified six-chain Alchemy RPC config scaffold'
 );
 check(
   lifiConfig.includes("variant: 'compact'"),

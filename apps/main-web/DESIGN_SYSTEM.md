@@ -53,6 +53,8 @@ Main-web does not own:
 - The outer widget shell uses shared `.glass` + `.glass-tier-2` so the widget takes center stage without introducing a new visual system.
 - The shell may include the dedicated conversation stage below the widget, but no extra marketing, metrics, or placeholder scroll sections.
 - Widget customization is deferred; first implementation is focused on mounting the widget cleanly with one shared integrator config.
+- Private RPC overrides should be supplied through `sdkConfig.rpcUrls` using the unified public config file at `src/lib/public-app-config.ts` for the primary six chains only: Ethereum, Arbitrum, Optimism, Base, Polygon, and Solana.
+- Keep public app metadata and browser-visible RPC configuration centralized in `src/lib/public-app-config.ts` instead of scattering them across env files.
 
 ## Conversation Stage
 - The conversation composer sits below the widget inside the same outer shell and matches the widget width.
