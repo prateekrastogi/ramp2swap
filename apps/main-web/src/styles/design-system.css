@@ -192,6 +192,7 @@ body.page .ambient-orb--mint-top {
   width: 20px;
   height: 20px;
   object-fit: contain;
+  opacity: 0.8;
 }
 
 .lifi-widget-mount {
@@ -199,11 +200,11 @@ body.page .ambient-orb--mint-top {
   min-width: 0;
 }
 
-.lifi-widget-mount > div {
+.lifi-widget-mount>div {
   width: 100%;
 }
 
-.lifi-widget-mount .MuiContainer-root > div:first-of-type {
+.lifi-widget-mount .MuiContainer-root>div:first-of-type {
   margin-bottom: clamp(12px, 1.8vw, 18px) !important;
 }
 
