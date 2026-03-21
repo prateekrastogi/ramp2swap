@@ -51,6 +51,7 @@ Main-web does not own:
 ## Widget Stage
 - The homepage body below the header is a single centered LI.FI widget stage.
 - The outer widget shell uses shared `.glass` + `.glass-tier-2` so the widget takes center stage without introducing a new visual system.
+- The LI.FI widget surface itself carries the softer partner-web `.glass-highlight-soft` language through its single container theme; do not add a nested extra glass shell around the widget to achieve this.
 - The shell may include the dedicated conversation stage below the widget, but no extra marketing, metrics, or placeholder scroll sections.
 - Widget customization is deferred; first implementation is focused on mounting the widget cleanly with one shared integrator config.
 - Private RPC overrides should be supplied through `sdkConfig.rpcUrls` using the unified public config file at `src/lib/public-app-config.ts` for the primary six chains only: Ethereum, Arbitrum, Optimism, Base, Polygon, and Solana.
@@ -59,6 +60,7 @@ Main-web does not own:
 ## Conversation Stage
 - The conversation composer sits below the widget inside the same outer shell and matches the widget width.
 - Use a separate inner glass surface with lighter treatment than the main shell so it reads as a secondary action area.
+- The conversation surface uses shared `.glass-mint` so it carries the fuller green fill tinge used by partner-web premium mint cards like revenue/link-builder surfaces.
 - Keep clear spacing between the widget surface and the conversation surface; the shell should expand vertically rather than compress either component.
 - The input area should autosize vertically while typing and keep the action button anchored to the lower right on desktop/tablet.
 - The section label is fixed to `Intent AI` and the placeholder copy is fixed to `Describe Your Swap...`.

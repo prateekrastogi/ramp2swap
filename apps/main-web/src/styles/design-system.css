@@ -208,6 +208,27 @@ body.page .ambient-orb--mint-top {
   overflow: hidden;
 }
 
+.lifi-widget-mount [id*='widget-relative-container'] {
+  position: relative;
+  background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%) !important;
+  border-color: var(--mint-border-soft) !important;
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px var(--mint-ring-edge),
+    inset 0 1px 0 var(--mint-tint-strong) !important;
+}
+
+.lifi-widget-mount [id*='widget-relative-container']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+  pointer-events: none;
+}
+
 @media (min-width: 1280px) {
   .main-header-nav {
     height: 64px;

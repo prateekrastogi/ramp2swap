@@ -808,6 +808,29 @@ body {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
 
+.glass-highlight-soft {
+  contain: paint;
+  background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
+  border-color: var(--white-a-10);
+  background-clip: padding-box;
+  backface-visibility: hidden;
+  backdrop-filter: none;
+  transform: translateZ(0);
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 var(--mint-tint-strong);
+}
+
+.glass-highlight-soft::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+}
+
 .glass-mint {
   overflow: hidden;
   background: var(--mint-tint-faint);

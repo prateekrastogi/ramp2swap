@@ -71,7 +71,8 @@ check(
     homeContent.includes('conversation-stage-submit') &&
     homeContent.includes('Intent AI') &&
     homeContent.includes('Describe Your Swap...') &&
-    homeContent.includes('/White_Ramp2Swap.svg'),
+    homeContent.includes('/White_Ramp2Swap.svg') &&
+    homeContent.includes('conversation-stage card glass glass-tier-1 glass-mint on-glass'),
   `[Conversation stage] ${relative(root, homePage)} must include the main-web conversation upload composer below the widget`
 );
 check(
@@ -112,11 +113,14 @@ const allowedLiFiRgbValues = new Set([
   'rgba(0, 0, 0, 0.42)',
   'rgba(255, 255, 255, 0.08)',
   'rgba(15, 20, 25, 0.82)',
+  'rgba(15, 20, 25, 0.72)',
   'rgba(255, 255, 255, 0.06)',
   'rgba(20, 28, 36, 0.86)',
   'rgba(255, 255, 255, 0.07)',
+  'rgba(0, 0, 0, 0.4)',
   'rgba(0, 0, 0, 0.28)',
   'rgba(0, 0, 0, 0.26)',
+  'rgba(0, 229, 160, 0.04)',
   'rgba(0, 229, 160, 0.12)',
   'rgba(0, 229, 160, 0.06)',
   'rgba(0, 229, 160, 0.15)',
@@ -213,8 +217,9 @@ check(
   '[Widget action color] apps/main-web/src/lib/lifi-config.ts must keep mint as the widget primary action color'
 );
 check(
-  lifiConfig.includes("backgroundColor: 'rgba(15, 20, 25, 0.82)'"),
-  '[Widget glass] apps/main-web/src/lib/lifi-config.ts must keep the approved obsidian glass container background'
+  lifiConfig.includes("background: 'linear-gradient(180deg, rgba(0, 229, 160, 0.04), rgba(15, 20, 25, 0.72) 42%)'") &&
+    lifiConfig.includes("backgroundColor: 'rgba(15, 20, 25, 0.72)'"),
+  '[Widget glass] apps/main-web/src/lib/lifi-config.ts must keep the approved mint-highlight single-surface widget container treatment'
 );
 check(
   lifiConfig.includes("color: '#C0CDD9'"),
@@ -240,6 +245,7 @@ for (const requiredClass of [
   '.glass-tier-2',
   '.glass-tier-3',
   '.glass-tier-4-nav',
+  '.glass-highlight-soft',
   '.glass-mint',
   '.ambient-layer',
   '.ambient-orb--mint-top',
@@ -321,6 +327,10 @@ check(
     localDocs.includes('Describe Your Swap...') &&
     localDocs.includes('/White_Ramp2Swap.svg'),
   '[Main-web docs] apps/main-web/DESIGN_SYSTEM.md must document the approved conversation stage copy and icon asset'
+);
+check(
+  localDocs.includes('glass-highlight-soft') && localDocs.includes('glass-mint'),
+  '[Main-web docs] apps/main-web/DESIGN_SYSTEM.md must document the shared mint-highlight and mint-fill treatments used by the widget and conversation stage'
 );
 
 if (failures.length > 0) {

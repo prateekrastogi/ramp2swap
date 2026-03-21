@@ -70,9 +70,10 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
           maxWidth: 'min(100%, 440px)',
           border: '1px solid rgba(255, 255, 255, 0.10)',
           borderRadius: '24px',
-          boxShadow: '0 18px 54px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-          backgroundColor: 'rgba(15, 20, 25, 0.82)',
-          backdropFilter: 'blur(32px) saturate(160%)',
+          boxShadow: '0 8px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(0, 229, 160, 0.12)',
+          background: 'linear-gradient(180deg, rgba(0, 229, 160, 0.04), rgba(15, 20, 25, 0.72) 42%)',
+          backgroundColor: 'rgba(15, 20, 25, 0.72)',
+          backdropFilter: 'blur(40px) saturate(160%)',
           maxHeight: 'min(760px, calc(100vh - 148px))',
         },
         palette: {

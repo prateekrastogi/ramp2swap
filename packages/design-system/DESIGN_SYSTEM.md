@@ -132,6 +132,10 @@ Classes:
 ### Mint Glass Variant
 Use `.glass-mint` for action surfaces only.
 
+### Mint Highlight Variants
+- Use `.glass-highlight-soft` for softer green flare surfaces where the mint should read as atmospheric emphasis, not a full action fill.
+- Use `.glass-mint` for fuller mint-tinted secondary/action surfaces with stronger border and ring presence.
+
 ### Interactive Glass States
 - `.glass-interactive:hover`
 - `.input-glass:focus-visible`
