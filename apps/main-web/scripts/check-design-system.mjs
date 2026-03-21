@@ -65,6 +65,12 @@ check(
   `[Widget mount] ${relative(root, homePage)} must include the LI.FI widget SSR mount`
 );
 check(
+  homeContent.includes('conversation-upload-input') &&
+    homeContent.includes('conversation-stage') &&
+    homeContent.includes('conversation-stage-submit'),
+  `[Conversation stage] ${relative(root, homePage)} must include the main-web conversation upload composer below the widget`
+);
+check(
   !homeContent.includes('Sticky header scroll preview') &&
     !homeContent.includes('Sample Metrics') &&
     !homeContent.includes('Long-form layout blocks'),
@@ -219,6 +225,10 @@ for (const requiredLocalClass of [
   '.widget-stage',
   '.widget-stage-shell',
   '.widget-stage-frame',
+  '.conversation-stage-frame',
+  '.conversation-stage',
+  '.conversation-stage-input',
+  '.conversation-stage-submit',
 ]) {
   check(localCss.includes(requiredLocalClass), `[Missing main-web rule] design-system.css must include ${requiredLocalClass}`);
 }
@@ -239,6 +249,7 @@ for (const requiredLocalDocSection of [
   '## Main Web Layer',
   '## Header Experience',
   '## Widget Stage',
+  '## Conversation Stage',
   '## Brand Assets And Favicon',
 ]) {
   check(localDocs.includes(requiredLocalDocSection), `[Missing main-web docs section] apps/main-web/DESIGN_SYSTEM.md must include: ${requiredLocalDocSection}`);

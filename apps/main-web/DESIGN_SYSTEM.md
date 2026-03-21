@@ -19,7 +19,7 @@ This file is the main-web addendum to the shared Ramp2Swap design system.
 - Confirm main-web additions do not redefine reusable brand primitives locally.
 - Confirm the header continues using the shared nav glass treatment.
 - Confirm the primary header action remains a pill-shaped `Connect Wallet` button with accessible touch sizing.
-- Confirm the homepage content remains header plus one centered LI.FI widget stage only.
+- Confirm the homepage content remains header plus the centered widget shell and the conversation stage below it.
 - Run `npm run build --workspace apps/main-web` after UI changes.
 
 ## Change Protocol (Every Time)
@@ -32,6 +32,7 @@ This file is the main-web addendum to the shared Ramp2Swap design system.
 ## Main Web Layer
 Main-web owns:
 - homepage composition around the centered LI.FI widget stage
+- the conversation upload surface that sits below the widget inside the same shell
 - the top navigation shell and its sticky behavior
 - page-level content arrangement below the shared brand primitives
 
@@ -50,8 +51,14 @@ Main-web does not own:
 ## Widget Stage
 - The homepage body below the header is a single centered LI.FI widget stage.
 - The outer widget shell uses shared `.glass` + `.glass-tier-2` so the widget takes center stage without introducing a new visual system.
-- Do not add extra marketing, metrics, or placeholder scroll sections around the widget in this phase.
+- The shell may include the dedicated conversation stage below the widget, but no extra marketing, metrics, or placeholder scroll sections.
 - Widget customization is deferred; first implementation is focused on mounting the widget cleanly with one shared integrator config.
+
+## Conversation Stage
+- The conversation composer sits below the widget inside the same outer shell and matches the widget width.
+- Use a separate inner glass surface with lighter treatment than the main shell so it reads as a secondary action area.
+- Keep clear spacing between the widget surface and the conversation surface; the shell should expand vertically rather than compress either component.
+- The input area should autosize vertically while typing and keep the action button anchored to the lower right on desktop/tablet.
 
 ## Brand Assets And Favicon
 - Main-web navbar uses `/Horizontal_Logo.svg` for the horizontal brand asset.

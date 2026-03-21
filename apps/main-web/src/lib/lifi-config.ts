@@ -41,7 +41,7 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
       theme: {
         header: {
           background: 'transparent',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          borderBottom: '0',
           boxShadow: 'none',
         },
         container: {
@@ -90,7 +90,7 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
             styleOverrides: {
               root: {
                 background: 'transparent',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                borderBottom: '0',
                 boxShadow: 'none',
                 '& .MuiButton-root': {
                   color: '#C0CDD9',

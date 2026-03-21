@@ -70,12 +70,40 @@ const shareImage = '/logo.png';
             <div class="widget-stage-frame">
               <div id="lifi-widget-root" class="lifi-widget-mount" set:html={widgetMarkup}></div>
             </div>
+            <section class="conversation-stage-frame" aria-label="Conversation upload composer">
+              <div class="conversation-stage card glass glass-tier-1 on-glass">
+                <label class="conversation-stage-label" for="conversation-upload-input">Intent AI</label>
+                <div class="conversation-stage-input-shell">
+                  <textarea
+                    id="conversation-upload-input"
+                    class="conversation-stage-input"
+                    rows="1"
+                    placeholder="Describe Your Swap..."
+                    aria-label="Conversation input"
+                  ></textarea>
+                  <button class="btn-primary btn-glass conversation-stage-submit" type="button" aria-label="Upload conversation to AI">
+                    <span class="conversation-stage-submit-label">Upload</span>
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
         </section>
       </main>
     </div>
     <script>
       import '../scripts/lifi-widget-mount.ts';
+
+      const conversationInput = document.getElementById('conversation-upload-input');
+      if (conversationInput instanceof HTMLTextAreaElement) {
+        const resizeConversationInput = () => {
+          conversationInput.style.height = 'auto';
+          conversationInput.style.height = `${conversationInput.scrollHeight}px`;
+        };
+
+        resizeConversationInput();
+        conversationInput.addEventListener('input', resizeConversationInput);
+      }
     </script>
   </body>
 </html>
