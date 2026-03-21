@@ -204,10 +204,6 @@ body.page .ambient-orb--mint-top {
   width: 100%;
 }
 
-.lifi-widget-mount .MuiContainer-root>div:first-of-type {
-  margin-bottom: clamp(12px, 1.8vw, 18px) !important;
-}
-
 .lifi-widget-mount [class*='container'] {
   overflow: hidden;
 }

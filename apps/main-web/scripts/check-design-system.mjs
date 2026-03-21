@@ -287,10 +287,6 @@ check(
   '[Conversation icon size] apps/main-web/src/styles/design-system.css must keep the White Ramp2Swap icon sized for desktop/tablet and mobile'
 );
 check(
-  localCss.includes("margin-bottom: clamp(12px, 1.8vw, 18px) !important;"),
-  '[Widget spacing] apps/main-web/src/styles/design-system.css must keep responsive breathing room below the top widget glass surface'
-);
-check(
   localCss.includes('font-size: 24px !important;') && localCss.includes('font-size: 20px !important;'),
   '[Conversation heading] apps/main-web/src/styles/design-system.css must keep Intent AI aligned with the widget title scale across breakpoints'
 );
