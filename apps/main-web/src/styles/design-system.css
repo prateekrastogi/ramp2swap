@@ -175,8 +175,8 @@ body.page .ambient-orb--mint-top {
   right: 12px;
   bottom: 12px;
   min-width: 0;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   border-radius: 999px;
   display: inline-flex;
@@ -187,10 +187,11 @@ body.page .ambient-orb--mint-top {
     inset 0 1px 0 var(--mint-tint-strong);
 }
 
-.conversation-stage-submit-label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.conversation-stage-submit-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .lifi-widget-mount {
@@ -319,5 +320,15 @@ body.page .ambient-orb--mint-top {
     min-height: 104px;
     padding: 14px 14px 62px;
     font-size: 16px;
+  }
+
+  .conversation-stage-submit {
+    width: 44px;
+    height: 44px;
+  }
+
+  .conversation-stage-submit-icon {
+    width: 18px;
+    height: 18px;
   }
 }

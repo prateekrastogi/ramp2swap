@@ -67,8 +67,15 @@ check(
 check(
   homeContent.includes('conversation-upload-input') &&
     homeContent.includes('conversation-stage') &&
-    homeContent.includes('conversation-stage-submit'),
+    homeContent.includes('conversation-stage-submit') &&
+    homeContent.includes('Intent AI') &&
+    homeContent.includes('Describe Your Swap...') &&
+    homeContent.includes('/White_Ramp2Swap.svg'),
   `[Conversation stage] ${relative(root, homePage)} must include the main-web conversation upload composer below the widget`
+);
+check(
+  !homeContent.includes('Upload</span>') && !homeContent.includes('Upload Conversation To AI'),
+  `[Conversation stage] ${relative(root, homePage)} must not revert to the old upload-label CTA treatment`
 );
 check(
   !homeContent.includes('Sticky header scroll preview') &&
@@ -227,11 +234,41 @@ for (const requiredLocalClass of [
   '.widget-stage-frame',
   '.conversation-stage-frame',
   '.conversation-stage',
+  '.conversation-stage-input-shell',
+  '.conversation-stage-label',
   '.conversation-stage-input',
   '.conversation-stage-submit',
+  '.conversation-stage-submit-icon',
 ]) {
   check(localCss.includes(requiredLocalClass), `[Missing main-web rule] design-system.css must include ${requiredLocalClass}`);
 }
+
+check(
+  localCss.includes('width: 48px;') &&
+    localCss.includes('height: 48px;') &&
+    localCss.includes('width: 44px;') &&
+    localCss.includes('height: 44px;'),
+  '[Conversation action size] apps/main-web/src/styles/design-system.css must keep the composer action at 48px on tablet/desktop and 44px on mobile'
+);
+check(
+  localCss.includes('width: 20px;') &&
+    localCss.includes('height: 20px;') &&
+    localCss.includes('width: 18px;') &&
+    localCss.includes('height: 18px;'),
+  '[Conversation icon size] apps/main-web/src/styles/design-system.css must keep the White Ramp2Swap icon sized for desktop/tablet and mobile'
+);
+check(
+  localCss.includes("margin-bottom: clamp(12px, 1.8vw, 18px) !important;"),
+  '[Widget spacing] apps/main-web/src/styles/design-system.css must keep responsive breathing room below the top widget glass surface'
+);
+check(
+  localCss.includes('font-size: 24px !important;') && localCss.includes('font-size: 20px !important;'),
+  '[Conversation heading] apps/main-web/src/styles/design-system.css must keep Intent AI aligned with the widget title scale across breakpoints'
+);
+check(
+  localCss.includes('font-size: 18px;') && localCss.includes('font-size: 16px;') && localCss.includes('font-weight: 500;'),
+  '[Conversation input type] apps/main-web/src/styles/design-system.css must keep the composer text aligned with the widget field typography'
+);
 
 const sharedDocs = readFileSync(sharedDocsFile, 'utf8');
 for (const requiredDocSection of [
@@ -254,6 +291,12 @@ for (const requiredLocalDocSection of [
 ]) {
   check(localDocs.includes(requiredLocalDocSection), `[Missing main-web docs section] apps/main-web/DESIGN_SYSTEM.md must include: ${requiredLocalDocSection}`);
 }
+check(
+  localDocs.includes('Intent AI') &&
+    localDocs.includes('Describe Your Swap...') &&
+    localDocs.includes('/White_Ramp2Swap.svg'),
+  '[Main-web docs] apps/main-web/DESIGN_SYSTEM.md must document the approved conversation stage copy and icon asset'
+);
 
 if (failures.length > 0) {
   console.error('\nDesign system guardrails failed:\n');

@@ -59,6 +59,10 @@ Main-web does not own:
 - Use a separate inner glass surface with lighter treatment than the main shell so it reads as a secondary action area.
 - Keep clear spacing between the widget surface and the conversation surface; the shell should expand vertically rather than compress either component.
 - The input area should autosize vertically while typing and keep the action button anchored to the lower right on desktop/tablet.
+- The section label is fixed to `Intent AI` and the placeholder copy is fixed to `Describe Your Swap...`.
+- The composer action uses `/White_Ramp2Swap.svg` inside the circular button; do not revert to an `Upload` text label.
+- Keep the composer action at `48px` on desktop/tablet and `44px` on mobile, with the icon sized proportionally inside it.
+- Keep the composer heading aligned with the LI.FI `Exchange` title scale and keep the input text aligned with the widget field typography.
 
 ## Brand Assets And Favicon
 - Main-web navbar uses `/Horizontal_Logo.svg` for the horizontal brand asset.
