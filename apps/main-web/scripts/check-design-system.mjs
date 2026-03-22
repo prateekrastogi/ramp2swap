@@ -85,6 +85,16 @@ check(
     !homeContent.includes('Long-form layout blocks'),
   `[Homepage cleanup] ${relative(root, homePage)} must remove the old placeholder and scroll-demo sections`
 );
+check(
+  homeContent.includes('main-footer') &&
+    homeContent.includes('/Ramp2Swap.svg') &&
+    homeContent.includes('One Interface. All of DeFi.') &&
+    homeContent.includes('Copyright © 2026 Ramp2Swap') &&
+    homeContent.includes('>Terms<') &&
+    homeContent.includes('>Privacy<') &&
+    homeContent.includes('>Risk Disclosure<'),
+  `[Legal footer] ${relative(root, homePage)} must include the approved footer brand lockup, copyright, and legal links`
+);
 
 const forbiddenFonts = [
   /(^|[^a-z])Inter([^a-z]|$)/i,
@@ -234,6 +244,10 @@ check(
 const sharedCss = readFileSync(sharedCssFile, 'utf8');
 const localCss = readFileSync(localCssFile, 'utf8');
 const combinedCss = `${sharedCss}\n${localCss}`;
+check(
+  sharedCss.includes('--ivory-100: #FDF6E3;'),
+  '[Shared token] packages/design-system/src/styles/foundation.css must define the approved ivory brand-copy token'
+);
 
 check(
   localCss.includes('@import "../../../../packages/design-system/src/styles/foundation.css";'),
@@ -264,6 +278,10 @@ for (const requiredLocalClass of [
   '.main-header',
   '.main-header-brand',
   '.main-header-cta',
+  '.main-footer',
+  '.main-footer-brand-row',
+  '.main-footer-tagline',
+  '.main-footer-link',
   '.widget-stage',
   '.widget-stage-shell',
   '.widget-stage-frame',
@@ -300,6 +318,10 @@ check(
   localCss.includes('font-size: 18px;') && localCss.includes('font-size: 16px;') && localCss.includes('font-weight: 500;'),
   '[Conversation input type] apps/main-web/src/styles/design-system.css must keep the composer text aligned with the widget field typography'
 );
+check(
+  localCss.includes('color: var(--ivory-100);'),
+  '[Footer tagline color] apps/main-web/src/styles/design-system.css must use the shared ivory token for the footer tagline'
+);
 
 const sharedDocs = readFileSync(sharedDocsFile, 'utf8');
 for (const requiredDocSection of [
@@ -323,6 +345,10 @@ for (const requiredLocalDocSection of [
   check(localDocs.includes(requiredLocalDocSection), `[Missing main-web docs section] apps/main-web/DESIGN_SYSTEM.md must include: ${requiredLocalDocSection}`);
 }
 check(
+  sharedDocs.includes('#FDF6E3') && sharedDocs.includes('Ivory Usage Rule'),
+  '[Shared docs] packages/design-system/DESIGN_SYSTEM.md must document the approved ivory token and its usage limits'
+);
+check(
   localDocs.includes('Intent AI') &&
     localDocs.includes('Describe Your Swap...') &&
     localDocs.includes('/White_Ramp2Swap.svg'),
@@ -331,6 +357,10 @@ check(
 check(
   localDocs.includes('glass-highlight-soft') && localDocs.includes('glass-mint'),
   '[Main-web docs] apps/main-web/DESIGN_SYSTEM.md must document the shared mint-highlight and mint-fill treatments used by the widget and conversation stage'
+);
+check(
+  localDocs.includes('ivory') && localDocs.includes('footer tagline'),
+  '[Main-web docs] apps/main-web/DESIGN_SYSTEM.md must document the ivory footer tagline treatment'
 );
 
 if (failures.length > 0) {

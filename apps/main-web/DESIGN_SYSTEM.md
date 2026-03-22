@@ -61,6 +61,7 @@ Main-web does not own:
 ## Legal Footer And Pages
 - The homepage may include a subdued legal footer below the widget stage for compliance links and platform identity.
 - Use a softer shared glass tier than the header so the footer reads as supportive chrome, not a competing hero surface.
+- The footer tagline may use the shared ivory accent token for a single warm brand-copy moment beside the footer mark.
 - Keep the copyright block above the legal link row.
 - Legal links should open their documents in a new tab.
 - Legal document pages should use the shared main-web header treatment plus a readable, long-form glass panel centered in the viewport.

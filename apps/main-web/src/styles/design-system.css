@@ -190,6 +190,9 @@ body.page .ambient-orb--mint-top {
   width: 100%;
   margin: 0 auto;
   padding: 24px 32px;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
 }
 
 .widget-stage {
@@ -207,12 +210,6 @@ body.page .ambient-orb--mint-top {
   border-right: 0;
   border-bottom: 0;
   box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.28);
-}
-
-.main-footer-shell {
-  display: grid;
-  gap: 16px;
-  justify-items: center;
 }
 
 .main-footer-copy {
@@ -238,7 +235,7 @@ body.page .ambient-orb--mint-top {
 }
 
 .main-footer-tagline {
-  color: var(--slate-100);
+  color: var(--ivory-100);
 }
 
 .main-footer-copyright {

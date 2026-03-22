@@ -35,6 +35,7 @@ Use only the colors below. Do not add new hex/rgb values outside these approved 
 - `#7A98B3` secondary/supporting text
 - `#3D5269` muted text, placeholders, disabled text
 - `#243040` subtle fills and neutral hover states
+- `#FDF6E3` warm brand-copy highlight for rare tagline and narrative lockup use only
 - `#C0CDD9` platinum accent for premium tier indicators, enterprise badges, and partner-logo emphasis only
 
 ### 10% Mint
@@ -51,6 +52,11 @@ Use only the colors below. Do not add new hex/rgb values outside these approved 
   - partner-logo emphasis
 - Never use platinum for primary CTAs, active controls, or transactional confirmation states.
 - Mint remains the only action accent in the system.
+
+### Ivory Usage Rule
+- Ivory is a restrained warmth accent, not a general replacement for primary text.
+- Use it sparingly for brand-tagline moments or similarly small editorial lockups.
+- Never use ivory for dense body copy, legal text, or primary actions.
 
 ### Approved Glass Extension Tokens
 - `rgba(255,255,255,0.06)` glass top edge / nav border
