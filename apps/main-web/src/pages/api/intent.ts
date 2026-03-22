@@ -18,7 +18,7 @@ function isLocalRequest(request: Request) {
   );
 }
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   const body = (await request.json().catch(() => null)) as { text?: unknown } | null;
   const text = typeof body?.text === 'string' ? body.text.trim() : '';
 
@@ -45,7 +45,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     body: JSON.stringify({ text }),
   };
 
-  const runtimeEnv = (locals as { runtime?: { env?: Env } }).runtime?.env;
   const localMainApiOrigin = getLocalMainApiOrigin();
 
   if (isLocalRequest(request)) {
@@ -56,9 +55,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return fetch(`${localMainApiOrigin}/intent`, init);
   }
 
-  if (runtimeEnv?.MAIN_API) {
+  const cloudflareWorkers = await import('cloudflare:workers').catch(() => null);
+  const workerEnv = cloudflareWorkers?.env as Env | undefined;
+
+  if (workerEnv?.MAIN_API) {
     console.log('[main-web] Forwarding /api/intent through Cloudflare service binding');
-    return runtimeEnv.MAIN_API.fetch('https://main-api/intent', init);
+    return workerEnv.MAIN_API.fetch('https://main-api/intent', init);
   }
 
   console.log('[main-web] Forwarding /api/intent to fallback main-api origin', {
