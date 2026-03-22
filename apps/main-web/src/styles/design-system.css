@@ -2,7 +2,7 @@
 
 .main-app {
   min-height: 100vh;
-  padding: 0 0 48px;
+  padding: 0;
 }
 
 body.page .ambient-orb--mint-top {
@@ -189,13 +189,11 @@ body.page .ambient-orb--mint-top {
 .main-footer-shell {
   width: 100%;
   margin: 0 auto;
-  padding: 24px 32px;
+  padding: 18px 32px;
   display: grid;
-  min-height: 152px;
-  grid-template-rows: 1fr auto 1fr;
-  gap: 0;
-  justify-items: center;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
+  column-gap: 24px;
 }
 
 .widget-stage {
@@ -219,12 +217,11 @@ body.page .ambient-orb--mint-top {
 .main-footer-brand-row {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
   min-width: 0;
   flex-wrap: wrap;
-  text-align: center;
-  align-self: center;
+  text-align: left;
 }
 
 .main-footer-brand-mark {
@@ -239,16 +236,19 @@ body.page .ambient-orb--mint-top {
 
 .main-footer-copyright {
   color: var(--slate-300);
-  align-self: center;
+  justify-self: center;
+  text-align: center;
+  margin: 0;
 }
 
 .main-footer-legal-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 24px;
   flex-wrap: wrap;
-  align-self: center;
+  line-height: 1;
+  justify-self: end;
 }
 
 .main-footer-link {
@@ -258,7 +258,7 @@ body.page .ambient-orb--mint-top {
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1;
   letter-spacing: 0;
   transition:
     color 180ms ease,
@@ -532,8 +532,8 @@ body.page .ambient-orb--mint-top {
   }
 
   .main-footer-shell {
-    padding: 22px 24px;
-    min-height: 144px;
+    padding: 18px 24px;
+    column-gap: 20px;
   }
 
   .legal-panel {
@@ -563,16 +563,20 @@ body.page .ambient-orb--mint-top {
 
 @media (max-width: 767px) {
   .main-app {
-    padding: 0 0 36px;
+    padding: 0;
   }
 
   .main-footer-shell {
-    padding: 18px 16px;
-    min-height: 132px;
+    padding: 16px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: 4px;
   }
 
   .main-footer-brand-row {
+    justify-content: center;
     gap: 10px;
+    text-align: center;
   }
 
   .main-footer-brand-mark {
@@ -585,7 +589,10 @@ body.page .ambient-orb--mint-top {
   }
 
   .main-footer-legal-row {
+    justify-content: center;
+    justify-self: center;
     gap: 12px 18px;
+    margin-bottom: 0;
   }
 
   .main-footer-link {
