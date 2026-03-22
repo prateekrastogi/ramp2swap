@@ -4,12 +4,54 @@ import { WidgetSkeleton } from '@lifi/widget/skeleton';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
+import { publicAppConfig } from '../lib/public-app-config';
 
 const runtime = getLiFiWidgetRuntimeConfig();
 const widgetMarkup = renderToString(createElement(WidgetSkeleton, { config: runtime.config }));
 const siteName = 'Ramp2Swap';
 const siteDescription = 'One Interface. All of DeFi.';
 const shareImage = '/logo.png';
+
+function getPartnerPortalUrl(currentUrl: URL, fallbackAppUrl: string) {
+  const fallbackUrl = new URL(fallbackAppUrl);
+  const normalizedUrl = new URL(currentUrl.toString());
+  const currentHost = normalizedUrl.hostname.toLowerCase();
+  const hostLabels = currentHost.split('.');
+  const isLocalHost =
+    currentHost === 'localhost' ||
+    currentHost === '127.0.0.1' ||
+    currentHost === '[::1]';
+  const isEnvironmentHost =
+    hostLabels.length >= 3 &&
+    (hostLabels[0] === 'staging' || hostLabels[0] === 'test');
+
+  if (currentHost.startsWith('partner.') || hostLabels[1] === 'partner') {
+    normalizedUrl.pathname = '/';
+    normalizedUrl.search = '';
+    normalizedUrl.hash = '';
+    return normalizedUrl.toString();
+  }
+
+  if (isLocalHost) {
+    fallbackUrl.hostname = `partner.${fallbackUrl.hostname}`;
+    fallbackUrl.pathname = '/';
+    fallbackUrl.search = '';
+    fallbackUrl.hash = '';
+    return fallbackUrl.toString();
+  }
+
+  if (isEnvironmentHost) {
+    normalizedUrl.hostname = [hostLabels[0], 'partner', ...hostLabels.slice(1)].join('.');
+  } else {
+    normalizedUrl.hostname = `partner.${currentHost}`;
+  }
+  normalizedUrl.pathname = '/';
+  normalizedUrl.search = '';
+  normalizedUrl.hash = '';
+  return normalizedUrl.toString();
+}
+
+const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
 ---
 
 <!doctype html>
@@ -51,16 +93,28 @@ const shareImage = '/logo.png';
             <img class="logo-mark logo-mark-nav mobile-nav-mark-only" src="/Ramp2Swap.svg" alt="Ramp2Swap mark" />
           </a>
 
-          <button
-            class="btn-primary btn-glass main-header-cta"
-            type="button"
-            id="header-connect-wallet"
-            data-wallet-state="disconnected"
-            aria-label="Connect Wallet"
-          >
-            <span class="main-header-cta-desktop" id="header-connect-wallet-label-desktop">Connect Wallet</span>
-            <span class="main-header-cta-mobile" id="header-connect-wallet-label-mobile">Connect</span>
-          </button>
+          <div class="main-header-actions">
+            <a
+              class="main-header-earn-link"
+              href={partnerPortalUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label="Open Earn in a new tab"
+            >
+              <span class="main-header-earn-link-copy">Earn</span>
+            </a>
+
+            <button
+              class="btn-primary btn-glass main-header-cta"
+              type="button"
+              id="header-connect-wallet"
+              data-wallet-state="disconnected"
+              aria-label="Connect Wallet"
+            >
+              <span class="main-header-cta-desktop" id="header-connect-wallet-label-desktop">Connect Wallet</span>
+              <span class="main-header-cta-mobile" id="header-connect-wallet-label-mobile">Connect</span>
+            </button>
+          </div>
         </div>
       </header>
 
