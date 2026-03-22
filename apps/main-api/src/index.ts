@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { pickMockWidgetFormValues } from './intent-mock'
 
 const app = new Hono()
 const MIN_INTENT_DELAY_MS = 5_000
@@ -50,23 +51,30 @@ app.post('/intent', async (c) => {
   }
 
   const delayMs = getIntentDelayMs()
+  const { profile, widgetFormValues } = pickMockWidgetFormValues()
   console.log(`[main-api] Received /intent request`, {
     text,
-    delayMs
+    delayMs,
+    profile,
+    widgetFormValues
   })
 
   await wait(delayMs)
 
   console.log(`[main-api] Responding to /intent request`, {
     text,
-    delayMs
+    delayMs,
+    profile,
+    widgetFormValues
   })
 
   return c.json(
     {
       success: true,
       receivedText: text,
-      delayMs
+      delayMs,
+      mock: true,
+      widgetFormValues
     },
     200
   )

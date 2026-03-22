@@ -185,6 +185,26 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
       const conversationInputShell = conversationInput?.closest('.conversation-stage-input-shell');
       const localMainApiOrigin = 'http://127.0.0.1:7878';
       let successFlashTimeoutId = 0;
+
+      /**
+       * @typedef {{
+       *   fromAmount?: string;
+       *   fromChain?: number;
+       *   fromToken?: string;
+       *   toChain?: number;
+       *   toToken?: string;
+       *   toAddress?: string;
+       * }} IntentWidgetFormValues
+       *
+       * @typedef {{
+       *   success: boolean;
+       *   receivedText?: string;
+       *   delayMs?: number;
+       *   mock?: boolean;
+       *   widgetFormValues?: IntentWidgetFormValues;
+       * }} IntentResponse
+       */
+
       if (conversationInput instanceof HTMLTextAreaElement) {
         const resizeConversationInput = () => {
           conversationInput.style.height = 'auto';
@@ -236,7 +256,18 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
               throw new Error(`Intent request failed with status ${response.status}`);
             }
 
+            /** @type {IntentResponse} */
+            const responseData = await response.json();
+
             console.log('[main-web] Intent request completed successfully');
+            console.log('[main-web] Intent response payload', responseData);
+
+            if (responseData.widgetFormValues) {
+              window.dispatchEvent(new CustomEvent('ramp2swap:intent-widget-update', {
+                detail: responseData.widgetFormValues,
+              }));
+            }
+
             conversationInput.value = '';
             resizeConversationInput();
             conversationSubmit.dataset.success = 'false';

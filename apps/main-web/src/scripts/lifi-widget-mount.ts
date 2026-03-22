@@ -1,5 +1,5 @@
-import { LiFiWidget } from '@lifi/widget';
-import { createElement } from 'react';
+import { LiFiWidget, type FormState } from '@lifi/widget';
+import { createElement, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
 
@@ -11,6 +11,43 @@ const headerConnectMobileLabel = document.getElementById('header-connect-wallet-
 const HEADER_CONNECT_DESKTOP = 'Connect Wallet';
 const HEADER_CONNECT_MOBILE = 'Connect';
 const HEADER_CONNECTED = 'Connected';
+const widgetFormRef = createRef<FormState>();
+
+type IntentWidgetFormValues = Partial<{
+  fromAmount: string;
+  fromChain: number;
+  fromToken: string;
+  toChain: number;
+  toToken: string;
+  toAddress: string;
+}>;
+
+type IntentWidgetUpdateEvent = CustomEvent<IntentWidgetFormValues>;
+
+function applyWidgetFormValues(widgetFormValues: IntentWidgetFormValues) {
+  const form = widgetFormRef.current;
+  if (!form) {
+    console.warn('[main-web] LI.FI widget formRef is not ready yet');
+    return;
+  }
+
+  const orderedFieldUpdates = [
+    ['fromChain', widgetFormValues.fromChain],
+    ['fromToken', widgetFormValues.fromToken],
+    ['toChain', widgetFormValues.toChain],
+    ['toToken', widgetFormValues.toToken],
+    ['fromAmount', widgetFormValues.fromAmount],
+    ['toAddress', widgetFormValues.toAddress],
+  ] as const;
+
+  for (const [fieldName, fieldValue] of orderedFieldUpdates) {
+    if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
+      continue;
+    }
+
+    form.setFieldValue(fieldName, fieldValue);
+  }
+}
 
 function isAddressLikeLabel(label: string) {
   return label.includes('...') && !label.includes(' ');
@@ -79,6 +116,7 @@ if (rootElement) {
   root.render(createElement(LiFiWidget, {
     integrator: runtime.integrator,
     config: runtime.config,
+    formRef: widgetFormRef,
   }));
 
   const widgetObserver = new MutationObserver(() => {
@@ -94,6 +132,16 @@ if (rootElement) {
 
   syncHeaderWalletState();
 }
+
+window.addEventListener('ramp2swap:intent-widget-update', (event: Event) => {
+  const customEvent = event as IntentWidgetUpdateEvent;
+  if (!customEvent.detail) {
+    return;
+  }
+
+  console.log('[main-web] Applying LI.FI widget form update', customEvent.detail);
+  applyWidgetFormValues(customEvent.detail);
+});
 
 if (headerConnectButton instanceof HTMLButtonElement) {
   headerConnectButton.addEventListener('click', () => {
