@@ -128,7 +128,7 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
             <section class="conversation-stage-frame" aria-label="Conversation upload composer">
               <div class="conversation-stage card glass glass-tier-1 glass-mint on-glass">
                 <label class="conversation-stage-label" for="conversation-upload-input">Intent AI</label>
-                <div class="conversation-stage-input-shell">
+                <form id="conversation-stage-form" class="conversation-stage-input-shell">
                   <textarea
                     id="conversation-upload-input"
                     class="conversation-stage-input"
@@ -136,7 +136,12 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
                     placeholder="Describe Your Swap..."
                     aria-label="Conversation input"
                   ></textarea>
-                  <button class="btn-primary btn-glass conversation-stage-submit" type="button" aria-label="Upload conversation to AI">
+                  <button
+                    id="conversation-stage-submit"
+                    class="btn-primary btn-glass conversation-stage-submit"
+                    type="submit"
+                    aria-label="Upload conversation to AI"
+                  >
                     <img
                       class="conversation-stage-submit-icon"
                       src="/White_Ramp2Swap.svg"
@@ -147,7 +152,7 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
                       decoding="async"
                     />
                   </button>
-                </div>
+                </form>
               </div>
             </section>
           </div>
@@ -175,14 +180,81 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
       import '../scripts/lifi-widget-mount.ts';
 
       const conversationInput = document.getElementById('conversation-upload-input');
+      const conversationForm = document.getElementById('conversation-stage-form');
+      const conversationSubmit = document.getElementById('conversation-stage-submit');
+      const localMainApiOrigin = 'http://127.0.0.1:7878';
       if (conversationInput instanceof HTMLTextAreaElement) {
         const resizeConversationInput = () => {
           conversationInput.style.height = 'auto';
           conversationInput.style.height = `${conversationInput.scrollHeight}px`;
         };
 
+        const submitIntent = async () => {
+          if (!(conversationSubmit instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const text = conversationInput.value.trim();
+          if (!text || conversationSubmit.disabled) {
+            return;
+          }
+
+          const previousAriaLabel = conversationSubmit.getAttribute('aria-label');
+          conversationSubmit.disabled = true;
+          conversationSubmit.setAttribute('aria-label', 'Sending intent');
+
+          try {
+            const isLocalHost =
+              window.location.hostname === 'localhost' ||
+              window.location.hostname === '127.0.0.1';
+            const endpoint = isLocalHost ? `${localMainApiOrigin}/intent` : '/api/intent';
+
+            console.log('[main-web] Sending intent request', {
+              endpoint,
+              text,
+            });
+
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: JSON.stringify({ text }),
+            });
+
+            if (!response.ok) {
+              throw new Error(`Intent request failed with status ${response.status}`);
+            }
+
+            console.log('[main-web] Intent request completed successfully');
+          } catch (error) {
+            console.error('Intent request failed', error);
+          } finally {
+            conversationSubmit.disabled = false;
+            if (previousAriaLabel) {
+              conversationSubmit.setAttribute('aria-label', previousAriaLabel);
+            } else {
+              conversationSubmit.removeAttribute('aria-label');
+            }
+          }
+        };
+
         resizeConversationInput();
         conversationInput.addEventListener('input', resizeConversationInput);
+
+        if (conversationForm instanceof HTMLFormElement) {
+          conversationForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            void submitIntent();
+          });
+        }
+
+        conversationInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            void submitIntent();
+          }
+        });
       }
     </script>
   </body>

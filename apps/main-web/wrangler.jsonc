@@ -16,9 +16,22 @@
 	"observability": {
 		"enabled": true
 	},
+	"services": [
+		{
+			"binding": "MAIN_API",
+			"service": "main-api"
+		}
+	],
 	"env": {
 		"staging": {
-			"name": "main-web-staging"
+			"name": "main-web-staging",
+			"services": [
+				{
+					"binding": "MAIN_API",
+					"service": "main-api",
+					"environment": "staging"
+				}
+			]
 		}
 	}
 	/**
