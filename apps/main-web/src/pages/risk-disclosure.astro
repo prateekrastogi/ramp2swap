@@ -1,0 +1,103 @@
+---
+import '../styles/design-system.css';
+
+const pageTitle = 'Risk Disclosure | Ramp2Swap';
+const pageDescription = 'Risk disclosure for using ramp2swap.com, a DeFi swap platform.';
+const lastUpdated = 'March 22, 2026';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={pageDescription} />
+    <title>{pageTitle}</title>
+    <link rel="icon" type="image/svg+xml" href="/Ramp2Swap.svg" />
+  </head>
+  <body class="page legal-page">
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <div class="content-layer">
+      <header class="main-header glass glass-tier-4-nav on-glass" aria-label="Legal page header">
+        <div class="brand-nav main-header-nav">
+          <a class="brand-row main-header-brand" href="/" aria-label="Ramp2Swap home">
+            <img class="logo-horizontal logo-nav-horizontal mobile-nav-horizontal-only main-header-logo" src="/Horizontal_Logo.svg" alt="Ramp2Swap" />
+            <img class="logo-mark logo-mark-nav mobile-nav-mark-only" src="/Ramp2Swap.svg" alt="Ramp2Swap mark" />
+          </a>
+        </div>
+      </header>
+
+      <main class="legal-stage">
+        <article class="legal-panel card glass glass-tier-2 on-glass">
+          <header class="legal-header">
+            <p class="ui-label legal-eyebrow">Legal</p>
+            <h1 class="heading-section">Risk Disclosure</h1>
+            <p class="body legal-meta">Last updated {lastUpdated}</p>
+            <p class="body">
+              Digital asset swaps and DeFi interactions involve significant risk. You should carefully evaluate whether
+              using Ramp2Swap and any connected protocols is appropriate for your experience level and financial
+              circumstances.
+            </p>
+          </header>
+
+          <section class="legal-section-list">
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Market and price risk</h2>
+              <p class="body">
+                Token prices may change rapidly, spreads may widen, and quoted values may become stale before a
+                transaction is executed. You may receive less value than expected or incur a loss.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Protocol and smart contract risk</h2>
+              <p class="body">
+                Third-party protocols, bridges, and smart contracts may contain bugs, security vulnerabilities, design
+                flaws, governance failures, or other issues that can result in partial or total loss of assets.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Execution and slippage risk</h2>
+              <p class="body">
+                Transactions may fail, revert, be delayed, or settle at materially different rates due to slippage,
+                congestion, MEV, liquidity fragmentation, oracle issues, or volatile market conditions.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Wallet and operational risk</h2>
+              <ul class="legal-list">
+                <li>Loss of private keys, seed phrases, or device control can make assets unrecoverable.</li>
+                <li>Approvals or signatures may expose assets to unintended transfers if not reviewed carefully.</li>
+                <li>User error, including selecting the wrong token, amount, or chain, can lead to irreversible loss.</li>
+              </ul>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Regulatory and tax risk</h2>
+              <p class="body">
+                Laws, regulations, sanctions regimes, and tax treatment applicable to digital assets may change quickly
+                and differ across jurisdictions. You are responsible for obtaining advice regarding your own compliance
+                obligations.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">No guarantee</h2>
+              <p class="body">
+                Ramp2Swap does not guarantee execution quality, protocol availability, token legitimacy, or suitability
+                of any route surfaced through the platform. You should only transact after your own independent review.
+              </p>
+            </section>
+          </section>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

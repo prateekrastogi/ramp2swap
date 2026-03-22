@@ -1,0 +1,116 @@
+---
+import '../styles/design-system.css';
+
+const pageTitle = 'Terms of Use | Ramp2Swap';
+const pageDescription = 'Terms of Use for ramp2swap.com, a DeFi swap platform.';
+const lastUpdated = 'March 22, 2026';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={pageDescription} />
+    <title>{pageTitle}</title>
+    <link rel="icon" type="image/svg+xml" href="/Ramp2Swap.svg" />
+  </head>
+  <body class="page legal-page">
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <div class="content-layer">
+      <header class="main-header glass glass-tier-4-nav on-glass" aria-label="Legal page header">
+        <div class="brand-nav main-header-nav">
+          <a class="brand-row main-header-brand" href="/" aria-label="Ramp2Swap home">
+            <img class="logo-horizontal logo-nav-horizontal mobile-nav-horizontal-only main-header-logo" src="/Horizontal_Logo.svg" alt="Ramp2Swap" />
+            <img class="logo-mark logo-mark-nav mobile-nav-mark-only" src="/Ramp2Swap.svg" alt="Ramp2Swap mark" />
+          </a>
+        </div>
+      </header>
+
+      <main class="legal-stage">
+        <article class="legal-panel card glass glass-tier-2 on-glass">
+          <header class="legal-header">
+            <p class="ui-label legal-eyebrow">Legal</p>
+            <h1 class="heading-section">Terms of Use</h1>
+            <p class="body legal-meta">Last updated {lastUpdated}</p>
+            <p class="body">
+              These Terms of Use govern your access to and use of ramp2swap.com, including any swap discovery,
+              routing, wallet connectivity, and informational features made available through the platform.
+            </p>
+          </header>
+
+          <section class="legal-section-list">
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Eligibility and acceptance</h2>
+              <p class="body">
+                By using Ramp2Swap, you represent that you are legally capable of entering into these terms and that
+                your access to digital assets, wallets, and related services is lawful in your jurisdiction.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Platform role</h2>
+              <p class="body">
+                Ramp2Swap provides software interfaces that help users view routes and interact with third-party DeFi
+                protocols. Ramp2Swap does not take custody of user assets, act as a broker, guarantee liquidity, or
+                become a counterparty to any trade.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">User responsibilities</h2>
+              <ul class="legal-list">
+                <li>Review token, route, gas, slippage, and network details before confirming a transaction.</li>
+                <li>Maintain control of wallet credentials, seed phrases, and connected device security.</li>
+                <li>Comply with sanctions, export controls, tax obligations, and local laws that apply to you.</li>
+                <li>Confirm that any wallet or protocol interaction is suitable for your own objectives and risk tolerance.</li>
+              </ul>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">No investment or legal advice</h2>
+              <p class="body">
+                Content on Ramp2Swap is provided for general informational purposes only and does not constitute
+                investment, financial, tax, accounting, or legal advice. You are solely responsible for decisions made
+                in connection with your assets and transactions.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Third-party services</h2>
+              <p class="body">
+                The platform may surface or connect to third-party wallets, bridges, RPC providers, and liquidity
+                sources. Ramp2Swap is not responsible for the availability, accuracy, security, or performance of those
+                external services.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Disclaimers and limitation of liability</h2>
+              <p class="body">
+                The platform is provided on an “as is” and “as available” basis to the fullest extent permitted by law.
+                Ramp2Swap disclaims warranties of merchantability, fitness for a particular purpose, title, and
+                non-infringement, and will not be liable for indirect, incidental, special, consequential, exemplary,
+                or similar damages arising from use of the platform.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Changes and contact</h2>
+              <p class="body">
+                Ramp2Swap may update these terms from time to time by publishing a revised version on this site.
+                Continued use after an update indicates acceptance of the revised terms. Questions may be directed to
+                <a class="legal-inline-link" href="mailto:help@ramp2swap.com">help@ramp2swap.com</a>.
+              </p>
+            </section>
+          </section>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

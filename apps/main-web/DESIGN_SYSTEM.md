@@ -19,7 +19,7 @@ This file is the main-web addendum to the shared Ramp2Swap design system.
 - Confirm main-web additions do not redefine reusable brand primitives locally.
 - Confirm the header continues using the shared nav glass treatment.
 - Confirm the primary header action remains a pill-shaped `Connect Wallet` button with accessible touch sizing.
-- Confirm the homepage content remains header plus the centered widget shell and the conversation stage below it.
+- Confirm the homepage content remains header plus the centered widget shell, the conversation stage below it, and a low-emphasis legal footer beneath the main stage.
 - Run `npm run build --workspace apps/main-web` after UI changes.
 
 ## Change Protocol (Every Time)
@@ -34,6 +34,7 @@ Main-web owns:
 - homepage composition around the centered LI.FI widget stage
 - the conversation upload surface that sits below the widget inside the same shell
 - the top navigation shell and its sticky behavior
+- the low-emphasis legal footer and main-web legal document pages
 - page-level content arrangement below the shared brand primitives
 
 Main-web does not own:
@@ -56,6 +57,13 @@ Main-web does not own:
 - Widget customization is deferred; first implementation is focused on mounting the widget cleanly with one shared integrator config.
 - Private RPC overrides should be supplied through `sdkConfig.rpcUrls` using the unified public config file at `src/lib/public-app-config.ts` for the primary six chains only: Ethereum, Arbitrum, Optimism, Base, Polygon, and Solana.
 - Keep public app metadata and browser-visible RPC configuration centralized in `src/lib/public-app-config.ts` instead of scattering them across env files.
+
+## Legal Footer And Pages
+- The homepage may include a subdued legal footer below the widget stage for compliance links and platform identity.
+- Use a softer shared glass tier than the header so the footer reads as supportive chrome, not a competing hero surface.
+- Keep the copyright block above the legal link row.
+- Legal links should open their documents in a new tab.
+- Legal document pages should use the shared main-web header treatment plus a readable, long-form glass panel centered in the viewport.
 
 ## Conversation Stage
 - The conversation composer sits below the widget inside the same outer shell and matches the widget width.

@@ -1,0 +1,113 @@
+---
+import '../styles/design-system.css';
+
+const pageTitle = 'Privacy Notice | Ramp2Swap';
+const pageDescription = 'Privacy Notice for ramp2swap.com, a DeFi swap platform.';
+const lastUpdated = 'March 22, 2026';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={pageDescription} />
+    <title>{pageTitle}</title>
+    <link rel="icon" type="image/svg+xml" href="/Ramp2Swap.svg" />
+  </head>
+  <body class="page legal-page">
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <div class="content-layer">
+      <header class="main-header glass glass-tier-4-nav on-glass" aria-label="Legal page header">
+        <div class="brand-nav main-header-nav">
+          <a class="brand-row main-header-brand" href="/" aria-label="Ramp2Swap home">
+            <img class="logo-horizontal logo-nav-horizontal mobile-nav-horizontal-only main-header-logo" src="/Horizontal_Logo.svg" alt="Ramp2Swap" />
+            <img class="logo-mark logo-mark-nav mobile-nav-mark-only" src="/Ramp2Swap.svg" alt="Ramp2Swap mark" />
+          </a>
+        </div>
+      </header>
+
+      <main class="legal-stage">
+        <article class="legal-panel card glass glass-tier-2 on-glass">
+          <header class="legal-header">
+            <p class="ui-label legal-eyebrow">Legal</p>
+            <h1 class="heading-section">Privacy Notice</h1>
+            <p class="body legal-meta">Last updated {lastUpdated}</p>
+            <p class="body">
+              This Privacy Notice explains how Ramp2Swap may collect, use, disclose, and safeguard information when
+              you visit ramp2swap.com or interact with platform features.
+            </p>
+          </header>
+
+          <section class="legal-section-list">
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Information we may collect</h2>
+              <ul class="legal-list">
+                <li>Basic technical information such as browser type, device details, and approximate analytics data.</li>
+                <li>Wallet addresses or public blockchain identifiers that you choose to connect or submit.</li>
+                <li>Support or feedback information that you voluntarily send to Ramp2Swap.</li>
+              </ul>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">How we use information</h2>
+              <p class="body">
+                Ramp2Swap may use collected information to operate and improve the platform, secure the service,
+                investigate abuse, respond to inquiries, understand product usage, and comply with legal obligations.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Blockchain transparency</h2>
+              <p class="body">
+                Transactions executed through public blockchains may be permanently visible to others. Even when
+                Ramp2Swap limits the personal information it collects, wallet activity on public chains can be
+                independently analyzed by third parties.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Sharing and service providers</h2>
+              <p class="body">
+                Ramp2Swap may share limited information with infrastructure vendors, analytics providers, wallet or
+                routing partners, legal advisors, or authorities where reasonably necessary to operate the platform,
+                enforce terms, or comply with law.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Data retention and security</h2>
+              <p class="body">
+                Information may be retained for as long as needed for legitimate business, security, or legal purposes.
+                While Ramp2Swap uses reasonable safeguards, no internet transmission or storage system can be guaranteed
+                to be fully secure.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Your choices</h2>
+              <p class="body">
+                You may choose whether to connect a wallet, provide support information, or continue using the site.
+                Depending on applicable law, you may also have rights regarding access, correction, deletion, or
+                objection to certain processing activities.
+              </p>
+            </section>
+
+            <section class="legal-section stack-12">
+              <h2 class="heading-card">Contact</h2>
+              <p class="body">
+                Privacy-related requests may be sent to
+                <a class="legal-inline-link" href="mailto:help@ramp2swap.com">help@ramp2swap.com</a>.
+              </p>
+            </section>
+          </section>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
