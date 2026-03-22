@@ -33,10 +33,6 @@ app.use('*', async (c, next) => {
   await next()
 })
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
-
 app.post('/intent', async (c) => {
   const body = await c.req.json<{ text?: unknown }>().catch(() => null)
   const text = typeof body?.text === 'string' ? body.text.trim() : ''
