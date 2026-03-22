@@ -195,10 +195,8 @@ check(
   publicAppConfig.includes("appName: 'Ramp2Swap'") &&
     publicAppConfig.includes("appDescription: 'One Interface. All of DeFi.'") &&
     publicAppConfig.includes("appUrl: 'https://ramp2swap.com'") &&
-    publicAppConfig.includes("appIconPath: '/logo.png'") &&
-    publicAppConfig.includes("walletConnectProjectId: '5432e3507d41270bee46b7b85bbc2ef8'") &&
-    lifiConfig.includes('icons: [appIconUrl]'),
-  '[WalletConnect metadata] apps/main-web/src/lib/public-app-config.ts and apps/main-web/src/lib/lifi-config.ts must define the approved Ramp2Swap wallet metadata for wallet apps'
+    publicAppConfig.includes("appIconPath: '/logo.png'"),
+  '[Public app identity] apps/main-web/src/lib/public-app-config.ts must define the approved Ramp2Swap public app identity fields'
 );
 check(
   publicAppConfig.includes('alchemyRpcUrls: {') &&

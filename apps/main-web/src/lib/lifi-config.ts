@@ -8,15 +8,7 @@ type LiFiWidgetRuntimeConfig = {
 
 export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
   const integrator = 'ramp2swap';
-  const {
-    appName,
-    appDescription,
-    appUrl,
-    appIconPath,
-    walletConnectProjectId,
-    alchemyRpcUrls,
-  } = publicAppConfig;
-  const appIconUrl = `${appUrl}${appIconPath}`;
+  const { alchemyRpcUrls } = publicAppConfig;
   const rpcUrls = Object.fromEntries(
     [
       [ChainId.ETH, alchemyRpcUrls.ethereum],
@@ -37,17 +29,6 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
       integrator,
       sdkConfig: {
         rpcUrls,
-      },
-      walletConfig: {
-        walletConnect: {
-          projectId: walletConnectProjectId,
-          metadata: {
-            name: appName,
-            description: appDescription,
-            url: appUrl,
-            icons: [appIconUrl],
-          },
-        },
       },
       languageResources: {
         en: {
