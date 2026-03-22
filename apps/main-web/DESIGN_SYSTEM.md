@@ -75,6 +75,8 @@ Main-web does not own:
 - The section label is fixed to `Intent AI` and the placeholder copy is fixed to `Describe Your Swap...`.
 - The composer action uses `/White_Ramp2Swap.svg` inside the circular button; do not revert to an `Upload` text label.
 - Keep the composer action at `48px` on desktop/tablet and `44px` on mobile, with the icon sized proportionally inside it.
+- While the intent request is pending, the composer action may hold a pressed visual state and rotate the icon to indicate active submission.
+- On successful submission, the composer action may use a brief subtle mint confirmation flash before returning to its resting state.
 - Keep the composer heading aligned with the LI.FI `Exchange` title scale and keep the input text aligned with the widget field typography.
 
 ## Brand Assets And Favicon

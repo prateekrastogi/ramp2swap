@@ -182,7 +182,9 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
       const conversationInput = document.getElementById('conversation-upload-input');
       const conversationForm = document.getElementById('conversation-stage-form');
       const conversationSubmit = document.getElementById('conversation-stage-submit');
+      const conversationInputShell = conversationInput?.closest('.conversation-stage-input-shell');
       const localMainApiOrigin = 'http://127.0.0.1:7878';
+      let successFlashTimeoutId = 0;
       if (conversationInput instanceof HTMLTextAreaElement) {
         const resizeConversationInput = () => {
           conversationInput.style.height = 'auto';
@@ -200,7 +202,15 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
           }
 
           const previousAriaLabel = conversationSubmit.getAttribute('aria-label');
+          const previousInputAriaLabel = conversationInput.getAttribute('aria-label');
+          conversationInput.readOnly = true;
+          conversationInput.setAttribute('aria-label', 'Conversation input locked while sending');
+          if (conversationInputShell instanceof HTMLElement) {
+            conversationInputShell.dataset.loading = 'true';
+          }
           conversationSubmit.disabled = true;
+          conversationSubmit.dataset.loading = 'true';
+          conversationSubmit.setAttribute('aria-pressed', 'true');
           conversationSubmit.setAttribute('aria-label', 'Sending intent');
 
           try {
@@ -227,10 +237,30 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
             }
 
             console.log('[main-web] Intent request completed successfully');
+            conversationInput.value = '';
+            resizeConversationInput();
+            conversationSubmit.dataset.success = 'false';
+            window.clearTimeout(successFlashTimeoutId);
+            void conversationSubmit.offsetWidth;
+            conversationSubmit.dataset.success = 'true';
+            successFlashTimeoutId = window.setTimeout(() => {
+              conversationSubmit.dataset.success = 'false';
+            }, 450);
           } catch (error) {
             console.error('Intent request failed', error);
           } finally {
+            conversationInput.readOnly = false;
+            if (previousInputAriaLabel) {
+              conversationInput.setAttribute('aria-label', previousInputAriaLabel);
+            } else {
+              conversationInput.removeAttribute('aria-label');
+            }
+            if (conversationInputShell instanceof HTMLElement) {
+              conversationInputShell.dataset.loading = 'false';
+            }
             conversationSubmit.disabled = false;
+            conversationSubmit.dataset.loading = 'false';
+            conversationSubmit.setAttribute('aria-pressed', 'false');
             if (previousAriaLabel) {
               conversationSubmit.setAttribute('aria-label', previousAriaLabel);
             } else {

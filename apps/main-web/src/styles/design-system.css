@@ -418,6 +418,14 @@ body.page .ambient-orb--mint-top {
     inset 0 1px 0 var(--white-a-06);
 }
 
+.conversation-stage-input-shell[data-loading='true'] {
+  border-color: var(--mint-border-focus);
+  box-shadow:
+    0 0 0 3px var(--mint-ring-soft),
+    0 10px 28px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 var(--mint-tint-strong);
+}
+
 .conversation-stage-input {
   width: 100%;
   min-height: 118px;
@@ -444,6 +452,10 @@ body.page .ambient-orb--mint-top {
   outline: none;
 }
 
+.conversation-stage-input[readonly] {
+  cursor: default;
+}
+
 .conversation-stage-submit {
   position: absolute;
   right: 12px;
@@ -459,6 +471,23 @@ body.page .ambient-orb--mint-top {
   box-shadow:
     0 12px 26px rgba(0, 0, 0, 0.26),
     inset 0 1px 0 var(--mint-tint-strong);
+  filter: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+.conversation-stage-submit:active,
+.conversation-stage-submit[data-loading='true'] {
+  background: var(--mint-press-bg);
+  border-color: var(--mint-600);
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 var(--mint-tint-strong),
+    inset 0 2px 6px rgba(0, 0, 0, 0.24);
+  filter: saturate(1.06) brightness(0.94);
 }
 
 .conversation-stage-submit-icon {
@@ -467,6 +496,52 @@ body.page .ambient-orb--mint-top {
   height: 20px;
   object-fit: contain;
   opacity: 0.8;
+  transform-origin: center;
+}
+
+.conversation-stage-submit[data-loading='true'] .conversation-stage-submit-icon {
+  animation: conversation-stage-submit-spin 900ms linear infinite;
+}
+
+.conversation-stage-submit[data-success='true'] {
+  animation: conversation-stage-submit-success 420ms ease;
+}
+
+@keyframes conversation-stage-submit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes conversation-stage-submit-success {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 12px 26px rgba(0, 0, 0, 0.26),
+      inset 0 1px 0 var(--mint-tint-strong);
+    filter: none;
+  }
+
+  40% {
+    transform: scale(1.04);
+    box-shadow:
+      0 0 0 4px rgba(123, 255, 196, 0.18),
+      0 16px 32px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.26);
+    filter: brightness(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 12px 26px rgba(0, 0, 0, 0.26),
+      inset 0 1px 0 var(--mint-tint-strong);
+    filter: none;
+  }
 }
 
 .lifi-widget-mount {
