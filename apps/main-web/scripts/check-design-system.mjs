@@ -89,7 +89,7 @@ check(
   homeContent.includes('main-footer') &&
     homeContent.includes('/Ramp2Swap.svg') &&
     homeContent.includes('One Interface. All of DeFi.') &&
-    homeContent.includes('Copyright © 2026 Ramp2Swap') &&
+    homeContent.includes('Copyright © {currentYear} Ramp2Swap') &&
     homeContent.includes('>Terms<') &&
     homeContent.includes('>Privacy<') &&
     homeContent.includes('>Risk Disclosure<'),

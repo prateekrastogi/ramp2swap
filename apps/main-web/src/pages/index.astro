@@ -11,6 +11,7 @@ const widgetMarkup = renderToString(createElement(WidgetSkeleton, { config: runt
 const siteName = 'Ramp2Swap';
 const siteDescription = 'One Interface. All of DeFi.';
 const shareImage = '/logo.png';
+const currentYear = new Date().getFullYear();
 
 function getPartnerPortalUrl(currentUrl: URL, fallbackAppUrl: string) {
   const fallbackUrl = new URL(fallbackAppUrl);
@@ -155,13 +156,12 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
 
       <footer class="main-footer glass glass-tier-4-nav on-glass" aria-label="Legal footer">
         <div class="main-footer-shell">
-          <div class="main-footer-copy">
-            <div class="main-footer-brand-row">
-              <img class="main-footer-brand-mark" src="/Ramp2Swap.svg" alt="Ramp2Swap" />
-              <p class="body-small main-footer-tagline">One Interface. All of DeFi.</p>
-            </div>
-            <p class="body-small main-footer-copyright">Copyright © 2026 Ramp2Swap</p>
+          <div class="main-footer-brand-row">
+            <img class="main-footer-brand-mark" src="/Ramp2Swap.svg" alt="Ramp2Swap" />
+            <p class="body-small main-footer-tagline">One Interface. All of DeFi.</p>
           </div>
+
+          <p class="body-small main-footer-copyright">Copyright © {currentYear} Ramp2Swap</p>
 
           <div class="main-footer-legal-row">
             <a class="main-footer-link" href="/terms" target="_blank" rel="noreferrer noopener">Terms</a>
