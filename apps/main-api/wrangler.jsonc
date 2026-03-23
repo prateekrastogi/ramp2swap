@@ -9,13 +9,25 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "ai": {
+    "binding": "AI"
+  },
   "dev": {
     "port": 7878,
     "inspector_port": 9232
   },
+  "vars": {
+    "RAG_AI_NAME": "rag-ai"
+  },
   "env": {
     "staging": {
-      "name": "main-api-staging"
+      "name": "main-api-staging",
+      "ai": {
+        "binding": "AI"
+      },
+      "vars": {
+        "RAG_AI_NAME": "rag-ai"
+      }
     }
   }
   // "vars": {
