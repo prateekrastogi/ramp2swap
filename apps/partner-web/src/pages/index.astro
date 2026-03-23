@@ -523,6 +523,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
       const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
       const mobileLogoToggle = document.getElementById('mobile-logo-toggle');
       const sidebarBrandToggle = document.getElementById('sidebar-brand-toggle');
+      const sidebarLogoutButton = document.querySelector('.sidebar-logout');
       const sidebarElement = document.querySelector('.sidebar');
       const mobileTopbar = document.querySelector('.mobile-topbar');
       const mobileControl = document.getElementById('sidebar-mobile');
@@ -565,6 +566,18 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         mobileLogoToggle.addEventListener('click', (event) => {
           event.stopPropagation();
           mobileControl.checked = !mobileControl.checked;
+        });
+      }
+
+      if (sidebarLogoutButton instanceof HTMLButtonElement) {
+        sidebarLogoutButton.addEventListener('click', async () => {
+          try {
+            await fetch('/api/auth/logout', {
+              method: 'POST',
+            });
+          } finally {
+            window.location.assign('/login');
+          }
         });
       }
 

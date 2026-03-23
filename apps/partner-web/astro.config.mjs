@@ -6,10 +6,10 @@ const disableCloudflareAdapter = process.env.ASTRO_DISABLE_CLOUDFLARE_ADAPTER ==
 
 // https://astro.build/config
 export default defineConfig({
+  output: 'server',
   ...(disableCloudflareAdapter
     ? {}
     : {
-        output: 'server',
         adapter: cloudflare({
           inspectorPort: 9230,
           platformProxy: {

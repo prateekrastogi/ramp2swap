@@ -40,24 +40,26 @@ import '../styles/design-system.css';
           <div class="login-form-shell">
             <div class="stack-12">
               <h2 class="heading-card heading-section login-form-title">Partner Login</h2>
+              <p class="body-small" data-login-feedback aria-live="polite"></p>
             </div>
 
             <form class="login-form stack-16" data-login-flow>
               <section class="login-step-shell stack-16" data-login-step="email">
                 <div class="stack-12">
                   <label class="ui-label" for="partner-email">Email Address</label>
-                  <input id="partner-email" class="input input-glass" data-login-email-input type="email" placeholder="partner@company.com" />
+                  <input id="partner-email" class="input input-glass" data-login-email-input type="email" placeholder="partner@company.com" required />
                 </div>
 
-                <button class="btn-primary btn-glass login-submit" type="button" data-login-continue>Continue</button>
+                <button class="btn-primary btn-glass login-submit" type="button" data-login-continue>Send OTP</button>
               </section>
 
               <section class="login-step-shell stack-16" data-login-step="password" hidden>
                 <div class="stack-12">
                   <label class="ui-label" for="partner-otp">Email OTP</label>
-                  <input id="partner-otp" class="input input-glass" type="text" inputmode="numeric" placeholder="Enter the OTP sent to your email" />
+                  <input id="partner-otp" class="input input-glass" data-login-otp-input type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Enter the OTP sent to your email" required />
                 </div>
 
+                <button class="btn-secondary" type="button" data-login-back>Edit email</button>
                 <button class="btn-primary btn-glass login-submit" type="submit">Verify OTP</button>
               </section>
             </form>
@@ -72,14 +74,30 @@ import '../styles/design-system.css';
         const emailStep = loginFlow.querySelector('[data-login-step="email"]');
         const passwordStep = loginFlow.querySelector('[data-login-step="password"]');
         const emailInput = loginFlow.querySelector('[data-login-email-input]');
+        const otpInput = loginFlow.querySelector('[data-login-otp-input]');
         const continueButton = loginFlow.querySelector('[data-login-continue]');
+        const backButton = loginFlow.querySelector('[data-login-back]');
+        const feedbackNode = document.querySelector('[data-login-feedback]');
+
+        const setFeedback = (message, isError = false) => {
+          if (!(feedbackNode instanceof HTMLElement)) return;
+          feedbackNode.textContent = message;
+          feedbackNode.style.color = isError ? 'var(--color-status-danger)' : 'var(--color-text-secondary)';
+        };
+
+        const setBusy = (button, isBusy, busyLabel, idleLabel) => {
+          if (!(button instanceof HTMLButtonElement)) return;
+          button.disabled = isBusy;
+          button.textContent = isBusy ? busyLabel : idleLabel;
+        };
 
         const showEmailStep = () => {
           if (emailStep instanceof HTMLElement) emailStep.hidden = false;
           if (passwordStep instanceof HTMLElement) passwordStep.hidden = true;
+          if (otpInput instanceof HTMLInputElement) otpInput.value = '';
         };
 
-        const showPasswordStep = () => {
+        const showPasswordStep = async () => {
           if (!(emailInput instanceof HTMLInputElement)) return;
           const emailValue = emailInput.value.trim();
           if (!emailValue) {
@@ -88,13 +106,89 @@ import '../styles/design-system.css';
             return;
           }
 
+          setBusy(continueButton, true, 'Sending OTP...', 'Send OTP');
+          setFeedback('');
+
+          try {
+            const response = await fetch('/api/auth/request-otp', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email: emailValue }),
+            });
+
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || !payload?.ok) {
+              setFeedback(payload?.error ?? 'Unable to send OTP right now.', true);
+              return;
+            }
+          } catch {
+            setFeedback('Unable to reach the login service.', true);
+            return;
+          } finally {
+            setBusy(continueButton, false, 'Sending OTP...', 'Send OTP');
+          }
+
           if (emailStep instanceof HTMLElement) emailStep.hidden = true;
           if (passwordStep instanceof HTMLElement) passwordStep.hidden = false;
+          setFeedback('OTP sent. Check your inbox and enter the 6-digit code.');
+          if (otpInput instanceof HTMLInputElement) otpInput.focus();
         };
 
         if (continueButton instanceof HTMLButtonElement) {
-          continueButton.addEventListener('click', showPasswordStep);
+          continueButton.addEventListener('click', () => {
+            void showPasswordStep();
+          });
         }
+
+        if (backButton instanceof HTMLButtonElement) {
+          backButton.addEventListener('click', () => {
+            showEmailStep();
+            setFeedback('');
+            if (emailInput instanceof HTMLInputElement) emailInput.focus();
+          });
+        }
+
+        loginFlow.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          if (!(emailInput instanceof HTMLInputElement) || !(otpInput instanceof HTMLInputElement)) return;
+          const emailValue = emailInput.value.trim();
+          const otpValue = otpInput.value.trim();
+
+          if (!otpValue) {
+            otpInput.reportValidity();
+            otpInput.focus();
+            return;
+          }
+
+          const submitButton = passwordStep instanceof HTMLElement ? passwordStep.querySelector('.login-submit') : null;
+          setBusy(submitButton, true, 'Verifying...', 'Verify OTP');
+          setFeedback('');
+
+          try {
+            const response = await fetch('/api/auth/verify-otp', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email: emailValue, otp: otpValue }),
+            });
+
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || !payload?.ok) {
+              setFeedback(payload?.error ?? 'Unable to verify OTP.', true);
+              return;
+            }
+
+            window.location.assign('/');
+          } catch {
+            setFeedback('Unable to reach the login service.', true);
+          } finally {
+            setBusy(submitButton, false, 'Verifying...', 'Verify OTP');
+          }
+        });
       }
     </script>
   </body>

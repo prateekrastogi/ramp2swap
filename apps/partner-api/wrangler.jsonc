@@ -20,9 +20,33 @@
 	"dev": {
 		"inspector_port": 9233
 	},
+	"d1_databases": [
+		{
+			"binding": "AUTH_DB",
+			"database_name": "partner-auth-prod",
+			"database_id": "f9bcb999-162b-4349-9916-35068843c253",
+			"preview_database_id": "5e83f56b-8aba-488f-b762-663ee547b930"
+		}
+	],
+	"vars": {
+		"AUTH_EMAIL_MODE": "resend",
+		"LOGIN_EMAIL_FROM": "Ramp2Swap Partners Security <security@ramp2swap.com>"
+	},
 	"env": {
 		"staging": {
-			"name": "partner-api-staging"
+			"name": "partner-api-staging",
+			"d1_databases": [
+				{
+					"binding": "AUTH_DB",
+					"database_name": "partner-auth-staging",
+					"database_id": "2434aca6-20ab-4420-a712-797e93b5020b",
+					"preview_database_id": "5e83f56b-8aba-488f-b762-663ee547b930"
+				}
+			],
+			"vars": {
+				"AUTH_EMAIL_MODE": "resend",
+				"LOGIN_EMAIL_FROM": "Ramp2Swap Partners Security <security@ramp2swap.com>"
+			}
 		}
 	}
 	/**

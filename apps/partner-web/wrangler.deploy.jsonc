@@ -14,9 +14,15 @@
 	"observability": {
 		"enabled": true
 	},
+	"vars": {
+		"PARTNER_API_BASE_URL": "https://api.partner.ramp2swap.com"
+	},
 	"env": {
 		"staging": {
-			"name": "partner-web-staging"
+			"name": "partner-web-staging",
+			"vars": {
+				"PARTNER_API_BASE_URL": "https://staging.api.partner.ramp2swap.com"
+			}
 		}
 	}
 }

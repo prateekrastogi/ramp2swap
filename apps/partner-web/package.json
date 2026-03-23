@@ -3,7 +3,8 @@
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "ASTRO_DISABLE_CLOUDFLARE_ADAPTER=true astro dev",
+		"setup:auth-local": "node ../../scripts/setup-partner-auth-local.mjs",
+		"dev": "npm run setup:auth-local && ASTRO_DISABLE_CLOUDFLARE_ADAPTER=true astro dev",
 		"check:design-system": "node ./scripts/check-design-system.mjs",
 		"build": "npm run check:design-system && astro build",
 		"preview": "npm run check:design-system && astro build && wrangler dev --config ./wrangler.deploy.jsonc",

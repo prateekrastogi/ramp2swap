@@ -2,7 +2,8 @@
 	"name": "partner-api",
 	"type": "module",
 	"scripts": {
-		"dev": "wrangler dev",
+		"setup:auth-local": "node ../../scripts/setup-partner-auth-local.mjs && wrangler d1 execute AUTH_DB --local --file ./migrations/0001_auth.sql",
+		"dev": "npm run setup:auth-local && wrangler dev --local",
 		"deploy": "wrangler deploy --minify",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings"
 	},
