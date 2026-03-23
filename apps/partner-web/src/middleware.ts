@@ -12,7 +12,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   const sessionToken = context.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const sessionSecret = getSessionSecret(context.locals);
+  const sessionSecret = await getSessionSecret();
 
   let hasValidSession = false;
   if (sessionToken && sessionSecret) {

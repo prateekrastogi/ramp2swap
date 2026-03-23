@@ -3,8 +3,8 @@ import { getPartnerApiBaseUrl } from '../../../lib/runtime-env';
 
 const SESSION_COOKIE_NAME = 'partner_session';
 
-export const POST: APIRoute = async ({ request, cookies, locals, url }) => {
-  const partnerApiBaseUrl = getPartnerApiBaseUrl(locals);
+export const POST: APIRoute = async ({ request, cookies, url }) => {
+  const partnerApiBaseUrl = await getPartnerApiBaseUrl();
   if (!partnerApiBaseUrl) {
     return new Response(JSON.stringify({ ok: false, error: 'PARTNER_API_BASE_URL is not configured.' }), {
       status: 500,

@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getPartnerApiBaseUrl } from '../../../lib/runtime-env';
 
-export const POST: APIRoute = async ({ request, locals }) => {
-  const partnerApiBaseUrl = getPartnerApiBaseUrl(locals);
+export const POST: APIRoute = async ({ request }) => {
+  const partnerApiBaseUrl = await getPartnerApiBaseUrl();
   if (!partnerApiBaseUrl) {
     return new Response(JSON.stringify({ ok: false, error: 'PARTNER_API_BASE_URL is not configured.' }), {
       status: 500,

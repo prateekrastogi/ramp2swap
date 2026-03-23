@@ -3,9 +3,9 @@ import { getPartnerApiBaseUrl } from '../../../lib/runtime-env';
 
 const SESSION_COOKIE_NAME = 'partner_session';
 
-export const POST: APIRoute = async ({ cookies, locals }) => {
+export const POST: APIRoute = async ({ cookies }) => {
   const sessionToken = cookies.get(SESSION_COOKIE_NAME)?.value;
-  const partnerApiBaseUrl = getPartnerApiBaseUrl(locals);
+  const partnerApiBaseUrl = await getPartnerApiBaseUrl();
 
   if (partnerApiBaseUrl && sessionToken) {
     try {
