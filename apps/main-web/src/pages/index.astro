@@ -239,11 +239,6 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
               window.location.hostname === '127.0.0.1';
             const endpoint = isLocalHost ? `${localMainApiOrigin}/intent` : '/api/intent';
 
-            console.log('[main-web] Sending intent request', {
-              endpoint,
-              text,
-            });
-
             const response = await fetch(endpoint, {
               method: 'POST',
               headers: {
@@ -258,9 +253,6 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
 
             /** @type {IntentResponse} */
             const responseData = await response.json();
-
-            console.log('[main-web] Intent request completed successfully');
-            console.log('[main-web] Intent response payload', responseData);
 
             if (responseData.widgetFormValues) {
               window.dispatchEvent(new CustomEvent('ramp2swap:intent-widget-update', {
@@ -277,8 +269,7 @@ const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
             successFlashTimeoutId = window.setTimeout(() => {
               conversationSubmit.dataset.success = 'false';
             }, 450);
-          } catch (error) {
-            console.error('Intent request failed', error);
+          } catch {
           } finally {
             conversationInput.readOnly = false;
             if (previousInputAriaLabel) {

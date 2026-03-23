@@ -48,10 +48,6 @@ export const POST: APIRoute = async ({ request }) => {
   const localMainApiOrigin = getLocalMainApiOrigin();
 
   if (isLocalRequest(request)) {
-    console.log('[main-web] Forwarding /api/intent to local main-api', {
-      target: `${localMainApiOrigin}/intent`,
-    });
-
     return fetch(`${localMainApiOrigin}/intent`, init);
   }
 
@@ -59,13 +55,8 @@ export const POST: APIRoute = async ({ request }) => {
   const workerEnv = cloudflareWorkers?.env as Env | undefined;
 
   if (workerEnv?.MAIN_API) {
-    console.log('[main-web] Forwarding /api/intent through Cloudflare service binding');
     return workerEnv.MAIN_API.fetch('https://main-api/intent', init);
   }
-
-  console.log('[main-web] Forwarding /api/intent to fallback main-api origin', {
-    target: `${localMainApiOrigin}/intent`,
-  });
 
   return fetch(`${localMainApiOrigin}/intent`, init);
 };

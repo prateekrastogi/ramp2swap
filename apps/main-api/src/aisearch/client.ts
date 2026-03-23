@@ -63,7 +63,7 @@ export function getAiSearchName(env: MainApiBindings) {
 export function buildRagAiPayload(payload: AiSearchRequestPayload) {
   return {
     query: payload.query,
-    system_prompt: systemPrompt,
+    system_prompt: buildRuntimeSystemPrompt(),
     model: payload.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
     rewrite_query: payload.rewrite_query ?? true,
     max_num_results: payload.max_num_results ?? 6,
@@ -76,6 +76,19 @@ export function buildRagAiPayload(payload: AiSearchRequestPayload) {
     },
     stream: false
   }
+}
+
+function buildRuntimeSystemPrompt() {
+  return [
+    systemPrompt,
+    '',
+    'RUNTIME INSTRUCTIONS:',
+    '- The active user request is provided only in the query field for this call.',
+    '- Parse only the current query for this request.',
+    '- Never copy example values unless the current query matches them exactly.',
+    '- If a field is not explicitly present or cannot be grounded from retrieval, omit it.',
+    '- Return only strict JSON with a top-level "widgetFormValues" object.'
+  ].join('\n')
 }
 
 export async function callBoundRagAiService(env: MainApiBindings, payload: AiSearchRequestPayload) {

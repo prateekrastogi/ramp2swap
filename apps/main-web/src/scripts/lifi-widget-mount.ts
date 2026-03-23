@@ -27,7 +27,6 @@ type IntentWidgetUpdateEvent = CustomEvent<IntentWidgetFormValues>;
 function applyWidgetFormValues(widgetFormValues: IntentWidgetFormValues) {
   const form = widgetFormRef.current;
   if (!form) {
-    console.warn('[main-web] LI.FI widget formRef is not ready yet');
     return;
   }
 
@@ -139,7 +138,6 @@ window.addEventListener('ramp2swap:intent-widget-update', (event: Event) => {
     return;
   }
 
-  console.log('[main-web] Applying LI.FI widget form update', customEvent.detail);
   applyWidgetFormValues(customEvent.detail);
 });
 
