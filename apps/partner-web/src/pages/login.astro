@@ -59,7 +59,6 @@ import '../styles/design-system.css';
                   <input id="partner-otp" class="input input-glass" data-login-otp-input type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Enter the OTP sent to your email" required />
                 </div>
 
-                <button class="btn-secondary" type="button" data-login-back>Edit email</button>
                 <button class="btn-primary btn-glass login-submit" type="submit">Verify OTP</button>
               </section>
             </form>
@@ -76,7 +75,6 @@ import '../styles/design-system.css';
         const emailInput = loginFlow.querySelector('[data-login-email-input]');
         const otpInput = loginFlow.querySelector('[data-login-otp-input]');
         const continueButton = loginFlow.querySelector('[data-login-continue]');
-        const backButton = loginFlow.querySelector('[data-login-back]');
         const feedbackNode = document.querySelector('[data-login-feedback]');
 
         const setFeedback = (message, isError = false) => {
@@ -89,12 +87,6 @@ import '../styles/design-system.css';
           if (!(button instanceof HTMLButtonElement)) return;
           button.disabled = isBusy;
           button.textContent = isBusy ? busyLabel : idleLabel;
-        };
-
-        const showEmailStep = () => {
-          if (emailStep instanceof HTMLElement) emailStep.hidden = false;
-          if (passwordStep instanceof HTMLElement) passwordStep.hidden = true;
-          if (otpInput instanceof HTMLInputElement) otpInput.value = '';
         };
 
         const showPasswordStep = async () => {
@@ -132,21 +124,13 @@ import '../styles/design-system.css';
 
           if (emailStep instanceof HTMLElement) emailStep.hidden = true;
           if (passwordStep instanceof HTMLElement) passwordStep.hidden = false;
-          setFeedback('OTP sent. Check your inbox and enter the 6-digit code.');
+          setFeedback('Check your inbox and enter the 6-digit code.');
           if (otpInput instanceof HTMLInputElement) otpInput.focus();
         };
 
         if (continueButton instanceof HTMLButtonElement) {
           continueButton.addEventListener('click', () => {
             void showPasswordStep();
-          });
-        }
-
-        if (backButton instanceof HTMLButtonElement) {
-          backButton.addEventListener('click', () => {
-            showEmailStep();
-            setFeedback('');
-            if (emailInput instanceof HTMLInputElement) emailInput.focus();
           });
         }
 
