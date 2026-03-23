@@ -9,8 +9,6 @@ import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import {
-  complianceSettings,
-  notificationSettings,
   payoutSettings,
   profileSettings,
 } from '../data/settings-mock';
@@ -420,7 +418,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                 <p class="ui-label">Settings</p>
                 <h2 class="heading-card heading-section dashboard-section-title">Partner Settings Control Center</h2>
                 <p class="body dashboard-section-copy">
-                  Manage identity, compliance, payout configuration, and notification preferences for your partner account.
+                  Manage identity details and payout configuration for your partner account.
                 </p>
               </div>
             </div>
@@ -435,24 +433,10 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                     </span>
                   </button>
 
-                  <button class="settings-nav-button" type="button" data-settings-target="kyb">
-                    <span class="settings-nav-copy">
-                      <span class="heading-card">KYB & Compliance</span>
-                      <span class="body-small">Verification status, documents, tier, and tax forms.</span>
-                    </span>
-                  </button>
-
                   <button class="settings-nav-button" type="button" data-settings-target="payouts">
                     <span class="settings-nav-copy">
                       <span class="heading-card">Payout Configuration</span>
                       <span class="body-small">Wallet routing, thresholds, and payout schedule.</span>
-                    </span>
-                  </button>
-
-                  <button class="settings-nav-button" type="button" data-settings-target="notifications">
-                    <span class="settings-nav-copy">
-                      <span class="heading-card">Notifications</span>
-                      <span class="body-small">Conversion alerts, summaries, and threshold notices.</span>
                     </span>
                   </button>
                 </div>
@@ -489,47 +473,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                   </article>
                 </section>
 
-                <section class="settings-panel" data-settings-panel="kyb" hidden>
-                  <article class="card glass glass-tier-3 glass-interactive on-glass settings-feature-card">
-                    <div class="widget-header">
-                      <p class="heading-card">KYB & Compliance</p>
-                      <span class={`status ${complianceSettings.kybStatus === 'verified' ? 'status-completed' : complianceSettings.kybStatus === 'pending' ? 'status-pending' : 'status-failed'}`}>
-                        {complianceSettings.kybStatus}
-                      </span>
-                    </div>
-
-                    <div class="settings-feature-grid">
-                      <div class="settings-field-card">
-                        <p class="ui-label">Compliance Tier</p>
-                        <p class="data-large settings-field-value">{complianceSettings.complianceTier}</p>
-                      </div>
-                      <div class="settings-field-card settings-field-card-wide">
-                        <p class="ui-label">Uploaded Documents</p>
-                        <div class="settings-list">
-                          {complianceSettings.documents.map((document) => (
-                            <div class="settings-list-row">
-                              <span class="body-small">{document.name}</span>
-                              <span class={`status ${document.status === 'uploaded' ? 'status-completed' : 'status-pending'}`}>
-                                {document.status === 'uploaded' ? 'uploaded' : 'needs update'}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div class="settings-field-card">
-                        <p class="ui-label">Tax Information</p>
-                        <p class="body settings-field-body">{complianceSettings.taxForm}</p>
-                      </div>
-                      <div class="settings-field-card">
-                        <p class="ui-label">Resubmission Control</p>
-                        <div class="row-12">
-                          <button class="btn-secondary" type="button">Resubmit Documents</button>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </section>
-
                 <section class="settings-panel" data-settings-panel="payouts" hidden>
                   <article class="card glass glass-tier-3 glass-interactive on-glass settings-feature-card">
                     <div class="widget-header">
@@ -558,56 +501,8 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         <p class="body settings-field-body">{payoutSettings.autoPayoutSchedule}</p>
                       </div>
                       <div class="settings-field-card">
-                        <p class="ui-label">Payout History</p>
-                        <div class="row-12">
-                          <button class="btn-secondary" type="button">{payoutSettings.payoutHistoryLabel}</button>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </section>
-
-                <section class="settings-panel" data-settings-panel="notifications" hidden>
-                  <article class="card glass glass-tier-3 glass-interactive on-glass settings-feature-card">
-                    <div class="widget-header">
-                      <p class="heading-card">Notifications</p>
-                    </div>
-
-                    <div class="settings-notification-list">
-                      <div class="settings-notification-row">
-                        <div class="stack-8">
-                          <p class="heading-card">New Conversions</p>
-                          <p class="body-small">Email alert whenever a referred user completes a ramp transaction.</p>
-                        </div>
-                        <span class={`settings-toggle ${notificationSettings.newConversions ? 'settings-toggle-active' : ''}`}>{notificationSettings.newConversions ? 'On' : 'Off'}</span>
-                      </div>
-                      <div class="settings-notification-row">
-                        <div class="stack-8">
-                          <p class="heading-card">Payout Received</p>
-                          <p class="body-small">Get notified once a payout batch lands in your configured wallet.</p>
-                        </div>
-                        <span class={`settings-toggle ${notificationSettings.payoutReceived ? 'settings-toggle-active' : ''}`}>{notificationSettings.payoutReceived ? 'On' : 'Off'}</span>
-                      </div>
-                      <div class="settings-notification-row">
-                        <div class="stack-8">
-                          <p class="heading-card">Weekly Summary</p>
-                          <p class="body-small">Receive a compact weekly digest of clicks, conversions, and commission earned.</p>
-                        </div>
-                        <span class={`settings-toggle ${notificationSettings.weeklySummary ? 'settings-toggle-active' : ''}`}>{notificationSettings.weeklySummary ? 'On' : 'Off'}</span>
-                      </div>
-                      <div class="settings-notification-row">
-                        <div class="stack-8">
-                          <p class="heading-card">KYB Status Changes</p>
-                          <p class="body-small">Immediate update if your compliance review status changes.</p>
-                        </div>
-                        <span class={`settings-toggle ${notificationSettings.kybStatusChange ? 'settings-toggle-active' : ''}`}>{notificationSettings.kybStatusChange ? 'On' : 'Off'}</span>
-                      </div>
-                      <div class="settings-notification-row">
-                        <div class="stack-8">
-                          <p class="heading-card">High-Value Transaction Threshold</p>
-                          <p class="body-small">Notify when a single attributed transaction crosses {notificationSettings.highValueThreshold}.</p>
-                        </div>
-                        <span class="settings-threshold">{notificationSettings.highValueThreshold}</span>
+                        <p class="ui-label">Payout Rate</p>
+                        <p class="body settings-field-body">{payoutSettings.payoutRate}</p>
                       </div>
                     </div>
                   </article>
