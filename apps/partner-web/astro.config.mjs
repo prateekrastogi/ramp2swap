@@ -10,12 +10,12 @@ export default defineConfig({
   ...(disableCloudflareAdapter
     ? {}
     : {
-        adapter: cloudflare({
+        adapter: cloudflare(/** @type {any} */ ({
           inspectorPort: 9230,
           platformProxy: {
             enabled: true
           },
           imageService: 'cloudflare'
-        })
+        }))
       })
 });

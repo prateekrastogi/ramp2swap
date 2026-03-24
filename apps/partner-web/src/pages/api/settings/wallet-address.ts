@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { getPartnerApiBaseUrl } from '../../../lib/runtime-env';
 
-export const POST: APIRoute = async ({ request }) => {
+const SESSION_COOKIE_NAME = 'partner_session';
+
+export const POST: APIRoute = async ({ request, cookies }) => {
   const partnerApiBaseUrl = await getPartnerApiBaseUrl();
   if (!partnerApiBaseUrl) {
     return new Response(JSON.stringify({ ok: false, error: 'PARTNER_API_BASE_URL is not configured.' }), {
@@ -13,17 +15,28 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const payload = (await request.json().catch(() => null)) as { email?: unknown } | null;
-  const email = typeof payload?.email === 'string' ? payload.email : '';
+  const sessionToken = cookies.get(SESSION_COOKIE_NAME)?.value ?? '';
+  if (!sessionToken) {
+    return new Response(JSON.stringify({ ok: false, error: 'Session expired or invalid.' }), {
+      status: 401,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
+
+  const payload = (await request.json().catch(() => null)) as { withdrawalAddress?: unknown } | null;
+  const withdrawalAddress = typeof payload?.withdrawalAddress === 'string' ? payload.withdrawalAddress : '-';
 
   let response: Response;
   try {
-    response = await fetch(`${partnerApiBaseUrl}/auth/request-otp`, {
+    response = await fetch(`${partnerApiBaseUrl}/settings/wallet-address`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ sessionToken, withdrawalAddress }),
     });
   } catch {
     return new Response(JSON.stringify({ ok: false, error: 'Partner API is unavailable. Start partner-api and try again.' }), {

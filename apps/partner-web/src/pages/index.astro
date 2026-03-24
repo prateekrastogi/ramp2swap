@@ -8,11 +8,51 @@ import {
 import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
-import {
-  payoutSettings,
-  profileSettings,
-} from '../data/settings-mock';
+import { payoutSettings } from '../data/settings-mock';
+import { getPartnerApiBaseUrl } from '../lib/runtime-env';
 import { transactionFeedItems } from '../data/transaction-feed-mock';
+
+type PartnerSessionPayload = {
+  ok?: boolean;
+  email?: string;
+  uid?: string;
+  settings?: {
+    username?: string;
+    withdrawalAddress?: string;
+  };
+};
+
+const sessionToken = Astro.cookies.get('partner_session')?.value ?? '';
+const partnerApiBaseUrl = await getPartnerApiBaseUrl();
+
+const partnerSettings = {
+  email: 'partners@ramp2swap.com',
+  uid: '',
+  username: 'prime-vault',
+  withdrawalAddress: '-',
+};
+
+if (sessionToken && partnerApiBaseUrl) {
+  try {
+    const response = await fetch(`${partnerApiBaseUrl}/auth/session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionToken }),
+    });
+
+    const payload = (await response.json().catch(() => null)) as PartnerSessionPayload | null;
+    if (response.ok && payload?.ok) {
+      partnerSettings.email = payload.email ?? partnerSettings.email;
+      partnerSettings.uid = payload.uid ?? partnerSettings.uid;
+      partnerSettings.username = payload.settings?.username ?? partnerSettings.username;
+      partnerSettings.withdrawalAddress = payload.settings?.withdrawalAddress ?? partnerSettings.withdrawalAddress;
+    }
+  } catch (error) {
+    console.warn('[partner-web] failed to load partner settings', error);
+  }
+}
 
 const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
   analyticsSummaries[rangeKey].points
@@ -91,9 +131,9 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           <a class="nav-item" href="mailto:help@ramp2swap.com" data-label="Help"><span class="nav-icon">i</span><span class="nav-text">Help</span></a>
 
           <div class="sidebar-profile" data-label="Profile">
-            <span class="sidebar-avatar"></span>
+            <img class="sidebar-avatar" data-sidebar-avatar alt="Partner identicon" />
             <span class="profile-copy">
-              <span class="profile-name">Partner Account</span>
+              <span class="profile-name" data-profile-name>{partnerSettings.username}</span>
               <span class="profile-role">PRO PLAN</span>
             </span>
             <button class="sidebar-logout" type="button" aria-label="Logout" data-label="Logout">
@@ -429,7 +469,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                   <button class="settings-nav-button settings-nav-button-active" type="button" data-settings-target="profile">
                     <span class="settings-nav-copy">
                       <span class="heading-card">Profile & Identity</span>
-                      <span class="body-small">Name, email, timezone, and language preferences.</span>
+                      <span class="body-small">Username and login email used for your partner account.</span>
                     </span>
                   </button>
 
@@ -451,11 +491,11 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                     <div class="settings-feature-grid">
                       <div class="settings-field-card">
                         <p class="ui-label">Display Name</p>
-                        <p class="data-large settings-field-value">{profileSettings.displayName}</p>
+                        <p class="data-large settings-field-value">{partnerSettings.username}</p>
                       </div>
                       <div class="settings-field-card">
                         <p class="ui-label">Email Address</p>
-                        <p class="body settings-field-body">{profileSettings.email}</p>
+                        <p class="body settings-field-body">{partnerSettings.email}</p>
                       </div>
                     </div>
                   </article>
@@ -487,11 +527,11 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                             </svg>
                           </button>
                         </div>
-                        <p class="body settings-field-body" data-wallet-address-value>{payoutSettings.walletAddress}</p>
+                        <p class="body settings-field-body" data-wallet-address-value>{partnerSettings.withdrawalAddress}</p>
                         <input
                           class="input input-glass surface-mint-muted settings-wallet-input"
                           type="text"
-                          value={payoutSettings.walletAddress}
+                          value={partnerSettings.withdrawalAddress}
                           aria-label="Wallet address"
                           data-wallet-address-input
                           hidden
@@ -531,8 +571,15 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
       const pinControl = document.getElementById('sidebar-pin');
       const navViewTriggers = document.querySelectorAll('[data-view-target]');
       const dashboardViews = document.querySelectorAll('[data-dashboard-view]');
+      const profileNameNode = document.querySelector('[data-profile-name]');
+      const sidebarAvatar = document.querySelector('[data-sidebar-avatar]');
       const settingsViewTriggers = document.querySelectorAll('[data-settings-target]');
       const settingsPanels = document.querySelectorAll('[data-settings-panel]');
+
+      if (profileNameNode instanceof HTMLElement && sidebarAvatar instanceof HTMLImageElement) {
+        const usernameSeed = profileNameNode.textContent?.trim() || 'prime-vault';
+        sidebarAvatar.src = `https://api.dicebear.com/9.x/identicon/svg?seed=${encodeURIComponent(usernameSeed)}`;
+      }
 
       if (
         sidebarBrandToggle instanceof HTMLButtonElement &&
@@ -685,12 +732,15 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         `;
 
         let currentWalletAddress = walletAddressInput.value;
+        let isSavingWalletAddress = false;
 
         const setWalletEditMode = (isEditing) => {
           walletAddressValue.hidden = isEditing;
           walletAddressInput.hidden = !isEditing;
           walletAddressToggle.innerHTML = isEditing ? saveIcon : editIcon;
           walletAddressToggle.setAttribute('aria-label', isEditing ? 'Save wallet address' : 'Edit wallet address');
+          walletAddressToggle.disabled = isSavingWalletAddress;
+          walletAddressInput.disabled = isSavingWalletAddress;
 
           if (isEditing) {
             walletAddressInput.focus();
@@ -698,38 +748,66 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           }
         };
 
-        const saveWalletAddress = () => {
-          const nextValue = walletAddressInput.value.trim();
-          if (!nextValue) {
+        const saveWalletAddress = async () => {
+          const nextValue = walletAddressInput.value.trim() || '-';
+          walletAddressInput.setCustomValidity('');
+          isSavingWalletAddress = true;
+          setWalletEditMode(true);
+
+          try {
+            const response = await fetch('/api/settings/wallet-address', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ withdrawalAddress: nextValue }),
+            });
+
+            const payload = (await response.json().catch(() => null)) as
+              | { ok?: boolean; error?: string; settings?: { withdrawalAddress?: string } }
+              | null;
+
+            if (!response.ok || !payload?.ok) {
+              throw new Error(payload?.error ?? 'Unable to save wallet address.');
+            }
+
+            currentWalletAddress = payload.settings?.withdrawalAddress ?? nextValue;
+            walletAddressValue.textContent = currentWalletAddress;
             walletAddressInput.value = currentWalletAddress;
             setWalletEditMode(false);
-            return;
+          } catch (error) {
+            walletAddressInput.setCustomValidity(error instanceof Error ? error.message : 'Unable to save wallet address.');
+            walletAddressInput.reportValidity();
+            walletAddressInput.focus();
+          } finally {
+            isSavingWalletAddress = false;
+            walletAddressToggle.disabled = false;
+            walletAddressInput.disabled = false;
           }
-
-          currentWalletAddress = nextValue;
-          walletAddressValue.textContent = currentWalletAddress;
-          walletAddressInput.value = currentWalletAddress;
-          setWalletEditMode(false);
         };
 
         const cancelWalletAddressEdit = () => {
+          if (isSavingWalletAddress) return;
           walletAddressInput.value = currentWalletAddress;
+          walletAddressInput.setCustomValidity('');
           setWalletEditMode(false);
         };
 
-        walletAddressToggle.addEventListener('click', () => {
+        walletAddressToggle.addEventListener('click', async () => {
+          if (isSavingWalletAddress) return;
+
           if (walletAddressInput.hidden) {
             setWalletEditMode(true);
             return;
           }
 
-          saveWalletAddress();
+          await saveWalletAddress();
         });
 
-        walletAddressInput.addEventListener('keydown', (event) => {
+        walletAddressInput.addEventListener('keydown', async (event) => {
           if (event.key === 'Enter') {
             event.preventDefault();
-            saveWalletAddress();
+            await saveWalletAddress();
           }
 
           if (event.key === 'Escape') {

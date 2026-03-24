@@ -2,13 +2,18 @@
 	"name": "partner-api",
 	"type": "module",
 	"scripts": {
-		"setup:auth-local": "node ../../scripts/setup-partner-auth-local.mjs && wrangler d1 execute AUTH_DB --local --file ./migrations/0001_auth.sql",
+		"migrate:local": "wrangler d1 execute AUTH_DB --local --file ./migrations/0001_auth.sql && wrangler d1 execute AUTH_DB --local --file ./migrations/0002_partner_settings.sql",
+		"migrate:staging": "wrangler d1 execute AUTH_DB --env staging --remote --file ./migrations/0001_auth.sql && wrangler d1 execute AUTH_DB --env staging --remote --file ./migrations/0002_partner_settings.sql",
+		"migrate:prod": "wrangler d1 execute AUTH_DB --remote --file ./migrations/0001_auth.sql && wrangler d1 execute AUTH_DB --remote --file ./migrations/0002_partner_settings.sql",
+		"setup:auth-local": "node ../../scripts/setup-partner-auth-local.mjs && npm run migrate:local",
 		"dev": "npm run setup:auth-local && wrangler dev --local",
-		"deploy": "wrangler deploy --minify",
+		"deploy:staging": "npm run migrate:staging && wrangler deploy --env staging --minify",
+		"deploy": "npm run migrate:prod && wrangler deploy --minify",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings"
 	},
 	"dependencies": {
-		"hono": "^4.12.7"
+		"hono": "^4.12.7",
+		"unique-names-generator": "^4.7.1"
 	},
 	"devDependencies": {
 		"@types/node": "^25.5.0",

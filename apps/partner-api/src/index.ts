@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import type { HonoRequest } from 'hono';
 import { createOtp, createRandomToken, createSessionToken, getSessionExpiry, hashOtp, isValidEmail, normalizeEmail, verifySessionToken } from './lib/auth';
 import { sendOtpEmail } from './lib/email';
+import { ensurePartnerSettings, normalizeWithdrawalAddress, updateWithdrawalAddress } from './lib/partner-settings';
 
 type AuthOtpRow = {
   email: string;
@@ -95,6 +96,26 @@ const ensureSchema = async (db: D1Database) => {
       `),
       db.prepare('CREATE INDEX IF NOT EXISTS idx_auth_sessions_email ON auth_sessions(email)'),
       db.prepare('CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires_at ON auth_sessions(expires_at)'),
+      db.prepare(`
+        CREATE TABLE IF NOT EXISTS auth_users (
+          uid TEXT PRIMARY KEY,
+          email TEXT NOT NULL UNIQUE,
+          created_at INTEGER NOT NULL,
+          last_login_at INTEGER NOT NULL
+        )
+      `),
+      db.prepare('CREATE INDEX IF NOT EXISTS idx_auth_users_email ON auth_users(email)'),
+      db.prepare(`
+        CREATE TABLE IF NOT EXISTS settings (
+          user_uid TEXT PRIMARY KEY,
+          username TEXT NOT NULL UNIQUE,
+          withdrawal_address TEXT NOT NULL DEFAULT '-',
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          FOREIGN KEY (user_uid) REFERENCES auth_users(uid) ON DELETE CASCADE
+        )
+      `),
+      db.prepare('CREATE INDEX IF NOT EXISTS idx_settings_username ON settings(username)'),
     ])
     .then(() => undefined);
 
@@ -248,6 +269,7 @@ app.post('/auth/verify-otp', async (c) => {
 
   const sessionId = createRandomToken(24);
   const sessionExpiry = getSessionExpiry();
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, email, now);
 
   await c.env.AUTH_DB.batch([
     c.env.AUTH_DB.prepare(
@@ -278,6 +300,11 @@ app.post('/auth/verify-otp', async (c) => {
     ok: true,
     email,
     expiresAt: sessionExpiry,
+    uid: partnerSettings.uid,
+    settings: {
+      username: partnerSettings.username,
+      withdrawalAddress: partnerSettings.withdrawalAddress,
+    },
     sessionToken,
   });
 });
@@ -331,10 +358,56 @@ app.post('/auth/session', async (c) => {
     .bind(Date.now(), sessionRow.id)
     .run();
 
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionRow.email);
+
   return c.json({
     ok: true,
-    email: sessionRow.email,
+    email: partnerSettings.email,
     expiresAt: sessionRow.expires_at,
+    uid: partnerSettings.uid,
+    settings: {
+      username: partnerSettings.username,
+      withdrawalAddress: partnerSettings.withdrawalAddress,
+    },
+  });
+});
+
+app.post('/settings/wallet-address', async (c) => {
+  await ensureSchema(c.env.AUTH_DB);
+
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  if (!sessionToken) {
+    return jsonError('Missing session token.', 401);
+  }
+
+  const payload = await verifySessionToken(sessionToken, c.env.SESSION_SECRET);
+  if (!payload) {
+    return jsonError('Session expired or invalid.', 401);
+  }
+
+  const sessionRow = await c.env.AUTH_DB.prepare(
+    'SELECT id, email, expires_at FROM auth_sessions WHERE id = ? AND revoked_at IS NULL',
+  )
+    .bind(payload.sid)
+    .first<AuthSessionRow>();
+
+  if (!sessionRow || sessionRow.expires_at <= Date.now()) {
+    return jsonError('Session expired or invalid.', 401);
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionRow.email);
+  const withdrawalAddress = normalizeWithdrawalAddress(typeof body.withdrawalAddress === 'string' ? body.withdrawalAddress : '-');
+  const updatedWithdrawalAddress = await updateWithdrawalAddress(c.env.AUTH_DB, partnerSettings.uid, withdrawalAddress);
+
+  return c.json({
+    ok: true,
+    email: partnerSettings.email,
+    uid: partnerSettings.uid,
+    settings: {
+      username: partnerSettings.username,
+      withdrawalAddress: updatedWithdrawalAddress,
+    },
   });
 });
 

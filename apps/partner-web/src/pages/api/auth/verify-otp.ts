@@ -15,7 +15,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
     });
   }
 
-  const requestPayload = await request.json().catch(() => null);
+  const requestPayload = (await request.json().catch(() => null)) as { email?: unknown; otp?: unknown } | null;
   const email = typeof requestPayload?.email === 'string' ? requestPayload.email : '';
   const otp = typeof requestPayload?.otp === 'string' ? requestPayload.otp : '';
 

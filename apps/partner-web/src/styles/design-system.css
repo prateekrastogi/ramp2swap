@@ -860,8 +860,10 @@
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  border: 1.5px solid var(--mint-500);
-  background: var(--mint-tint-soft);
+  border: 1px solid var(--white-a-07);
+  background: rgba(15, 20, 25, 0.85);
+  object-fit: cover;
+  display: block;
   flex: 0 0 auto;
 }
 

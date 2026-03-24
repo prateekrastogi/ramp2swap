@@ -1,9 +1,9 @@
 const readCloudflareEnv = async () => {
   try {
     const module = (await import('cloudflare:workers')) as {
-      env?: Record<string, string | undefined>;
+      env?: unknown;
     };
-    return module.env ?? {};
+    return (module.env as Record<string, string | undefined> | undefined) ?? {};
   } catch {
     return {};
   }
