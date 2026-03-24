@@ -150,6 +150,7 @@ import '../styles/design-system.css';
           const submitButton = passwordStep instanceof HTMLElement ? passwordStep.querySelector('.login-submit') : null;
           setBusy(submitButton, true, 'Verifying...', 'Verify OTP');
           setFeedback('');
+          let didVerify = false;
 
           try {
             const response = await fetch('/api/auth/verify-otp', {
@@ -166,11 +167,14 @@ import '../styles/design-system.css';
               return;
             }
 
+            didVerify = true;
             window.location.assign('/');
           } catch {
             setFeedback('Unable to reach the login service.', true);
           } finally {
-            setBusy(submitButton, false, 'Verifying...', 'Verify OTP');
+            if (!didVerify) {
+              setBusy(submitButton, false, 'Verifying...', 'Verify OTP');
+            }
           }
         });
       }
