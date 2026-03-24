@@ -107,7 +107,7 @@ export const buildOtpEmailHtml = ({
     }
 
     .header {
-      padding: 34px 34px 24px;
+      padding: 34px 34px 14px;
       border-bottom: 1px solid var(--white-a-06);
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
     }
@@ -137,7 +137,7 @@ export const buildOtpEmailHtml = ({
 
     .brand {
       margin-bottom: 0;
-      height: 72px;
+      height: 60px;
       overflow: visible;
     }
 
@@ -313,10 +313,11 @@ export const buildOtpEmailHtml = ({
     @media (max-width: 520px) {
       .wrapper { padding: 24px 10px; }
       .header, .body, .footer { padding-left: 22px; padding-right: 22px; }
-      .header-top { display: block; }
-      .brand { padding-left: 0; height: 60px; }
-      .brand-logo { height: 24px; max-width: 220px; margin-left: 0; }
+      .header-top { display: block; text-align: center; }
+      .brand { padding-left: 0; height: 52px; text-align: center; }
+      .brand-logo { height: 24px; max-width: 220px; margin: 0 auto; }
       .eyebrow { margin-top: 14px; margin-bottom: 18px; }
+      .detail-item:last-child { padding-bottom: 12px; }
       .title { font-size: 24px; }
       .otp-code { font-size: 32px; letter-spacing: 0.18em; text-indent: 0.18em; }
     }
