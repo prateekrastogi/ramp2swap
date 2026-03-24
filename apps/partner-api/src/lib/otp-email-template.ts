@@ -287,6 +287,10 @@ export const buildOtpEmailHtml = ({
       font-weight: 500;
     }
 
+    .detail-item:first-child {
+      border-top: 0;
+    }
+
     .footer {
       padding: 0 34px 30px;
     }
