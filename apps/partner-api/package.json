@@ -7,8 +7,8 @@
 		"migrate:prod": "wrangler d1 execute AUTH_DB --remote --file ./migrations/0001_auth.sql && wrangler d1 execute AUTH_DB --remote --file ./migrations/0002_partner_settings.sql",
 		"setup:auth-local": "node ../../scripts/setup-partner-auth-local.mjs && npm run migrate:local",
 		"dev": "npm run setup:auth-local && wrangler dev --local",
-		"deploy:staging": "npm run migrate:staging && wrangler deploy --env staging --minify",
-		"deploy": "npm run migrate:prod && wrangler deploy --minify",
+		"deploy:staging": "node ./scripts/deploy-with-migrations.mjs --env staging --minify",
+		"deploy": "node ./scripts/deploy-with-migrations.mjs --minify",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings"
 	},
 	"dependencies": {
