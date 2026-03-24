@@ -8,7 +8,7 @@ import {
 import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
 import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
-import { payoutSettings } from '../data/settings-mock';
+import { payoutDisplaySettings } from '../data/settings-display';
 import { getPartnerApiBaseUrl } from '../lib/runtime-env';
 import { transactionFeedItems } from '../data/transaction-feed-mock';
 
@@ -510,7 +510,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                     <div class="settings-feature-grid">
                       <div class="settings-field-card">
                         <p class="ui-label">Preferred Asset</p>
-                        <p class="data-large settings-field-value">{payoutSettings.walletAsset}</p>
+                        <p class="data-large settings-field-value">{payoutDisplaySettings.walletAsset}</p>
                       </div>
                       <div class="settings-field-card">
                         <div class="settings-field-card-head">
@@ -539,11 +539,11 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                       </div>
                       <div class="settings-field-card">
                         <p class="ui-label">Payout Network</p>
-                        <p class="body settings-field-body">{payoutSettings.network}</p>
+                        <p class="body settings-field-body">{payoutDisplaySettings.network}</p>
                       </div>
                       <div class="settings-field-card">
                         <p class="ui-label">Minimum Threshold</p>
-                        <p class="body settings-field-body">{payoutSettings.minimumThreshold}</p>
+                        <p class="body settings-field-body">{payoutDisplaySettings.minimumThreshold}</p>
                       </div>
                     </div>
                   </article>

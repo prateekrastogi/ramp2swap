@@ -70,6 +70,22 @@ check(
   partnerHomeContent.includes('/logo.png'),
   `[Brand asset] ${relative(root, partnerHomePage)} must use /logo.png for the shared brand mark`
 );
+check(
+  !partnerHomeContent.includes("settings-mock"),
+  `[Settings source] ${relative(root, partnerHomePage)} must not import deprecated settings mock data`
+);
+check(
+  partnerHomeContent.includes('data-profile-name'),
+  `[Sidebar identity] ${relative(root, partnerHomePage)} must expose the profile name hook for the seeded identicon`
+);
+check(
+  partnerHomeContent.includes('data-sidebar-avatar'),
+  `[Sidebar identity] ${relative(root, partnerHomePage)} must expose the sidebar avatar hook for the seeded identicon`
+);
+check(
+  partnerHomeContent.includes("'/api/settings/wallet-address'"),
+  `[Settings persistence] ${relative(root, partnerHomePage)} must persist wallet address edits through the server route`
+);
 
 const forbiddenFonts = [
   /(^|[^a-z])Inter([^a-z]|$)/i,
@@ -135,12 +151,18 @@ for (const requiredClass of [
 for (const requiredLocalClass of [
   '.dashboard-shell',
   '.sidebar',
+  '.sidebar-avatar',
   '.login-showcase-logo',
   '.analytics-grid',
   '.settings-grid',
 ]) {
   check(localCss.includes(requiredLocalClass), `[Missing partner rule] design-system.css must include ${requiredLocalClass}`);
 }
+
+check(
+  !localCss.includes('border: 1.5px solid var(--mint-500);'),
+  '[Sidebar avatar] partner-web design system must not use the deprecated mint ring avatar border'
+);
 
 const sharedDocs = readFileSync(sharedDocsFile, 'utf8');
 for (const requiredDocSection of [
