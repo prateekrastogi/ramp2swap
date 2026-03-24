@@ -457,18 +457,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         <p class="ui-label">Email Address</p>
                         <p class="body settings-field-body">{profileSettings.email}</p>
                       </div>
-                      <div class="settings-field-card">
-                        <p class="ui-label">Profile Photo</p>
-                        <p class="body settings-field-body">{profileSettings.profilePhotoLabel}</p>
-                      </div>
-                      <div class="settings-field-card">
-                        <p class="ui-label">Timezone</p>
-                        <p class="body settings-field-body">{profileSettings.timezone}</p>
-                      </div>
-                      <div class="settings-field-card">
-                        <p class="ui-label">Language</p>
-                        <p class="body settings-field-body">{profileSettings.language}</p>
-                      </div>
                     </div>
                   </article>
                 </section>
@@ -485,8 +473,29 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         <p class="data-large settings-field-value">{payoutSettings.walletAsset}</p>
                       </div>
                       <div class="settings-field-card">
-                        <p class="ui-label">Wallet Address</p>
-                        <p class="body settings-field-body">{payoutSettings.walletAddress}</p>
+                        <div class="settings-field-card-head">
+                          <p class="ui-label">Wallet Address</p>
+                          <button
+                            class="settings-edit-button"
+                            type="button"
+                            aria-label="Edit wallet address"
+                            data-wallet-address-toggle
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path d="M4 20h4l10-10-4-4L4 16v4Z"></path>
+                              <path d="M13 7l4 4"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        <p class="body settings-field-body" data-wallet-address-value>{payoutSettings.walletAddress}</p>
+                        <input
+                          class="input input-glass surface-mint-muted settings-wallet-input"
+                          type="text"
+                          value={payoutSettings.walletAddress}
+                          aria-label="Wallet address"
+                          data-wallet-address-input
+                          hidden
+                        />
                       </div>
                       <div class="settings-field-card">
                         <p class="ui-label">Payout Network</p>
@@ -495,14 +504,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                       <div class="settings-field-card">
                         <p class="ui-label">Minimum Threshold</p>
                         <p class="body settings-field-body">{payoutSettings.minimumThreshold}</p>
-                      </div>
-                      <div class="settings-field-card">
-                        <p class="ui-label">Auto-Payout</p>
-                        <p class="body settings-field-body">{payoutSettings.autoPayoutSchedule}</p>
-                      </div>
-                      <div class="settings-field-card">
-                        <p class="ui-label">Payout Rate</p>
-                        <p class="body settings-field-body">{payoutSettings.payoutRate}</p>
                       </div>
                     </div>
                   </article>
@@ -657,6 +658,90 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             if (!target) return;
             setActiveSettingsPanel(target);
           });
+        });
+      }
+
+      const walletAddressCard = document.querySelector('[data-wallet-address-toggle]')?.closest('.settings-field-card');
+      const walletAddressToggle = document.querySelector('[data-wallet-address-toggle]');
+      const walletAddressValue = document.querySelector('[data-wallet-address-value]');
+      const walletAddressInput = document.querySelector('[data-wallet-address-input]');
+
+      if (
+        walletAddressCard instanceof HTMLElement &&
+        walletAddressToggle instanceof HTMLButtonElement &&
+        walletAddressValue instanceof HTMLElement &&
+        walletAddressInput instanceof HTMLInputElement
+      ) {
+        const editIcon = `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 20h4l10-10-4-4L4 16v4Z"></path>
+            <path d="M13 7l4 4"></path>
+          </svg>
+        `;
+        const saveIcon = `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m5 12 4 4L19 6"></path>
+          </svg>
+        `;
+
+        let currentWalletAddress = walletAddressInput.value;
+
+        const setWalletEditMode = (isEditing) => {
+          walletAddressValue.hidden = isEditing;
+          walletAddressInput.hidden = !isEditing;
+          walletAddressToggle.innerHTML = isEditing ? saveIcon : editIcon;
+          walletAddressToggle.setAttribute('aria-label', isEditing ? 'Save wallet address' : 'Edit wallet address');
+
+          if (isEditing) {
+            walletAddressInput.focus();
+            walletAddressInput.select();
+          }
+        };
+
+        const saveWalletAddress = () => {
+          const nextValue = walletAddressInput.value.trim();
+          if (!nextValue) {
+            walletAddressInput.value = currentWalletAddress;
+            setWalletEditMode(false);
+            return;
+          }
+
+          currentWalletAddress = nextValue;
+          walletAddressValue.textContent = currentWalletAddress;
+          walletAddressInput.value = currentWalletAddress;
+          setWalletEditMode(false);
+        };
+
+        const cancelWalletAddressEdit = () => {
+          walletAddressInput.value = currentWalletAddress;
+          setWalletEditMode(false);
+        };
+
+        walletAddressToggle.addEventListener('click', () => {
+          if (walletAddressInput.hidden) {
+            setWalletEditMode(true);
+            return;
+          }
+
+          saveWalletAddress();
+        });
+
+        walletAddressInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            saveWalletAddress();
+          }
+
+          if (event.key === 'Escape') {
+            cancelWalletAddressEdit();
+          }
+        });
+
+        document.addEventListener('pointerdown', (event) => {
+          if (walletAddressInput.hidden) return;
+          if (!(event.target instanceof Node)) return;
+          if (walletAddressCard.contains(event.target)) return;
+          cancelWalletAddressEdit();
         });
       }
 

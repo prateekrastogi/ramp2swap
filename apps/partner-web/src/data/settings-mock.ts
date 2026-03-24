@@ -26,8 +26,8 @@ export const profileSettings: ProfileSettings = {
 export const payoutSettings: PayoutSettings = {
   walletAsset: 'USDC',
   walletAddress: '0x7d2f...91c4',
-  network: 'ERC20',
-  minimumThreshold: '$2,500',
+  network: 'Solana',
+  minimumThreshold: '$10',
   autoPayoutSchedule: 'Weekly',
   payoutRate: '0.15%',
 };

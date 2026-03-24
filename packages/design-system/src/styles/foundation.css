@@ -592,6 +592,12 @@ body {
   color: var(--slate-500);
 }
 
+.surface-mint-muted {
+  border: 1px solid var(--mint-border-soft);
+  background: var(--mint-tint-faint);
+  box-shadow: inset 0 1px 0 var(--mint-ring-edge);
+}
+
 .ambient-layer {
   position: fixed;
   inset: 0;

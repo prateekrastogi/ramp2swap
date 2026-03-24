@@ -400,6 +400,11 @@
   min-width: 0;
 }
 
+.settings-feature-card {
+  display: grid;
+  gap: 18px;
+}
+
 .settings-feature-card::before {
   content: '';
   position: absolute;
@@ -466,6 +471,51 @@
   display: grid;
   align-content: start;
   gap: 12px;
+}
+
+.settings-field-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-edit-button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--white-a-10);
+  border-radius: 999px;
+  background: rgba(15, 20, 25, 0.5);
+  color: var(--slate-300);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.settings-edit-button:hover,
+.settings-edit-button:focus-visible {
+  border-color: var(--mint-border-soft);
+  background: var(--mint-tint-faint);
+  color: var(--slate-100);
+}
+
+.settings-edit-button svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.settings-wallet-input {
+  font-family: var(--font-data);
+  font-size: 13px;
+  letter-spacing: 0.02em;
 }
 
 .settings-field-card-wide {
