@@ -1,3 +1,5 @@
+import { buildOtpEmailHtml } from './otp-email-template';
+
 export const sendOtpEmail = async ({
   email,
   otp,
@@ -29,9 +31,9 @@ export const sendOtpEmail = async ({
     body: JSON.stringify({
       from,
       to: [email],
-      subject: 'Your Ramp2Swap partner login code',
-      text: `Your OTP is ${otp}. It expires in 10 minutes.`,
-      html: `<p>Your Ramp2Swap partner login code is <strong>${otp}</strong>.</p><p>This code expires in 10 minutes.</p>`,
+      subject: 'Verify Your Login | Ramp2Swap Partner',
+      text: `Your Ramp2Swap Partner Login Code: ${otp}. It expires in 10 minutes.`,
+      html: buildOtpEmailHtml({ email, otp }),
     }),
   });
 
