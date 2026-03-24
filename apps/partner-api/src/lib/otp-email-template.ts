@@ -104,7 +104,8 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
 
     .eyebrow {
       display: inline-block;
-      margin-bottom: 16px;
+      margin-top: 16px;
+      margin-bottom: 0;
       padding: 6px 12px;
       border-radius: 999px;
       border: 1px solid var(--mint-border-soft);
@@ -117,8 +118,7 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
     }
 
     .brand {
-      margin-bottom: 10px;
-      padding-left: 28px;
+      margin-bottom: 0;
       height: 72px;
       overflow: visible;
     }
@@ -302,7 +302,7 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
     @media (max-width: 520px) {
       .wrapper { padding: 24px 10px; }
       .header, .body, .footer { padding-left: 22px; padding-right: 22px; }
-      .brand { padding-left: 28px; height: 60px; }
+      .brand { height: 60px; }
       .brand-logo { height: 24px; max-width: 220px; }
       .title { font-size: 24px; }
       .otp-code { font-size: 32px; letter-spacing: 0.18em; text-indent: 0.18em; }
@@ -314,10 +314,10 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
     <div class="shell">
       <div class="content">
         <div class="header">
-          <div class="eyebrow">Partner Portal Security</div>
           <div class="brand">
             <img class="brand-logo" src="${partnerLogoUrl}" alt="Ramp2Swap" />
           </div>
+          <div class="eyebrow">Partner Portal Security</div>
           <div class="header-sub">
             We received a sign-in request for your Ramp2Swap Partner Portal account.
           </div>

@@ -3,7 +3,7 @@ import { getPartnerApiBaseUrl } from '../../../lib/runtime-env';
 
 const SESSION_COOKIE_NAME = 'partner_session';
 
-export const POST: APIRoute = async ({ cookies }) => {
+export const POST: APIRoute = async ({ cookies, url }) => {
   const sessionToken = cookies.get(SESSION_COOKIE_NAME)?.value;
   const partnerApiBaseUrl = await getPartnerApiBaseUrl();
 
@@ -23,6 +23,8 @@ export const POST: APIRoute = async ({ cookies }) => {
 
   cookies.delete(SESSION_COOKIE_NAME, {
     path: '/',
+    sameSite: 'lax',
+    secure: url.protocol === 'https:',
   });
 
   return new Response(JSON.stringify({ ok: true }), {

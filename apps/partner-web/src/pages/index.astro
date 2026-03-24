@@ -571,12 +571,15 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
       if (sidebarLogoutButton instanceof HTMLButtonElement) {
         sidebarLogoutButton.addEventListener('click', async () => {
+          sidebarLogoutButton.disabled = true;
+
           try {
             await fetch('/api/auth/logout', {
               method: 'POST',
+              credentials: 'same-origin',
             });
           } finally {
-            window.location.assign('/login');
+            window.location.replace('/login');
           }
         });
       }
