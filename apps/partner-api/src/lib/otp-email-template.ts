@@ -102,9 +102,16 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
     }
 
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
     .eyebrow {
       display: inline-block;
-      margin-top: 16px;
+      margin-top: 0;
       margin-bottom: 16px;
       padding: 6px 12px;
       border-radius: 999px;
@@ -115,6 +122,7 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
       font-size: 11px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .brand {
@@ -302,8 +310,9 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
     @media (max-width: 520px) {
       .wrapper { padding: 24px 10px; }
       .header, .body, .footer { padding-left: 22px; padding-right: 22px; }
+      .header-top { display: block; }
       .brand { padding-left: 18px; height: 60px; }
-      .brand-logo { height: 24px; max-width: 220px; }
+      .brand-logo { height: 24px; max-width: 220px; margin-left: 8px; }
       .eyebrow { margin-top: 14px; margin-bottom: 18px; }
       .title { font-size: 24px; }
       .otp-code { font-size: 32px; letter-spacing: 0.18em; text-indent: 0.18em; }
@@ -315,10 +324,12 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
     <div class="shell">
       <div class="content">
         <div class="header">
-          <div class="brand">
-            <img class="brand-logo" src="${partnerLogoUrl}" alt="Ramp2Swap" />
+          <div class="header-top">
+            <div class="brand">
+              <img class="brand-logo" src="${partnerLogoUrl}" alt="Ramp2Swap" />
+            </div>
+            <div class="eyebrow">Partner Portal Security</div>
           </div>
-          <div class="eyebrow">Partner Portal Security</div>
           <div class="header-sub">
             We received a sign-in request for your Ramp2Swap Partner Portal account.
           </div>
