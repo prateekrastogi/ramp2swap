@@ -314,8 +314,8 @@ export const buildOtpEmailHtml = ({
       .wrapper { padding: 24px 10px; }
       .header, .body, .footer { padding-left: 22px; padding-right: 22px; }
       .header-top { display: block; text-align: center; }
-      .brand { padding-left: 0; height: 52px; text-align: center; }
-      .brand-logo { height: 24px; max-width: 220px; margin: 0 auto; }
+      .brand { padding-left: 0; height: 52px; text-align: center; width: 100%; }
+      .brand-logo { display: block; height: 24px; max-width: 220px; margin: 0 auto; transform-origin: center center; }
       .eyebrow { margin-top: 14px; margin-bottom: 18px; }
       .detail-item:last-child { padding-bottom: 12px; }
       .title { font-size: 24px; }
