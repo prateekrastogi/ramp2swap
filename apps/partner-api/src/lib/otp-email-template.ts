@@ -151,13 +151,6 @@ export const buildOtpEmailHtml = ({
       transform-origin: left center;
     }
 
-    .header-sub {
-      color: var(--slate-300);
-      font-size: 13px;
-      line-height: 1.6;
-      max-width: 44ch;
-    }
-
     .body {
       padding: 32px 34px 18px;
     }
@@ -339,9 +332,6 @@ export const buildOtpEmailHtml = ({
               <img class="brand-logo" src="${resolvedPartnerLogoUrl}" alt="Ramp2Swap" />
             </div>
             <div class="eyebrow">Partner Portal Security</div>
-          </div>
-          <div class="header-sub">
-            We received a sign-in request for your Ramp2Swap Partner Portal account.
           </div>
         </div>
 
