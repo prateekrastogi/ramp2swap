@@ -105,7 +105,7 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
     .eyebrow {
       display: inline-block;
       margin-top: 16px;
-      margin-bottom: 0;
+      margin-bottom: 16px;
       padding: 6px 12px;
       border-radius: 999px;
       border: 1px solid var(--mint-border-soft);
@@ -302,8 +302,9 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
     @media (max-width: 520px) {
       .wrapper { padding: 24px 10px; }
       .header, .body, .footer { padding-left: 22px; padding-right: 22px; }
-      .brand { height: 60px; }
+      .brand { padding-left: 18px; height: 60px; }
       .brand-logo { height: 24px; max-width: 220px; }
+      .eyebrow { margin-top: 14px; margin-bottom: 18px; }
       .title { font-size: 24px; }
       .otp-code { font-size: 32px; letter-spacing: 0.18em; text-indent: 0.18em; }
     }
