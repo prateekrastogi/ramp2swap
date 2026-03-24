@@ -13,6 +13,10 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./public"
+	},
 	"dev": {
 		"inspector_port": 9233
 	},
@@ -26,7 +30,8 @@
 	],
 	"vars": {
 		"AUTH_EMAIL_MODE": "resend",
-		"LOGIN_EMAIL_FROM": "Ramp2Swap Partners Security <security@ramp2swap.com>"
+		"LOGIN_EMAIL_FROM": "Ramp2Swap Partners Security <security@ramp2swap.com>",
+		"PARTNER_API_PUBLIC_BASE_URL": "https://api.partner.ramp2swap.com"
 	},
 	"env": {
 		"staging": {
@@ -41,7 +46,8 @@
 			],
 			"vars": {
 				"AUTH_EMAIL_MODE": "resend",
-				"LOGIN_EMAIL_FROM": "Ramp2Swap Security <security@ramp2swap.com>"
+				"LOGIN_EMAIL_FROM": "Ramp2Swap Security <security@ramp2swap.com>",
+				"PARTNER_API_PUBLIC_BASE_URL": "https://staging.api.partner.ramp2swap.com"
 			}
 		}
 	}

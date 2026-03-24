@@ -19,10 +19,12 @@ type AuthSessionRow = {
 };
 
 type Bindings = CloudflareBindings & {
+  ASSETS: Fetcher;
   AUTH_DB: D1Database;
   SESSION_SECRET: string;
   RESEND_KEY?: string;
   LOGIN_EMAIL_FROM?: string;
+  PARTNER_API_PUBLIC_BASE_URL?: string;
   AUTH_EMAIL_MODE?: string;
 };
 
@@ -117,6 +119,16 @@ app.get('/message', (c) => {
   return c.text('Hello Hono!');
 });
 
+app.get('/logo_horizontal.png', async (c) => {
+  const assetResponse = await c.env.ASSETS.fetch(new Request(new URL('/logo_horizontal.png', c.req.url)));
+
+  if (!assetResponse.ok) {
+    return c.notFound();
+  }
+
+  return assetResponse;
+});
+
 app.post('/auth/request-otp', async (c) => {
   await ensureSchema(c.env.AUTH_DB);
 
@@ -144,6 +156,7 @@ app.post('/auth/request-otp', async (c) => {
 
   try {
     await sendOtpEmail({
+      assetBaseUrl: c.env.PARTNER_API_PUBLIC_BASE_URL ?? new URL(c.req.url).origin,
       email,
       otp,
       resendKey: c.env.RESEND_KEY,

@@ -13,10 +13,13 @@ const escapeHtml = (value: string) =>
 
 const formatOtpForDisplay = (otp: string) => otp.replace(/\D/g, '').replace(/(\d{3})(\d{3})/, '$1 $2');
 
-export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }) => {
+const buildAbsoluteUrl = (baseUrl: string, path: string) => new URL(path, baseUrl).toString();
+
+export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: string; email: string; otp: string }) => {
   const safeEmail = escapeHtml(email);
-  const safeOtp = escapeHtml(otp);
   const displayOtp = escapeHtml(formatOtpForDisplay(otp));
+  const currentYear = new Date().getUTCFullYear();
+  const partnerLogoUrl = buildAbsoluteUrl(assetBaseUrl, '/logo_horizontal.png');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -88,40 +91,6 @@ export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }
       backdrop-filter: blur(40px) saturate(160%);
     }
 
-    .shell::before {
-      content: '';
-      position: absolute;
-      inset: auto 8% 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
-      z-index: 1;
-    }
-
-    .ambient-orb {
-      position: absolute;
-      border-radius: 999px;
-      pointer-events: none;
-      filter: blur(70px);
-      opacity: 0.95;
-      z-index: 0;
-    }
-
-    .ambient-orb--mint-bottom {
-      width: 280px;
-      height: 280px;
-      left: -30px;
-      bottom: -120px;
-      background: radial-gradient(circle, var(--mint-tint-strong) 0%, transparent 70%);
-    }
-
-    .ambient-orb--blue-bottom {
-      width: 220px;
-      height: 220px;
-      right: -60px;
-      bottom: -70px;
-      background: radial-gradient(circle, rgba(0, 120, 255, 0.10) 0%, transparent 70%);
-    }
-
     .content {
       position: relative;
       z-index: 2;
@@ -148,38 +117,15 @@ export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }
     }
 
     .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
       margin-bottom: 10px;
     }
 
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(180deg, var(--mint-500), var(--mint-600));
-      color: var(--obsidian-900);
-      font-family: 'DM Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 42px;
-      text-align: center;
-      box-shadow:
-        0 10px 24px rgba(0, 229, 160, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35);
-    }
-
-    .brand-copy {
-      color: var(--ivory-100);
-      font-family: 'Syne', Arial, sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-    }
-
-    .brand-copy span {
-      color: var(--mint-500);
+    .brand-logo {
+      display: block;
+      width: auto;
+      max-width: 260px;
+      height: 32px;
+      object-fit: contain;
     }
 
     .header-sub {
@@ -290,22 +236,6 @@ export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }
       text-transform: uppercase;
     }
 
-    .info-strip {
-      margin-bottom: 18px;
-      padding: 16px 18px;
-      border-radius: 16px;
-      border: 1px solid var(--white-a-07);
-      background: rgba(15, 20, 25, 0.55);
-      color: var(--slate-300);
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .info-strip strong {
-      color: var(--slate-100);
-      font-weight: 500;
-    }
-
     .security-note {
       margin-bottom: 22px;
       padding: 16px 18px;
@@ -367,6 +297,7 @@ export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }
     @media (max-width: 520px) {
       .wrapper { padding: 24px 10px; }
       .header, .body, .footer { padding-left: 22px; padding-right: 22px; }
+      .brand-logo { height: 24px; max-width: 220px; }
       .title { font-size: 24px; }
       .otp-code { font-size: 32px; letter-spacing: 0.18em; text-indent: 0.18em; }
     }
@@ -375,15 +306,11 @@ export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }
 <body>
   <div class="wrapper">
     <div class="shell">
-      <div class="ambient-orb ambient-orb--mint-bottom"></div>
-      <div class="ambient-orb ambient-orb--blue-bottom"></div>
-
       <div class="content">
         <div class="header">
           <div class="eyebrow">Partner Portal Security</div>
           <div class="brand">
-            <div class="brand-mark">R2S</div>
-            <div class="brand-copy">Ramp2<span>Swap</span></div>
+            <img class="brand-logo" src="${partnerLogoUrl}" alt="Ramp2Swap" />
           </div>
           <div class="header-sub">
             We received a sign-in request for your Ramp2Swap Partner Portal account.
@@ -402,18 +329,14 @@ export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }
             <div class="otp-meta">Expires in 10 minutes</div>
           </div>
 
-          <div class="info-strip">
-            <strong>Portal access:</strong> Return to the <a href="${PARTNER_PORTAL_URL}" target="_blank" rel="noreferrer noopener">Partner Portal</a> and enter <strong>${safeOtp}</strong> to continue.
-          </div>
-
           <div class="security-note">
             <strong>Never share this code.</strong> Ramp2Swap will never ask for your OTP by phone, chat, or email. If this sign-in was not initiated by you, you can ignore this message and your account will remain protected.
           </div>
 
           <div class="detail-list">
-            <div class="detail-item"><strong>Validity:</strong> 10 minutes from the time this email was sent.</div>
             <div class="detail-item"><strong>Need a new code?</strong> Go back to the partner login screen and request another OTP.</div>
             <div class="detail-item"><strong>Need help?</strong> Contact <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</div>
+            <div class="detail-item"><strong>Partner Portal:</strong> <a href="${PARTNER_PORTAL_URL}" target="_blank" rel="noreferrer noopener">partner.ramp2swap.com</a></div>
           </div>
         </div>
 
@@ -425,7 +348,7 @@ export const buildOtpEmailHtml = ({ email, otp }: { email: string; otp: string }
               <a href="mailto:${SUPPORT_EMAIL}">Support</a>
             </div>
             <div>
-              &copy; 2026 Ramp2Swap. This is an automated security email, so replies are not monitored.
+              &copy; ${currentYear} Ramp2Swap. This is an automated security email, so replies are not monitored.
             </div>
           </div>
         </div>

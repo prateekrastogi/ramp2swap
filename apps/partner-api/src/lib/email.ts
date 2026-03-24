@@ -1,12 +1,14 @@
 import { buildOtpEmailHtml } from './otp-email-template';
 
 export const sendOtpEmail = async ({
+  assetBaseUrl,
   email,
   otp,
   resendKey,
   from,
   mode,
 }: {
+  assetBaseUrl: string;
   email: string;
   otp: string;
   resendKey?: string;
@@ -33,7 +35,7 @@ export const sendOtpEmail = async ({
       to: [email],
       subject: 'Verify Your Login | Ramp2Swap Partner',
       text: `Your Ramp2Swap Partner Login Code: ${otp}. It expires in 10 minutes.`,
-      html: buildOtpEmailHtml({ email, otp }),
+      html: buildOtpEmailHtml({ assetBaseUrl, email, otp }),
     }),
   });
 
