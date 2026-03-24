@@ -15,11 +15,21 @@ const formatOtpForDisplay = (otp: string) => otp.replace(/\D/g, '').replace(/(\d
 
 const buildAbsoluteUrl = (baseUrl: string, path: string) => new URL(path, baseUrl).toString();
 
-export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: string; email: string; otp: string }) => {
+export const buildOtpEmailHtml = ({
+  assetBaseUrl,
+  email,
+  otp,
+  partnerLogoUrl,
+}: {
+  assetBaseUrl: string;
+  email: string;
+  otp: string;
+  partnerLogoUrl?: string;
+}) => {
   const safeEmail = escapeHtml(email);
   const displayOtp = escapeHtml(formatOtpForDisplay(otp));
   const currentYear = new Date().getUTCFullYear();
-  const partnerLogoUrl = buildAbsoluteUrl(assetBaseUrl, '/logo_horizontal.png');
+  const resolvedPartnerLogoUrl = partnerLogoUrl ?? buildAbsoluteUrl(assetBaseUrl, '/logo_horizontal.png');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -104,7 +114,7 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
 
     .header-top {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
     }
@@ -135,7 +145,7 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
       display: block;
       width: auto;
       max-width: 260px;
-      height: 32px;
+      height: 24px;
       object-fit: contain;
       transform: scale(8);
       transform-origin: left center;
@@ -311,8 +321,8 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
       .wrapper { padding: 24px 10px; }
       .header, .body, .footer { padding-left: 22px; padding-right: 22px; }
       .header-top { display: block; }
-      .brand { padding-left: 18px; height: 60px; }
-      .brand-logo { height: 24px; max-width: 220px; margin-left: 3px; }
+      .brand { padding-left: 0; height: 60px; }
+      .brand-logo { height: 24px; max-width: 220px; margin-left: 0; }
       .eyebrow { margin-top: 14px; margin-bottom: 18px; }
       .title { font-size: 24px; }
       .otp-code { font-size: 32px; letter-spacing: 0.18em; text-indent: 0.18em; }
@@ -326,7 +336,7 @@ export const buildOtpEmailHtml = ({ assetBaseUrl, email, otp }: { assetBaseUrl: 
         <div class="header">
           <div class="header-top">
             <div class="brand">
-              <img class="brand-logo" src="${partnerLogoUrl}" alt="Ramp2Swap" />
+              <img class="brand-logo" src="${resolvedPartnerLogoUrl}" alt="Ramp2Swap" />
             </div>
             <div class="eyebrow">Partner Portal Security</div>
           </div>
