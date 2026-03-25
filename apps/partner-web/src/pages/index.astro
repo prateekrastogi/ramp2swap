@@ -803,7 +803,12 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           }
 
           if (!canUpdate && typeof walletAddressCooldownEndsAt === 'number') {
-            cooldownTimer = window.setTimeout(syncWalletCooldownState, 1000);
+            const millisecondsUntilNextMinute = 60_000 - (now % 60_000);
+            const nextRefreshDelay = Math.min(
+              Math.max(millisecondsUntilNextMinute, 1_000),
+              Math.max(walletAddressCooldownEndsAt - now, 1_000),
+            );
+            cooldownTimer = window.setTimeout(syncWalletCooldownState, nextRefreshDelay);
           }
 
           return canUpdate;
@@ -920,6 +925,10 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           if (event.key === 'Escape') {
             cancelWalletAddressEdit();
           }
+        });
+
+        walletAddressInput.addEventListener('input', () => {
+          walletAddressInput.setCustomValidity('');
         });
 
         document.addEventListener('pointerdown', (event) => {
