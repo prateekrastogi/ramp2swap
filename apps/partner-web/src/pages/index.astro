@@ -655,16 +655,18 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                             </svg>
                           </button>
                         </div>
-                        <p class="body settings-field-body" data-wallet-address-value>{walletAddressDisplayValue}</p>
-                        <input
-                          class="input input-glass surface-mint-muted settings-wallet-input"
-                          type="text"
-                          value={partnerSettings.withdrawalAddress}
-                          placeholder={EMPTY_WALLET_ADDRESS_DISPLAY}
-                          aria-label="Wallet address"
-                          data-wallet-address-input
-                          hidden
-                        />
+                        <div class="settings-wallet-shell">
+                          <div class="settings-wallet-display" data-wallet-address-value>{walletAddressDisplayValue}</div>
+                          <input
+                            class="input input-glass settings-wallet-input"
+                            type="text"
+                            value={partnerSettings.withdrawalAddress}
+                            placeholder={EMPTY_WALLET_ADDRESS_DISPLAY}
+                            aria-label="Wallet address"
+                            data-wallet-address-input
+                            hidden
+                          />
+                        </div>
                       </div>
                       <div class="settings-field-card">
                         <p class="ui-label">Payout Network</p>
