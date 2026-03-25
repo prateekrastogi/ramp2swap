@@ -206,15 +206,48 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                   <span class="badge-active">Core Flow</span>
                 </div>
 
-                <div class="link-form-grid" data-link-generator data-base-url={linkGeneratorDraft.baseUrl}>
+                <div
+                  class="link-form-grid"
+                  data-link-generator
+                  data-base-url={linkGeneratorDraft.baseUrl}
+                  data-partner-username={partnerSettings.username}
+                >
                   <div class="stack-12">
-                    <label class="ui-label" for="partner-id">Partner ID</label>
-                    <input id="partner-id" class="input input-glass" data-link-partner-id value={linkGeneratorDraft.partnerId} />
+                    <label class="ui-label" for="campaign-name">CAMPAIGN NAME</label>
+                    <div class="link-input-shell" data-link-field>
+                      <input
+                        id="campaign-name"
+                        class="input input-glass"
+                        data-link-campaign-name
+                        value={linkGeneratorDraft.campaignName}
+                      />
+                      <span class="link-input-warning" data-link-warning-icon aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                          <path d="M12 4 3.5 19h17L12 4Z"></path>
+                          <path d="M12 9v5"></path>
+                          <path d="M12 17h.01"></path>
+                        </svg>
+                      </span>
+                    </div>
                   </div>
 
                   <div class="stack-12">
                     <label class="ui-label" for="campaign-tag">Campaign Tag</label>
-                    <input id="campaign-tag" class="input input-glass" data-link-campaign-tag value={linkGeneratorDraft.campaignTag} />
+                    <div class="link-input-shell" data-link-field>
+                      <input
+                        id="campaign-tag"
+                        class="input input-glass"
+                        data-link-campaign-tag
+                        value={linkGeneratorDraft.campaignTag}
+                      />
+                      <span class="link-input-warning" data-link-warning-icon aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                          <path d="M12 4 3.5 19h17L12 4Z"></path>
+                          <path d="M12 9v5"></path>
+                          <path d="M12 17h.01"></path>
+                        </svg>
+                      </span>
+                    </div>
                   </div>
 
                   <div class="stack-12 link-output-block">
@@ -233,7 +266,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         <button class="btn-secondary" type="button" data-download-qr>Download QR</button>
                       </div>
                     </div>
-                    <p class="data-small link-generator-feedback" data-link-feedback aria-live="polite"></p>
                   </div>
                 </div>
               </article>
@@ -944,34 +976,90 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
       const linkGenerator = document.querySelector('[data-link-generator]');
       if (linkGenerator instanceof HTMLElement) {
-        const partnerIdInput = linkGenerator.querySelector('[data-link-partner-id]');
+        const campaignNameInput = linkGenerator.querySelector('[data-link-campaign-name]');
         const campaignTagInput = linkGenerator.querySelector('[data-link-campaign-tag]');
         const generatedLinkInput = linkGenerator.querySelector('[data-generated-link]');
         const generateLinkButton = linkGenerator.querySelector('[data-generate-link]');
         const copyGeneratedLinkButton = linkGenerator.querySelector('[data-copy-generated-link]');
         const downloadQrButton = linkGenerator.querySelector('[data-download-qr]');
-        const feedbackNode = linkGenerator.querySelector('[data-link-feedback]');
         const baseUrl = linkGenerator.dataset.baseUrl ?? '';
+        const partnerUsername = linkGenerator.dataset.partnerUsername ?? '';
+        const generateButtonLabels = {
+          idle: 'Generate Link',
+          pending: 'Generating...',
+          complete: 'Generated',
+        };
 
-        const setFeedback = (message) => {
-          if (feedbackNode instanceof HTMLElement) {
-            feedbackNode.textContent = message;
+        const setGenerateButtonState = (state) => {
+          if (!(generateLinkButton instanceof HTMLButtonElement)) {
+            return;
           }
+
+          generateLinkButton.textContent = generateButtonLabels[state];
+          generateLinkButton.dataset.state = state;
+          generateLinkButton.disabled = state !== 'idle';
+        };
+
+        const getFieldLabel = (input) => {
+          if (!(input instanceof HTMLInputElement)) {
+            return '';
+          }
+
+          return input.id === 'campaign-name' ? 'Campaign name' : 'Campaign tag';
+        };
+
+        const setFieldWarning = (input, isInvalid) => {
+          if (!(input instanceof HTMLInputElement)) {
+            return;
+          }
+
+          input.toggleAttribute('aria-invalid', isInvalid);
+          input.closest('[data-link-field]')?.toggleAttribute('data-invalid', isInvalid);
+        };
+
+        const validateLinkInputs = () => {
+          const requiredInputs = [campaignNameInput, campaignTagInput].filter((input) => input instanceof HTMLInputElement);
+          const missingLabels = [];
+
+          requiredInputs.forEach((input) => {
+            const isEmpty = input.value.trim().length === 0;
+            setFieldWarning(input, isEmpty);
+            if (isEmpty) {
+              missingLabels.push(getFieldLabel(input));
+            }
+          });
+
+          return {
+            isValid: missingLabels.length === 0,
+            missingLabels,
+          };
         };
 
         const buildGeneratedUrl = () => {
           if (
-            !(partnerIdInput instanceof HTMLInputElement) ||
+            !(campaignNameInput instanceof HTMLInputElement) ||
             !(campaignTagInput instanceof HTMLInputElement) ||
             !(generatedLinkInput instanceof HTMLInputElement)
           ) {
             return '';
           }
 
+          const validation = validateLinkInputs();
+          if (!validation.isValid) {
+            generatedLinkInput.value = '';
+            setGenerateButtonState('idle');
+            return '';
+          }
+
+          if (!partnerUsername.trim()) {
+            generatedLinkInput.value = '';
+            setGenerateButtonState('idle');
+            return '';
+          }
+
           const url = new URL(baseUrl);
-          const partnerId = partnerIdInput.value.trim();
           const campaignTag = campaignTagInput.value.trim();
-          if (partnerId) url.searchParams.set('pid', partnerId);
+          url.searchParams.set('pid', partnerUsername.trim());
           if (campaignTag) {
             url.searchParams.set('cmp', campaignTag);
           } else {
@@ -981,29 +1069,53 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           return generatedLinkInput.value;
         };
 
-        const copyText = async (text, successMessage) => {
-          try {
-            await navigator.clipboard.writeText(text);
-            setFeedback(successMessage);
-          } catch {
-            setFeedback('Clipboard permission unavailable');
+        const refreshGeneratedUrlPreview = () => {
+          if (!(generatedLinkInput instanceof HTMLInputElement)) {
+            return;
           }
+
+          const validation = validateLinkInputs();
+          if (!validation.isValid || !partnerUsername.trim()) {
+            generatedLinkInput.value = '';
+            return;
+          }
+
+          const url = new URL(baseUrl);
+          url.searchParams.set('pid', partnerUsername.trim());
+          url.searchParams.set('cmp', campaignTagInput.value.trim());
+          generatedLinkInput.value = url.toString();
         };
 
-        buildGeneratedUrl();
+        const copyText = async (text) => {
+          try {
+            await navigator.clipboard.writeText(text);
+          } catch {
+            console.warn('[partner-web] Clipboard access is unavailable.');
+          }
+        };
+        generatedLinkInput.value = '';
+        setGenerateButtonState('idle');
 
-        [partnerIdInput, campaignTagInput].forEach((input) => {
+        [campaignNameInput, campaignTagInput].forEach((input) => {
           if (input instanceof HTMLInputElement) {
             input.addEventListener('input', () => {
-              setFeedback('');
+              setFieldWarning(input, input.value.trim().length === 0);
+              refreshGeneratedUrlPreview();
+              setGenerateButtonState('idle');
             });
           }
         });
 
         if (generateLinkButton instanceof HTMLButtonElement) {
-          generateLinkButton.addEventListener('click', () => {
-            buildGeneratedUrl();
-            setFeedback('Referral link generated');
+          generateLinkButton.addEventListener('click', async () => {
+            setGenerateButtonState('pending');
+            await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
+            const url = buildGeneratedUrl();
+            if (!url) {
+              return;
+            }
+
+            setGenerateButtonState('complete');
           });
         }
 
@@ -1011,7 +1123,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           copyGeneratedLinkButton.addEventListener('click', async () => {
             const url = buildGeneratedUrl();
             if (!url) return;
-            await copyText(url, 'Referral link copied');
+            await copyText(url);
           });
         }
 
@@ -1032,10 +1144,8 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
               downloadAnchor.click();
               downloadAnchor.remove();
               URL.revokeObjectURL(objectUrl);
-              setFeedback('QR download started');
             } catch {
               window.open(qrUrl, '_blank', 'noopener,noreferrer');
-              setFeedback('QR opened in a new tab');
             }
           });
         }
@@ -1044,9 +1154,12 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           button.addEventListener('click', async () => {
             const text = button.getAttribute('data-copy-text');
             if (!text) return;
-            await copyText(text, 'Campaign link copied');
+            await copyText(text);
           });
         });
+
+        validateLinkInputs();
+        refreshGeneratedUrlPreview();
       }
 
       const analyticsChart = document.querySelector('[data-analytics-chart]');

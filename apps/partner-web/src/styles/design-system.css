@@ -659,6 +659,49 @@
   gap: 14px;
 }
 
+.link-input-shell {
+  position: relative;
+}
+
+.link-input-shell .input {
+  padding-right: 40px;
+}
+
+.link-input-warning {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--state-amber);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.link-input-warning svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.link-input-shell[data-invalid] .input {
+  border-color: rgba(245, 158, 11, 0.65);
+  background: rgba(245, 158, 11, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.link-input-shell[data-invalid] .link-input-warning {
+  opacity: 1;
+}
+
 .link-output-shell {
   display: grid;
   gap: 14px;
@@ -676,9 +719,15 @@
   letter-spacing: 0.01em;
 }
 
-.link-generator-feedback {
-  min-height: 18px;
-  color: var(--slate-300);
+.link-output-actions .btn-primary[data-state='complete'] {
+  border-color: var(--mint-border-soft);
+  background: var(--mint-tint-strong);
+  color: var(--mint-500);
+  cursor: default;
+}
+
+.link-output-actions .btn-primary[data-state='pending'] {
+  cursor: progress;
 }
 
 .link-output-actions {

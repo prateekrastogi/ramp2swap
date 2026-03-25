@@ -1,6 +1,6 @@
 export type LinkGeneratorDraft = {
   baseUrl: string;
-  partnerId: string;
+  campaignName: string;
   campaignTag: string;
   generatedUrl: string;
 };
@@ -17,7 +17,7 @@ export type SavedCampaignLink = {
 // Mock link generator data is isolated here so backend/API wiring can replace it later.
 export const linkGeneratorDraft: LinkGeneratorDraft = {
   baseUrl: 'https://ramp2swap.com/r',
-  partnerId: 'partner_2swap_019',
+  campaignName: 'Spring Launch 2026',
   campaignTag: 'spring-launch-2026',
   generatedUrl: 'https://ramp2swap.com/r?pid=partner_2swap_019&cmp=spring-launch-2026',
 };
