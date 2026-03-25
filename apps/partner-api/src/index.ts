@@ -38,8 +38,6 @@ const OTP_TTL_MS = 10 * 60 * 1000;
 const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
 
-let schemaReadyPromise: Promise<void> | null = null;
-
 const app = new Hono<{ Bindings: Bindings }>();
 
 const parseRequestBody = async (request: HonoRequest) => {
@@ -73,60 +71,6 @@ const parseRequestBody = async (request: HonoRequest) => {
   }
 };
 
-const ensureSchema = async (db: D1Database) => {
-  schemaReadyPromise ??= db
-    .batch([
-      db.prepare(`
-        CREATE TABLE IF NOT EXISTS auth_otps (
-          email TEXT PRIMARY KEY,
-          code_hash TEXT NOT NULL,
-          salt TEXT NOT NULL,
-          expires_at INTEGER NOT NULL,
-          resend_after INTEGER NOT NULL,
-          attempts_remaining INTEGER NOT NULL,
-          requested_at INTEGER NOT NULL,
-          consumed_at INTEGER
-        )
-      `),
-      db.prepare('CREATE INDEX IF NOT EXISTS idx_auth_otps_expires_at ON auth_otps(expires_at)'),
-      db.prepare(`
-        CREATE TABLE IF NOT EXISTS auth_sessions (
-          id TEXT PRIMARY KEY,
-          email TEXT NOT NULL,
-          created_at INTEGER NOT NULL,
-          expires_at INTEGER NOT NULL,
-          last_verified_at INTEGER NOT NULL,
-          revoked_at INTEGER
-        )
-      `),
-      db.prepare('CREATE INDEX IF NOT EXISTS idx_auth_sessions_email ON auth_sessions(email)'),
-      db.prepare('CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires_at ON auth_sessions(expires_at)'),
-      db.prepare(`
-        CREATE TABLE IF NOT EXISTS auth_users (
-          uid TEXT PRIMARY KEY,
-          email TEXT NOT NULL UNIQUE,
-          created_at INTEGER NOT NULL,
-          last_login_at INTEGER NOT NULL
-        )
-      `),
-      db.prepare('CREATE INDEX IF NOT EXISTS idx_auth_users_email ON auth_users(email)'),
-      db.prepare(`
-        CREATE TABLE IF NOT EXISTS settings (
-          user_uid TEXT PRIMARY KEY,
-          username TEXT NOT NULL UNIQUE,
-          withdrawal_address TEXT NOT NULL DEFAULT '',
-          created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL,
-          FOREIGN KEY (user_uid) REFERENCES auth_users(uid) ON DELETE CASCADE
-        )
-      `),
-      db.prepare('CREATE INDEX IF NOT EXISTS idx_settings_username ON settings(username)'),
-    ])
-    .then(() => undefined);
-
-  await schemaReadyPromise;
-};
-
 const jsonError = (message: string, status = 400) =>
   new Response(JSON.stringify({ ok: false, error: message }), {
     status,
@@ -156,8 +100,6 @@ app.get('/logo_horizontal.png', async (c) => {
 });
 
 app.post('/auth/request-otp', async (c) => {
-  await ensureSchema(c.env.AUTH_DB);
-
   const body = await parseRequestBody(c.req);
   const email = normalizeEmail(typeof body.email === 'string' ? body.email : '');
 
@@ -228,8 +170,6 @@ app.post('/auth/request-otp', async (c) => {
 });
 
 app.post('/auth/verify-otp', async (c) => {
-  await ensureSchema(c.env.AUTH_DB);
-
   const body = await parseRequestBody(c.req);
   const email = normalizeEmail(typeof body.email === 'string' ? body.email : '');
   const otp = (typeof body.otp === 'string' ? body.otp : '').trim();
@@ -318,8 +258,6 @@ app.post('/auth/verify-otp', async (c) => {
 });
 
 app.post('/auth/logout', async (c) => {
-  await ensureSchema(c.env.AUTH_DB);
-
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   if (!sessionToken) {
@@ -339,8 +277,6 @@ app.post('/auth/logout', async (c) => {
 });
 
 app.post('/auth/session', async (c) => {
-  await ensureSchema(c.env.AUTH_DB);
-
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   if (!sessionToken) {
@@ -384,8 +320,6 @@ app.post('/auth/session', async (c) => {
 });
 
 app.post('/settings/wallet-address', async (c) => {
-  await ensureSchema(c.env.AUTH_DB);
-
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   if (!sessionToken) {
