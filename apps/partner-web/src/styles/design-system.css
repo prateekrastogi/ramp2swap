@@ -569,15 +569,24 @@
   min-height: 42px;
   width: 100%;
   border-radius: var(--radius-sm);
+  border: 1px solid var(--white-a-10);
+  background: rgba(15, 20, 25, 0.52);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 var(--white-a-08);
+  font-family: var(--font-data);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--slate-300);
+}
+
+.settings-wallet-shell[data-wallet-filled='true'] .settings-wallet-display,
+.settings-wallet-shell[data-wallet-filled='true'] .settings-wallet-input {
   border: 1px solid rgba(0, 229, 160, 0.42);
   background: var(--mint-tint-faint);
   box-shadow:
     0 0 0 1px rgba(0, 229, 160, 0.08),
     inset 0 1px 0 var(--mint-ring-edge);
-  font-family: var(--font-data);
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  color: var(--slate-300);
 }
 
 .settings-wallet-display[hidden],
@@ -604,6 +613,10 @@
     inset 0 1px 0 var(--white-a-08),
     inset 0 -1px 0 rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(24px) saturate(150%);
+}
+
+.settings-wallet-shell[data-wallet-filled='true'] .settings-wallet-input {
+  background: rgba(10, 24, 20, 0.62);
 }
 
 .settings-wallet-input:focus-visible {

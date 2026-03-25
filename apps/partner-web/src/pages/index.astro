@@ -655,7 +655,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                             </svg>
                           </button>
                         </div>
-                        <div class="settings-wallet-shell">
+                        <div class="settings-wallet-shell" data-wallet-filled={partnerSettings.withdrawalAddress ? 'true' : 'false'}>
                           <div class="settings-wallet-display" data-wallet-address-value>{walletAddressDisplayValue}</div>
                           <input
                             class="input input-glass settings-wallet-input"
@@ -843,6 +843,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
       const walletAddressToggle = document.querySelector('[data-wallet-address-toggle]');
       const walletAddressValue = document.querySelector('[data-wallet-address-value]');
       const walletAddressInput = document.querySelector('[data-wallet-address-input]');
+      const walletAddressShell = document.querySelector('.settings-wallet-shell');
 
       if (
         walletAddressCard instanceof HTMLElement &&
@@ -869,6 +870,13 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         let cooldownTimer = null;
 
         const getWalletAddressDisplayValue = (value) => (value === '' ? emptyWalletAddressDisplay : value);
+        const syncWalletFilledState = () => {
+          if (!(walletAddressShell instanceof HTMLElement)) {
+            return;
+          }
+
+          walletAddressShell.dataset.walletFilled = currentWalletAddress ? 'true' : 'false';
+        };
 
         const formatRelativeDuration = (milliseconds) => {
           const totalMinutes = Math.max(1, Math.ceil(milliseconds / (1000 * 60)));
@@ -939,6 +947,8 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           } else {
             walletAddressValue.textContent = getWalletAddressDisplayValue(currentWalletAddress);
           }
+
+          syncWalletFilledState();
 
           if (isEditing) {
             walletAddressInput.focus();
@@ -1053,6 +1063,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
         syncWalletCooldownState();
         walletAddressValue.textContent = getWalletAddressDisplayValue(currentWalletAddress);
+        syncWalletFilledState();
       }
 
       const linkGenerator = document.querySelector('[data-link-generator]');
