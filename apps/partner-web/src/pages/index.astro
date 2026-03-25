@@ -6,7 +6,7 @@ import {
   topPerformingLinks,
 } from '../data/analytics-mock';
 import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
-import { linkGeneratorDraft, savedCampaignLinks } from '../data/link-generator-mock';
+import { linkGeneratorDraft } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { payoutDisplaySettings } from '../data/settings-display';
 import { getPartnerApiBaseUrl } from '../lib/runtime-env';
@@ -25,6 +25,15 @@ type PartnerSessionPayload = {
   };
 };
 
+type PartnerLink = {
+  id: string;
+  campaignName: string;
+  campaignTag: string;
+  generatedUrl: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
 const sessionToken = Astro.cookies.get('partner_session')?.value ?? '';
 const partnerApiBaseUrl = await getPartnerApiBaseUrl();
 
@@ -37,19 +46,37 @@ const partnerSettings = {
   walletAddressCooldownEndsAt: null as number | null,
   canUpdateWalletAddress: true,
 };
+let savedPartnerLinks: PartnerLink[] = [];
+
+const formatCompactDate = (timestamp: number) => {
+  const date = new Date(timestamp);
+  const year = String(date.getFullYear()).slice(-2);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}/${month}/${day}`;
+};
 
 if (sessionToken && partnerApiBaseUrl) {
   try {
-    const response = await fetch(`${partnerApiBaseUrl}/auth/session`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ sessionToken }),
-    });
+    const [sessionResponse, linksResponse] = await Promise.all([
+      fetch(`${partnerApiBaseUrl}/auth/session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionToken }),
+      }),
+      fetch(`${partnerApiBaseUrl}/links`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionToken }),
+      }),
+    ]);
 
-    const payload = (await response.json().catch(() => null)) as PartnerSessionPayload | null;
-    if (response.ok && payload?.ok) {
+    const payload = (await sessionResponse.json().catch(() => null)) as PartnerSessionPayload | null;
+    if (sessionResponse.ok && payload?.ok) {
       partnerSettings.email = payload.email ?? partnerSettings.email;
       partnerSettings.uid = payload.uid ?? partnerSettings.uid;
       partnerSettings.username = payload.settings?.username ?? partnerSettings.username;
@@ -58,6 +85,11 @@ if (sessionToken && partnerApiBaseUrl) {
       partnerSettings.walletAddressCooldownEndsAt =
         payload.settings?.walletAddressCooldownEndsAt ?? partnerSettings.walletAddressCooldownEndsAt;
       partnerSettings.canUpdateWalletAddress = payload.settings?.canUpdateWalletAddress ?? partnerSettings.canUpdateWalletAddress;
+    }
+
+    const linksPayload = (await linksResponse.json().catch(() => null)) as { ok?: boolean; links?: PartnerLink[] } | null;
+    if (linksResponse.ok && linksPayload?.ok && Array.isArray(linksPayload.links)) {
+      savedPartnerLinks = linksPayload.links;
     }
   } catch (error) {
     console.warn('[partner-web] failed to load partner settings', error);
@@ -122,6 +154,22 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
     </header>
 
     <label for="sidebar-mobile" class="mobile-overlay" aria-hidden="true"></label>
+
+    <div class="dashboard-toast" data-link-toast hidden>
+      <div class="dashboard-toast-body">
+        <span class="dashboard-toast-icon" data-link-toast-icon aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M12 4 3.5 19h17L12 4Z"></path>
+            <path d="M12 9v5"></path>
+            <path d="M12 17h.01"></path>
+          </svg>
+        </span>
+        <div class="stack-4">
+          <p class="heading-card dashboard-toast-title" data-link-toast-title></p>
+          <p class="body-small dashboard-toast-copy" data-link-toast-copy></p>
+        </div>
+      </div>
+    </div>
 
     <main class="dashboard-shell content-layer">
       <aside class="sidebar glass glass-tier-4-nav on-glass">
@@ -257,44 +305,75 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         id="generated-link"
                         class="input input-glass link-output-input"
                         data-generated-link
-                        value={linkGeneratorDraft.generatedUrl}
+                        value=""
                         readonly
                       />
                       <div class="link-output-actions">
                         <button class="btn-primary btn-glass" type="button" data-generate-link>Generate Link</button>
-                        <button class="btn-secondary" type="button" data-copy-generated-link>Copy Link</button>
-                        <button class="btn-secondary" type="button" data-download-qr>Download QR</button>
                       </div>
                     </div>
                   </div>
                 </div>
+
               </article>
 
               <article class="card glass glass-tier-1 glass-interactive on-glass link-campaigns-card">
                 <div class="widget-header">
                   <p class="heading-card">Saved Campaign Links</p>
-                  <span class="chip">{savedCampaignLinks.length} active</span>
+                  <span class="chip" data-link-count>{savedPartnerLinks.length} active</span>
                 </div>
 
-                <div class="link-campaign-list">
-                  {savedCampaignLinks.map((link) => (
-                    <article class="link-campaign-row">
+                <div class="link-campaign-list" data-saved-links-list>
+                  {savedPartnerLinks.length > 0 ? (
+                    savedPartnerLinks.map((link) => (
+                    <article class="link-campaign-row" data-link-id={link.id}>
                       <div class="link-campaign-head">
                         <div class="stack-8">
-                          <p class="heading-card">{link.name}</p>
-                          <p class="data-small">{link.tag}</p>
+                          <p class="heading-card">{link.campaignName}</p>
+                          <p class="data-small">{link.campaignTag}</p>
                         </div>
-                        <span class="link-inline-stat">{link.clicks} clicks</span>
+                        <span class="link-inline-stat">{formatCompactDate(link.createdAt)}</span>
                       </div>
 
-                      <p class="link-url">{link.url}</p>
+                      <p class="link-url">{link.generatedUrl}</p>
 
                       <div class="link-campaign-meta">
-                        <span class="link-inline-stat">{link.conversions} conversions</span>
-                        <button class="btn-secondary link-inline-btn" type="button" data-copy-text={link.url}>Copy</button>
+                        <button class="link-delete-button" type="button" data-delete-link-id={link.id} aria-label="Delete generated link">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 7h16"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                            <path d="M6 7l1 12h10l1-12"></path>
+                            <path d="M9 7V4h6v3"></path>
+                          </svg>
+                        </button>
+                        <div class="link-row-actions">
+                          <button class="link-action-button" type="button" data-download-qr-link={link.generatedUrl} aria-label="Download QR code">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path d="M4 4h6v6H4z"></path>
+                              <path d="M14 4h6v6h-6z"></path>
+                              <path d="M4 14h6v6H4z"></path>
+                              <path d="M14 14h2"></path>
+                              <path d="M18 14h2v2"></path>
+                              <path d="M14 18h2v2h-2z"></path>
+                              <path d="M18 18h2"></path>
+                            </svg>
+                          </button>
+                          <button class="link-action-button" type="button" data-copy-text={link.generatedUrl} aria-label="Copy generated link">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                              <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </article>
-                  ))}
+                  ))
+                  ) : (
+                    <article class="link-campaign-row link-campaign-row-empty" data-empty-links-state>
+                      <p class="body-small">Generated links will appear here as soon as you create your first campaign.</p>
+                    </article>
+                  )}
                 </div>
               </article>
             </div>
@@ -980,8 +1059,11 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         const campaignTagInput = linkGenerator.querySelector('[data-link-campaign-tag]');
         const generatedLinkInput = linkGenerator.querySelector('[data-generated-link]');
         const generateLinkButton = linkGenerator.querySelector('[data-generate-link]');
-        const copyGeneratedLinkButton = linkGenerator.querySelector('[data-copy-generated-link]');
-        const downloadQrButton = linkGenerator.querySelector('[data-download-qr]');
+        const savedLinksList = document.querySelector('[data-saved-links-list]');
+        const savedLinksCount = document.querySelector('[data-link-count]');
+        const toastNode = document.querySelector('[data-link-toast]');
+        const toastTitleNode = document.querySelector('[data-link-toast-title]');
+        const toastCopyNode = document.querySelector('[data-link-toast-copy]');
         const baseUrl = linkGenerator.dataset.baseUrl ?? '';
         const partnerUsername = linkGenerator.dataset.partnerUsername ?? '';
         const generateButtonLabels = {
@@ -989,7 +1071,13 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           pending: 'Generating...',
           complete: 'Generated',
         };
+        let toastTimer = null;
 
+        if (
+          campaignNameInput instanceof HTMLInputElement &&
+          campaignTagInput instanceof HTMLInputElement &&
+          generatedLinkInput instanceof HTMLInputElement
+        ) {
         const setGenerateButtonState = (state) => {
           if (!(generateLinkButton instanceof HTMLButtonElement)) {
             return;
@@ -998,6 +1086,33 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           generateLinkButton.textContent = generateButtonLabels[state];
           generateLinkButton.dataset.state = state;
           generateLinkButton.disabled = state !== 'idle';
+        };
+
+        const showLinkToast = (title, copy, tone = 'success') => {
+          if (
+            !(toastNode instanceof HTMLElement) ||
+            !(toastTitleNode instanceof HTMLElement) ||
+            !(toastCopyNode instanceof HTMLElement)
+          ) {
+            return;
+          }
+
+          toastTitleNode.textContent = title;
+          toastCopyNode.textContent = copy;
+          toastNode.dataset.tone = tone;
+          toastNode.hidden = false;
+          toastNode.dataset.visible = 'true';
+
+          if (toastTimer !== null) {
+            window.clearTimeout(toastTimer);
+          }
+
+          toastTimer = window.setTimeout(() => {
+            toastNode.dataset.visible = 'false';
+            window.setTimeout(() => {
+              toastNode.hidden = true;
+            }, 220);
+          }, 2800);
         };
 
         const getFieldLabel = (input) => {
@@ -1018,7 +1133,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         };
 
         const validateLinkInputs = () => {
-          const requiredInputs = [campaignNameInput, campaignTagInput].filter((input) => input instanceof HTMLInputElement);
+          const requiredInputs = [campaignNameInput, campaignTagInput];
           const missingLabels = [];
 
           requiredInputs.forEach((input) => {
@@ -1037,8 +1152,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
         const buildGeneratedUrl = () => {
           if (
-            !(campaignNameInput instanceof HTMLInputElement) ||
-            !(campaignTagInput instanceof HTMLInputElement) ||
             !(generatedLinkInput instanceof HTMLInputElement)
           ) {
             return '';
@@ -1089,9 +1202,189 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         const copyText = async (text) => {
           try {
             await navigator.clipboard.writeText(text);
+            showLinkToast('Copied', 'Link copied to clipboard.');
           } catch {
             console.warn('[partner-web] Clipboard access is unavailable.');
+            showLinkToast('Clipboard unavailable', 'Your browser blocked clipboard access.', 'warning');
           }
+        };
+
+        const downloadQrForLink = async (url) => {
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=${encodeURIComponent(url)}`;
+          try {
+            const response = await fetch(qrUrl);
+            if (!response.ok) throw new Error('QR request failed');
+            const qrBlob = await response.blob();
+            const objectUrl = URL.createObjectURL(qrBlob);
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.href = objectUrl;
+            downloadAnchor.download = 'ramp2swap-referral-qr.png';
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            URL.revokeObjectURL(objectUrl);
+            showLinkToast('QR downloaded', 'QR export has started.', 'success');
+          } catch {
+            window.open(qrUrl, '_blank', 'noopener,noreferrer');
+            showLinkToast('QR opened', 'QR code opened in a new tab.', 'success');
+          }
+        };
+
+        const renderSavedLinkRow = (link) => `
+          <article class="link-campaign-row" data-link-id="${link.id}">
+            <div class="link-campaign-head">
+              <div class="stack-8">
+                <p class="heading-card">${link.campaignName}</p>
+                <p class="data-small">${link.campaignTag}</p>
+              </div>
+              <span class="link-inline-stat">${new Date(link.createdAt)
+                .toISOString()
+                .slice(2, 10)
+                .replace(/-/g, '/')}</span>
+            </div>
+            <p class="link-url">${link.generatedUrl}</p>
+            <div class="link-campaign-meta">
+              <button class="link-delete-button" type="button" data-delete-link-id="${link.id}" aria-label="Delete generated link">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h16"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                  <path d="M6 7l1 12h10l1-12"></path>
+                  <path d="M9 7V4h6v3"></path>
+                </svg>
+              </button>
+              <div class="link-row-actions">
+                <button class="link-action-button" type="button" data-download-qr-link="${link.generatedUrl}" aria-label="Download QR code">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 4h6v6H4z"></path>
+                    <path d="M14 4h6v6h-6z"></path>
+                    <path d="M4 14h6v6H4z"></path>
+                    <path d="M14 14h2"></path>
+                    <path d="M18 14h2v2"></path>
+                    <path d="M14 18h2v2h-2z"></path>
+                    <path d="M18 18h2"></path>
+                  </svg>
+                </button>
+                <button class="link-action-button" type="button" data-copy-text="${link.generatedUrl}" aria-label="Copy generated link">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                    <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+
+        const bindCopyButtons = (scope = document) => {
+          scope.querySelectorAll('[data-copy-text]').forEach((button) => {
+            if (!(button instanceof HTMLElement) || button.dataset.copyBound === 'true') {
+              return;
+            }
+
+            button.dataset.copyBound = 'true';
+            button.addEventListener('click', async () => {
+              const text = button.getAttribute('data-copy-text');
+              if (!text) return;
+              await copyText(text);
+            });
+          });
+        };
+
+        const bindQrButtons = (scope = document) => {
+          scope.querySelectorAll('[data-download-qr-link]').forEach((button) => {
+            if (!(button instanceof HTMLButtonElement) || button.dataset.qrBound === 'true') {
+              return;
+            }
+
+            button.dataset.qrBound = 'true';
+            button.addEventListener('click', async () => {
+              const url = button.dataset.downloadQrLink ?? '';
+              if (!url) return;
+              await downloadQrForLink(url);
+            });
+          });
+        };
+
+        const updateSavedLinksCount = (nextCount) => {
+          if (savedLinksCount instanceof HTMLElement) {
+            savedLinksCount.textContent = `${Math.max(nextCount, 0)} active`;
+          }
+        };
+
+        const ensureEmptySavedLinksState = () => {
+          if (!(savedLinksList instanceof HTMLElement)) {
+            return;
+          }
+
+          if (savedLinksList.querySelector('[data-link-id]')) {
+            return;
+          }
+
+          savedLinksList.innerHTML = `
+            <article class="link-campaign-row link-campaign-row-empty" data-empty-links-state>
+              <p class="body-small">Generated links will appear here as soon as you create your first campaign.</p>
+            </article>
+          `;
+        };
+
+        const bindDeleteButtons = (scope = document) => {
+          scope.querySelectorAll('[data-delete-link-id]').forEach((button) => {
+            if (!(button instanceof HTMLButtonElement) || button.dataset.deleteBound === 'true') {
+              return;
+            }
+
+            button.dataset.deleteBound = 'true';
+            button.addEventListener('click', async () => {
+              const linkId = button.dataset.deleteLinkId ?? '';
+              if (!linkId) return;
+
+              button.disabled = true;
+
+              try {
+                const response = await fetch('/api/links/delete', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ linkId }),
+                });
+
+                const payload = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+                if (!response.ok || !payload?.ok) {
+                  throw new Error(payload?.error ?? 'Unable to delete link.');
+                }
+
+                const row = button.closest('[data-link-id]');
+                row?.remove();
+                const remainingLinks = savedLinksList instanceof HTMLElement ? savedLinksList.querySelectorAll('[data-link-id]').length : 0;
+                updateSavedLinksCount(remainingLinks);
+                ensureEmptySavedLinksState();
+                showLinkToast('Link deleted', 'Campaign link removed from your dashboard.', 'success');
+              } catch (error) {
+                button.disabled = false;
+                showLinkToast('Delete failed', error instanceof Error ? error.message : 'Unable to delete link.', 'warning');
+              }
+            });
+          });
+        };
+
+        const prependSavedLink = (link) => {
+          if (!(savedLinksList instanceof HTMLElement)) {
+            return;
+          }
+
+          savedLinksList.querySelector('[data-empty-links-state]')?.remove();
+          savedLinksList.insertAdjacentHTML('afterbegin', renderSavedLinkRow(link));
+          const insertedRow = savedLinksList.querySelector(`[data-link-id="${link.id}"]`);
+          if (insertedRow instanceof HTMLElement) {
+            bindCopyButtons(insertedRow);
+            bindQrButtons(insertedRow);
+            bindDeleteButtons(insertedRow);
+          }
+
+          const nextCount = savedLinksList.querySelectorAll('[data-link-id]').length;
+          updateSavedLinksCount(nextCount);
         };
         generatedLinkInput.value = '';
         setGenerateButtonState('idle');
@@ -1115,51 +1408,61 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
               return;
             }
 
-            setGenerateButtonState('complete');
-          });
-        }
-
-        if (copyGeneratedLinkButton instanceof HTMLButtonElement) {
-          copyGeneratedLinkButton.addEventListener('click', async () => {
-            const url = buildGeneratedUrl();
-            if (!url) return;
-            await copyText(url);
-          });
-        }
-
-        if (downloadQrButton instanceof HTMLButtonElement) {
-          downloadQrButton.addEventListener('click', async () => {
-            const url = buildGeneratedUrl();
-            if (!url) return;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=${encodeURIComponent(url)}`;
             try {
-              const response = await fetch(qrUrl);
-              if (!response.ok) throw new Error('QR request failed');
-              const qrBlob = await response.blob();
-              const objectUrl = URL.createObjectURL(qrBlob);
-              const downloadAnchor = document.createElement('a');
-              downloadAnchor.href = objectUrl;
-              downloadAnchor.download = 'ramp2swap-referral-qr.png';
-              document.body.appendChild(downloadAnchor);
-              downloadAnchor.click();
-              downloadAnchor.remove();
-              URL.revokeObjectURL(objectUrl);
-            } catch {
-              window.open(qrUrl, '_blank', 'noopener,noreferrer');
+              const response = await fetch('/api/links/generate', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  campaignName: campaignNameInput.value.trim(),
+                  campaignTag: campaignTagInput.value.trim(),
+                }),
+              });
+
+              const payload = (await response.json().catch(() => null)) as
+                | {
+                    ok?: boolean;
+                    error?: string;
+                    duplicate?: boolean;
+                    link?: {
+                      id: string;
+                      campaignName: string;
+                      campaignTag: string;
+                      generatedUrl: string;
+                      createdAt: number;
+                    };
+                  }
+                | null;
+
+              if (!response.ok || !payload?.ok || !payload.link) {
+                throw new Error(payload?.error ?? 'Unable to generate link.');
+              }
+
+              generatedLinkInput.value = payload.link.generatedUrl;
+
+              if (payload.duplicate) {
+                setGenerateButtonState('idle');
+                showLinkToast('Already generated', 'This campaign tag already has a saved link.', 'warning');
+                return;
+              }
+
+              prependSavedLink(payload.link);
+              setGenerateButtonState('complete');
+              showLinkToast('Link saved', 'Campaign link generated and stored.', 'success');
+            } catch (error) {
+              setGenerateButtonState('idle');
+              showLinkToast('Generation failed', error instanceof Error ? error.message : 'Unable to generate link.', 'warning');
             }
           });
         }
 
-        document.querySelectorAll('[data-copy-text]').forEach((button) => {
-          button.addEventListener('click', async () => {
-            const text = button.getAttribute('data-copy-text');
-            if (!text) return;
-            await copyText(text);
-          });
-        });
-
+        bindCopyButtons();
+        bindQrButtons();
+        bindDeleteButtons();
         validateLinkInputs();
         refreshGeneratedUrlPreview();
+        }
       }
 
       const analyticsChart = document.querySelector('[data-analytics-chart]');

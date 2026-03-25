@@ -309,6 +309,7 @@
   min-width: 0;
 }
 
+
 .analytics-range-toggle {
   display: inline-flex;
   align-items: center;
@@ -736,25 +737,137 @@
   flex-wrap: wrap;
 }
 
+.dashboard-toast {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--mint-border-soft);
+  background: rgba(12, 18, 24, 0.84);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 var(--white-a-08);
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.dashboard-toast[data-visible='true'] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.dashboard-toast[data-tone='warning'] {
+  border-color: rgba(245, 158, 11, 0.32);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(245, 158, 11, 0.08),
+    inset 0 1px 0 var(--white-a-08);
+}
+
+.dashboard-toast-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dashboard-toast-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--mint-500);
+  flex: 0 0 auto;
+}
+
+.dashboard-toast[data-tone='warning'] .dashboard-toast-icon {
+  color: var(--state-amber);
+}
+
+.dashboard-toast-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dashboard-toast-title,
+.dashboard-toast-copy {
+  margin: 0;
+}
+
+.dashboard-toast-copy {
+  color: var(--slate-300);
+}
+
 .link-campaign-list {
   display: grid;
   gap: 12px;
+  max-height: 688px;
+  overflow-y: auto;
+  padding-right: 4px;
+  align-content: start;
+  scrollbar-width: thin;
+  scrollbar-color: var(--slate-500) var(--obsidian-700);
+}
+
+.link-campaign-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.link-campaign-list::-webkit-scrollbar-track {
+  background: var(--obsidian-700);
+  border-radius: 999px;
+}
+
+.link-campaign-list::-webkit-scrollbar-thumb {
+  background: var(--slate-500);
+  border-radius: 999px;
+  border: 2px solid var(--obsidian-700);
+}
+
+.link-campaign-list::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-300);
 }
 
 .link-campaign-row {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   padding: 14px;
   border: 1px solid var(--white-a-07);
   border-radius: var(--radius-md);
   background: rgba(15, 20, 25, 0.36);
   box-shadow: inset 0 1px 0 var(--white-a-06);
+  align-content: start;
+}
+
+.link-campaign-row-empty {
+  place-items: center;
+  min-height: 128px;
+  text-align: center;
+  color: var(--slate-400);
 }
 
 .link-campaign-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.link-row-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
   gap: 12px;
 }
 
@@ -776,7 +889,7 @@
 
 .link-url {
   margin: 0;
-  color: var(--slate-100);
+  color: var(--slate-300);
   font-family: var(--font-data);
   font-size: 12px;
   line-height: 1.6;
@@ -784,9 +897,51 @@
   word-break: break-all;
 }
 
-.link-inline-btn {
+.link-delete-button,
+.link-action-button {
+  width: 34px;
   height: 34px;
-  padding: 0 12px;
+  padding: 0;
+  border: 1px solid var(--white-a-07);
+  border-radius: 10px;
+  background: rgba(15, 20, 25, 0.48);
+  color: var(--slate-400);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.link-delete-button:hover,
+.link-delete-button:focus-visible {
+  border-color: rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--state-red);
+}
+
+.link-action-button:hover,
+.link-action-button:focus-visible {
+  border-color: var(--mint-border-soft);
+  background: var(--mint-tint-faint);
+  color: var(--slate-100);
+}
+
+.link-delete-button:disabled,
+.link-action-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.link-delete-button svg,
+.link-action-button svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .sidebar {

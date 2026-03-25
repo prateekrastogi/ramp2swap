@@ -8,6 +8,7 @@ import {
   updateWithdrawalAddress,
   WalletAddressCooldownError,
 } from './lib/partner-settings';
+import { deletePartnerLink, generatePartnerLink, listPartnerLinks } from './lib/partner-links';
 
 type AuthOtpRow = {
   email: string;
@@ -32,6 +33,7 @@ type Bindings = CloudflareBindings & {
   LOGIN_EMAIL_FROM?: string;
   PARTNER_API_PUBLIC_BASE_URL?: string;
   AUTH_EMAIL_MODE?: string;
+  PARTNER_LINK_BASE_URL?: string;
 };
 
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -79,6 +81,36 @@ const jsonError = (message: string, status = 400) =>
       'Cache-Control': 'no-store',
     },
   });
+
+const getAuthenticatedSession = async (
+  db: D1Database,
+  sessionSecret: string,
+  sessionToken: string,
+) => {
+  if (!sessionToken) {
+    return { error: jsonError('Missing session token.', 401) } as const;
+  }
+
+  const payload = await verifySessionToken(sessionToken, sessionSecret);
+  if (!payload) {
+    return { error: jsonError('Session expired or invalid.', 401) } as const;
+  }
+
+  const sessionRow = await db
+    .prepare('SELECT id, email, expires_at FROM auth_sessions WHERE id = ? AND revoked_at IS NULL')
+    .bind(payload.sid)
+    .first<AuthSessionRow>();
+
+  if (!sessionRow || sessionRow.expires_at <= Date.now()) {
+    return { error: jsonError('Session expired or invalid.', 401) } as const;
+  }
+
+  await db.prepare('UPDATE auth_sessions SET last_verified_at = ? WHERE id = ?')
+    .bind(Date.now(), sessionRow.id)
+    .run();
+
+  return { sessionRow } as const;
+};
 
 app.use('*', async (c, next) => {
   c.header('Cache-Control', 'no-store');
@@ -279,35 +311,17 @@ app.post('/auth/logout', async (c) => {
 app.post('/auth/session', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
-  if (!sessionToken) {
-    return jsonError('Missing session token.', 401);
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
   }
 
-  const payload = await verifySessionToken(sessionToken, c.env.SESSION_SECRET);
-  if (!payload) {
-    return jsonError('Session expired or invalid.', 401);
-  }
-
-  const sessionRow = await c.env.AUTH_DB.prepare(
-    'SELECT id, email, expires_at FROM auth_sessions WHERE id = ? AND revoked_at IS NULL',
-  )
-    .bind(payload.sid)
-    .first<AuthSessionRow>();
-
-  if (!sessionRow || sessionRow.expires_at <= Date.now()) {
-    return jsonError('Session expired or invalid.', 401);
-  }
-
-  await c.env.AUTH_DB.prepare('UPDATE auth_sessions SET last_verified_at = ? WHERE id = ?')
-    .bind(Date.now(), sessionRow.id)
-    .run();
-
-  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionRow.email);
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
 
   return c.json({
     ok: true,
     email: partnerSettings.email,
-    expiresAt: sessionRow.expires_at,
+    expiresAt: sessionResult.sessionRow.expires_at,
     uid: partnerSettings.uid,
     settings: {
       username: partnerSettings.username,
@@ -322,27 +336,13 @@ app.post('/auth/session', async (c) => {
 app.post('/settings/wallet-address', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
-  if (!sessionToken) {
-    return jsonError('Missing session token.', 401);
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
   }
 
-  const payload = await verifySessionToken(sessionToken, c.env.SESSION_SECRET);
-  if (!payload) {
-    return jsonError('Session expired or invalid.', 401);
-  }
-
-  const sessionRow = await c.env.AUTH_DB.prepare(
-    'SELECT id, email, expires_at FROM auth_sessions WHERE id = ? AND revoked_at IS NULL',
-  )
-    .bind(payload.sid)
-    .first<AuthSessionRow>();
-
-  if (!sessionRow || sessionRow.expires_at <= Date.now()) {
-    return jsonError('Session expired or invalid.', 401);
-  }
-
-  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionRow.email);
-  const withdrawalAddress = normalizeWithdrawalAddress(typeof body.withdrawalAddress === 'string' ? body.withdrawalAddress : '-');
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  const withdrawalAddress = normalizeWithdrawalAddress(typeof body.withdrawalAddress === 'string' ? body.withdrawalAddress : '');
   let updatedSettings;
 
   try {
@@ -380,6 +380,80 @@ app.post('/settings/wallet-address', async (c) => {
       canUpdateWalletAddress: updatedSettings.canUpdateWalletAddress,
     },
   });
+});
+
+app.post('/links', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  const links = await listPartnerLinks(c.env.AUTH_DB, partnerSettings.uid);
+
+  return c.json({
+    ok: true,
+    links,
+  });
+});
+
+app.post('/links/generate', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  const campaignName = typeof body.campaignName === 'string' ? body.campaignName : '';
+  const campaignTag = typeof body.campaignTag === 'string' ? body.campaignTag : '';
+
+  try {
+    const result = await generatePartnerLink(c.env.AUTH_DB, {
+      userUid: partnerSettings.uid,
+      username: partnerSettings.username,
+      campaignName,
+      campaignTag,
+      baseUrl: c.env.PARTNER_LINK_BASE_URL ?? 'https://ramp2swap.com/r',
+    });
+
+    return c.json({
+      ok: true,
+      duplicate: result.duplicate,
+      link: result.link,
+    });
+  } catch (error) {
+    return jsonError(error instanceof Error ? error.message : 'Unable to generate link.');
+  }
+});
+
+app.post('/links/delete', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  const linkId = typeof body.linkId === 'string' ? body.linkId : '';
+
+  try {
+    const deletedLink = await deletePartnerLink(c.env.AUTH_DB, partnerSettings.uid, linkId);
+    if (!deletedLink) {
+      return jsonError('Link not found.', 404);
+    }
+
+    return c.json({
+      ok: true,
+      link: deletedLink,
+    });
+  } catch (error) {
+    return jsonError(error instanceof Error ? error.message : 'Unable to delete link.');
+  }
 });
 
 export default app;
