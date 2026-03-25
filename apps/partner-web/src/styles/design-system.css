@@ -512,6 +512,52 @@
   stroke-linejoin: round;
 }
 
+.settings-edit-button-tooltip {
+  position: relative;
+}
+
+.settings-edit-button-tooltip::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 42px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--white-a-10);
+  background: rgba(20, 28, 36, 0.92);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: var(--slate-100);
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.settings-edit-button-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 4px solid var(--white-a-10);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-edit-button-tooltip:hover::after,
+.settings-edit-button-tooltip:hover::before,
+.settings-edit-button-tooltip:focus-visible::after,
+.settings-edit-button-tooltip:focus-visible::before {
+  opacity: 1;
+}
+
 .settings-wallet-input {
   font-family: var(--font-data);
   font-size: 13px;

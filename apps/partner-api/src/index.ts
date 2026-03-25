@@ -2,7 +2,12 @@ import { Hono } from 'hono';
 import type { HonoRequest } from 'hono';
 import { createOtp, createRandomToken, createSessionToken, getSessionExpiry, hashOtp, isValidEmail, normalizeEmail, verifySessionToken } from './lib/auth';
 import { sendOtpEmail } from './lib/email';
-import { ensurePartnerSettings, normalizeWithdrawalAddress, updateWithdrawalAddress } from './lib/partner-settings';
+import {
+  ensurePartnerSettings,
+  normalizeWithdrawalAddress,
+  updateWithdrawalAddress,
+  WalletAddressCooldownError,
+} from './lib/partner-settings';
 
 type AuthOtpRow = {
   email: string;
@@ -109,7 +114,7 @@ const ensureSchema = async (db: D1Database) => {
         CREATE TABLE IF NOT EXISTS settings (
           user_uid TEXT PRIMARY KEY,
           username TEXT NOT NULL UNIQUE,
-          withdrawal_address TEXT NOT NULL DEFAULT '-',
+          withdrawal_address TEXT NOT NULL DEFAULT '',
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL,
           FOREIGN KEY (user_uid) REFERENCES auth_users(uid) ON DELETE CASCADE
@@ -304,6 +309,9 @@ app.post('/auth/verify-otp', async (c) => {
     settings: {
       username: partnerSettings.username,
       withdrawalAddress: partnerSettings.withdrawalAddress,
+      walletAddressUpdatedAt: partnerSettings.walletAddressUpdatedAt,
+      walletAddressCooldownEndsAt: partnerSettings.walletAddressCooldownEndsAt,
+      canUpdateWalletAddress: partnerSettings.canUpdateWalletAddress,
     },
     sessionToken,
   });
@@ -368,6 +376,9 @@ app.post('/auth/session', async (c) => {
     settings: {
       username: partnerSettings.username,
       withdrawalAddress: partnerSettings.withdrawalAddress,
+      walletAddressUpdatedAt: partnerSettings.walletAddressUpdatedAt,
+      walletAddressCooldownEndsAt: partnerSettings.walletAddressCooldownEndsAt,
+      canUpdateWalletAddress: partnerSettings.canUpdateWalletAddress,
     },
   });
 });
@@ -398,7 +409,30 @@ app.post('/settings/wallet-address', async (c) => {
 
   const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionRow.email);
   const withdrawalAddress = normalizeWithdrawalAddress(typeof body.withdrawalAddress === 'string' ? body.withdrawalAddress : '-');
-  const updatedWithdrawalAddress = await updateWithdrawalAddress(c.env.AUTH_DB, partnerSettings.uid, withdrawalAddress);
+  let updatedSettings;
+
+  try {
+    updatedSettings = await updateWithdrawalAddress(c.env.AUTH_DB, partnerSettings.uid, withdrawalAddress);
+  } catch (error) {
+    if (error instanceof WalletAddressCooldownError) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: 'Wallet address can only be changed once every 7 days.',
+          walletAddressCooldownEndsAt: error.cooldownEndsAt,
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          },
+        },
+      );
+    }
+
+    throw error;
+  }
 
   return c.json({
     ok: true,
@@ -406,7 +440,10 @@ app.post('/settings/wallet-address', async (c) => {
     uid: partnerSettings.uid,
     settings: {
       username: partnerSettings.username,
-      withdrawalAddress: updatedWithdrawalAddress,
+      withdrawalAddress: updatedSettings.withdrawalAddress,
+      walletAddressUpdatedAt: updatedSettings.walletAddressUpdatedAt,
+      walletAddressCooldownEndsAt: updatedSettings.walletAddressCooldownEndsAt,
+      canUpdateWalletAddress: updatedSettings.canUpdateWalletAddress,
     },
   });
 });

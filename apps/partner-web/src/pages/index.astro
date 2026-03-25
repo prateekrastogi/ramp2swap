@@ -19,6 +19,9 @@ type PartnerSessionPayload = {
   settings?: {
     username?: string;
     withdrawalAddress?: string;
+    walletAddressUpdatedAt?: number | null;
+    walletAddressCooldownEndsAt?: number | null;
+    canUpdateWalletAddress?: boolean;
   };
 };
 
@@ -29,7 +32,10 @@ const partnerSettings = {
   email: 'partners@ramp2swap.com',
   uid: '',
   username: 'prime-vault',
-  withdrawalAddress: '-',
+  withdrawalAddress: '',
+  walletAddressUpdatedAt: null as number | null,
+  walletAddressCooldownEndsAt: null as number | null,
+  canUpdateWalletAddress: true,
 };
 
 if (sessionToken && partnerApiBaseUrl) {
@@ -48,11 +54,19 @@ if (sessionToken && partnerApiBaseUrl) {
       partnerSettings.uid = payload.uid ?? partnerSettings.uid;
       partnerSettings.username = payload.settings?.username ?? partnerSettings.username;
       partnerSettings.withdrawalAddress = payload.settings?.withdrawalAddress ?? partnerSettings.withdrawalAddress;
+      partnerSettings.walletAddressUpdatedAt = payload.settings?.walletAddressUpdatedAt ?? partnerSettings.walletAddressUpdatedAt;
+      partnerSettings.walletAddressCooldownEndsAt =
+        payload.settings?.walletAddressCooldownEndsAt ?? partnerSettings.walletAddressCooldownEndsAt;
+      partnerSettings.canUpdateWalletAddress = payload.settings?.canUpdateWalletAddress ?? partnerSettings.canUpdateWalletAddress;
     }
   } catch (error) {
     console.warn('[partner-web] failed to load partner settings', error);
   }
 }
+
+const EMPTY_WALLET_ADDRESS_DISPLAY = 'Editable once every 7 days';
+const walletAddressDisplayValue =
+  partnerSettings.withdrawalAddress === '' ? EMPTY_WALLET_ADDRESS_DISPLAY : partnerSettings.withdrawalAddress;
 
 const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
   analyticsSummaries[rangeKey].points
@@ -516,9 +530,12 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         <div class="settings-field-card-head">
                           <p class="ui-label">Wallet Address</p>
                           <button
-                            class="settings-edit-button"
+                            class="settings-edit-button settings-edit-button-tooltip"
                             type="button"
                             aria-label="Edit wallet address"
+                            data-label="Edit wallet address"
+                            data-wallet-address-can-update={partnerSettings.canUpdateWalletAddress ? 'true' : 'false'}
+                            data-wallet-address-cooldown-ends-at={partnerSettings.walletAddressCooldownEndsAt ?? ''}
                             data-wallet-address-toggle
                           >
                             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -527,11 +544,12 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                             </svg>
                           </button>
                         </div>
-                        <p class="body settings-field-body" data-wallet-address-value>{partnerSettings.withdrawalAddress}</p>
+                        <p class="body settings-field-body" data-wallet-address-value>{walletAddressDisplayValue}</p>
                         <input
                           class="input input-glass surface-mint-muted settings-wallet-input"
                           type="text"
                           value={partnerSettings.withdrawalAddress}
+                          placeholder={EMPTY_WALLET_ADDRESS_DISPLAY}
                           aria-label="Wallet address"
                           data-wallet-address-input
                           hidden
@@ -719,6 +737,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         walletAddressValue instanceof HTMLElement &&
         walletAddressInput instanceof HTMLInputElement
       ) {
+        const emptyWalletAddressDisplay = 'Editable once every 7 days';
         const editIcon = `
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 20h4l10-10-4-4L4 16v4Z"></path>
@@ -731,16 +750,77 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           </svg>
         `;
 
-        let currentWalletAddress = walletAddressInput.value;
+        let currentWalletAddress = walletAddressInput.value.trim();
         let isSavingWalletAddress = false;
+        let walletAddressCooldownEndsAt = Number(walletAddressToggle.dataset.walletAddressCooldownEndsAt || '') || null;
+        let cooldownTimer = null;
+
+        const getWalletAddressDisplayValue = (value) => (value === '' ? emptyWalletAddressDisplay : value);
+
+        const formatRelativeDuration = (milliseconds) => {
+          const totalMinutes = Math.max(1, Math.ceil(milliseconds / (1000 * 60)));
+          const days = Math.floor(totalMinutes / (24 * 60));
+          const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+          const minutes = totalMinutes % 60;
+
+          return `${days}D ${hours}H ${minutes}M`;
+        };
+
+        const getWalletButtonLabel = (isEditing, canUpdate) => {
+          if (isEditing) {
+            return 'Save wallet address';
+          }
+
+          if (!canUpdate && typeof walletAddressCooldownEndsAt === 'number' && walletAddressCooldownEndsAt > Date.now()) {
+            return `Editable in ${formatRelativeDuration(walletAddressCooldownEndsAt - Date.now())}`;
+          }
+
+          return 'Edit wallet address';
+        };
+
+        const syncWalletCooldownState = () => {
+          const now = Date.now();
+          const canUpdate = typeof walletAddressCooldownEndsAt !== 'number' || walletAddressCooldownEndsAt <= now;
+          const isEditing = !walletAddressInput.hidden;
+          const buttonLabel = getWalletButtonLabel(isEditing, canUpdate);
+
+          walletAddressToggle.dataset.walletAddressCanUpdate = canUpdate ? 'true' : 'false';
+          walletAddressToggle.dataset.walletAddressCooldownEndsAt = walletAddressCooldownEndsAt ? String(walletAddressCooldownEndsAt) : '';
+          walletAddressToggle.dataset.label = buttonLabel;
+          walletAddressToggle.setAttribute('aria-label', buttonLabel);
+
+          if (isSavingWalletAddress) {
+            walletAddressToggle.disabled = true;
+            walletAddressInput.disabled = true;
+          } else {
+            walletAddressToggle.disabled = false;
+            walletAddressInput.disabled = !canUpdate && !isEditing;
+          }
+
+          if (cooldownTimer !== null) {
+            window.clearTimeout(cooldownTimer);
+            cooldownTimer = null;
+          }
+
+          if (!canUpdate && typeof walletAddressCooldownEndsAt === 'number') {
+            cooldownTimer = window.setTimeout(syncWalletCooldownState, 1000);
+          }
+
+          return canUpdate;
+        };
 
         const setWalletEditMode = (isEditing) => {
           walletAddressValue.hidden = isEditing;
           walletAddressInput.hidden = !isEditing;
           walletAddressToggle.innerHTML = isEditing ? saveIcon : editIcon;
-          walletAddressToggle.setAttribute('aria-label', isEditing ? 'Save wallet address' : 'Edit wallet address');
-          walletAddressToggle.disabled = isSavingWalletAddress;
-          walletAddressInput.disabled = isSavingWalletAddress;
+          syncWalletCooldownState();
+
+          if (isEditing) {
+            walletAddressInput.placeholder = emptyWalletAddressDisplay;
+            walletAddressInput.value = currentWalletAddress;
+          } else {
+            walletAddressValue.textContent = getWalletAddressDisplayValue(currentWalletAddress);
+          }
 
           if (isEditing) {
             walletAddressInput.focus();
@@ -749,7 +829,14 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         };
 
         const saveWalletAddress = async () => {
-          const nextValue = walletAddressInput.value.trim() || '-';
+          const nextValue = walletAddressInput.value.trim();
+          const canUpdate = syncWalletCooldownState();
+          if (!canUpdate) {
+            walletAddressInput.setCustomValidity(walletAddressToggle.dataset.label || 'Wallet address is temporarily locked.');
+            walletAddressInput.reportValidity();
+            return;
+          }
+
           walletAddressInput.setCustomValidity('');
           isSavingWalletAddress = true;
           setWalletEditMode(true);
@@ -764,15 +851,32 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             });
 
             const payload = (await response.json().catch(() => null)) as
-              | { ok?: boolean; error?: string; settings?: { withdrawalAddress?: string } }
+              | {
+                  ok?: boolean;
+                  error?: string;
+                  walletAddressCooldownEndsAt?: number;
+                  settings?: {
+                    withdrawalAddress?: string;
+                    walletAddressUpdatedAt?: number | null;
+                    walletAddressCooldownEndsAt?: number | null;
+                    canUpdateWalletAddress?: boolean;
+                  };
+                }
               | null;
 
             if (!response.ok || !payload?.ok) {
+              if (payload?.walletAddressCooldownEndsAt) {
+                walletAddressCooldownEndsAt = payload.walletAddressCooldownEndsAt;
+                walletAddressInput.value = currentWalletAddress;
+                setWalletEditMode(false);
+                syncWalletCooldownState();
+              }
               throw new Error(payload?.error ?? 'Unable to save wallet address.');
             }
 
             currentWalletAddress = payload.settings?.withdrawalAddress ?? nextValue;
-            walletAddressValue.textContent = currentWalletAddress;
+            walletAddressCooldownEndsAt = payload.settings?.walletAddressCooldownEndsAt ?? walletAddressCooldownEndsAt;
+            walletAddressValue.textContent = getWalletAddressDisplayValue(currentWalletAddress);
             walletAddressInput.value = currentWalletAddress;
             setWalletEditMode(false);
           } catch (error) {
@@ -781,8 +885,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             walletAddressInput.focus();
           } finally {
             isSavingWalletAddress = false;
-            walletAddressToggle.disabled = false;
-            walletAddressInput.disabled = false;
+            syncWalletCooldownState();
           }
         };
 
@@ -795,6 +898,10 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
         walletAddressToggle.addEventListener('click', async () => {
           if (isSavingWalletAddress) return;
+
+          if (walletAddressInput.hidden && !syncWalletCooldownState()) {
+            return;
+          }
 
           if (walletAddressInput.hidden) {
             setWalletEditMode(true);
@@ -821,6 +928,9 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           if (walletAddressCard.contains(event.target)) return;
           cancelWalletAddressEdit();
         });
+
+        syncWalletCooldownState();
+        walletAddressValue.textContent = getWalletAddressDisplayValue(currentWalletAddress);
       }
 
       const linkGenerator = document.querySelector('[data-link-generator]');

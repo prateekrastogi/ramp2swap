@@ -12,6 +12,7 @@ type PartnerSettingsRow = {
   user_uid: string;
   username: string;
   withdrawal_address: string;
+  wallet_address_updated_at: number | null;
   created_at: number;
   updated_at: number;
 };
@@ -21,6 +22,9 @@ export type PartnerSettingsRecord = {
   email: string;
   username: string;
   withdrawalAddress: string;
+  walletAddressUpdatedAt: number | null;
+  walletAddressCooldownEndsAt: number | null;
+  canUpdateWalletAddress: boolean;
 };
 
 const cryptoAdjectives = [
@@ -226,7 +230,8 @@ const cryptoTerms = [
 ];
 
 const USERNAME_SEPARATOR = '-';
-const DEFAULT_WITHDRAWAL_ADDRESS = '-';
+const DEFAULT_WITHDRAWAL_ADDRESS = '';
+export const WALLET_ADDRESS_UPDATE_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 const buildUsernameCandidate = (email: string, attempt: number) =>
   uniqueNamesGenerator({
@@ -300,6 +305,7 @@ export const ensurePartnerSettings = async (db: D1Database, email: string, now =
     .prepare(
       `
         SELECT user_uid, username, withdrawal_address, created_at, updated_at
+             , wallet_address_updated_at
         FROM settings
         WHERE user_uid = ?
       `,
@@ -313,6 +319,7 @@ export const ensurePartnerSettings = async (db: D1Database, email: string, now =
       user_uid: user.uid,
       username,
       withdrawal_address: DEFAULT_WITHDRAWAL_ADDRESS,
+      wallet_address_updated_at: null,
       created_at: now,
       updated_at: now,
     };
@@ -320,19 +327,41 @@ export const ensurePartnerSettings = async (db: D1Database, email: string, now =
     await db
       .prepare(
         `
-          INSERT INTO settings (user_uid, username, withdrawal_address, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO settings (
+            user_uid,
+            username,
+            withdrawal_address,
+            wallet_address_updated_at,
+            created_at,
+            updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?)
         `,
       )
-      .bind(settings.user_uid, settings.username, settings.withdrawal_address, settings.created_at, settings.updated_at)
+      .bind(
+        settings.user_uid,
+        settings.username,
+        settings.withdrawal_address,
+        settings.wallet_address_updated_at,
+        settings.created_at,
+        settings.updated_at,
+      )
       .run();
   }
+
+  const walletAddressCooldownEndsAt =
+    typeof settings.wallet_address_updated_at === 'number'
+      ? settings.wallet_address_updated_at + WALLET_ADDRESS_UPDATE_COOLDOWN_MS
+      : null;
 
   return {
     uid: user.uid,
     email: user.email,
     username: settings.username,
     withdrawalAddress: settings.withdrawal_address,
+    walletAddressUpdatedAt: settings.wallet_address_updated_at,
+    walletAddressCooldownEndsAt,
+    canUpdateWalletAddress: walletAddressCooldownEndsAt === null || walletAddressCooldownEndsAt <= now,
   } satisfies PartnerSettingsRecord;
 };
 
@@ -341,6 +370,7 @@ export const getPartnerSettingsBySessionId = async (db: D1Database, sessionId: s
     .prepare(
       `
         SELECT u.uid, u.email, s.username, s.withdrawal_address
+             , s.wallet_address_updated_at
         FROM auth_sessions AS sess
         INNER JOIN auth_users AS u ON u.email = sess.email
         INNER JOIN settings AS s ON s.user_uid = u.uid
@@ -353,33 +383,86 @@ export const getPartnerSettingsBySessionId = async (db: D1Database, sessionId: s
       email: string;
       username: string;
       withdrawal_address: string;
+      wallet_address_updated_at: number | null;
     }>();
 
   if (!sessionUser) {
     return null;
   }
 
+  const walletAddressCooldownEndsAt =
+    typeof sessionUser.wallet_address_updated_at === 'number'
+      ? sessionUser.wallet_address_updated_at + WALLET_ADDRESS_UPDATE_COOLDOWN_MS
+      : null;
+
   return {
     uid: sessionUser.uid,
     email: sessionUser.email,
     username: sessionUser.username,
     withdrawalAddress: sessionUser.withdrawal_address,
+    walletAddressUpdatedAt: sessionUser.wallet_address_updated_at,
+    walletAddressCooldownEndsAt,
+    canUpdateWalletAddress: walletAddressCooldownEndsAt === null || walletAddressCooldownEndsAt <= Date.now(),
   } satisfies PartnerSettingsRecord;
 };
 
+export class WalletAddressCooldownError extends Error {
+  readonly cooldownEndsAt: number;
+
+  constructor(cooldownEndsAt: number) {
+    super(`Wallet address can be updated again after ${new Date(cooldownEndsAt).toISOString()}.`);
+    this.name = 'WalletAddressCooldownError';
+    this.cooldownEndsAt = cooldownEndsAt;
+  }
+}
+
 export const updateWithdrawalAddress = async (db: D1Database, userUid: string, withdrawalAddress: string, now = Date.now()) => {
   const normalizedAddress = normalizeWithdrawalAddress(withdrawalAddress);
+  const existingSettings = await db
+    .prepare('SELECT withdrawal_address, wallet_address_updated_at FROM settings WHERE user_uid = ?')
+    .bind(userUid)
+    .first<Pick<PartnerSettingsRow, 'withdrawal_address' | 'wallet_address_updated_at'>>();
+
+  if (!existingSettings) {
+    throw new Error('Partner settings were not found.');
+  }
+
+  if (existingSettings.withdrawal_address === normalizedAddress) {
+    return {
+      withdrawalAddress: normalizedAddress,
+      walletAddressUpdatedAt: existingSettings.wallet_address_updated_at,
+      walletAddressCooldownEndsAt:
+        typeof existingSettings.wallet_address_updated_at === 'number'
+          ? existingSettings.wallet_address_updated_at + WALLET_ADDRESS_UPDATE_COOLDOWN_MS
+          : null,
+      canUpdateWalletAddress:
+        typeof existingSettings.wallet_address_updated_at !== 'number' ||
+        existingSettings.wallet_address_updated_at + WALLET_ADDRESS_UPDATE_COOLDOWN_MS <= now,
+    };
+  }
+
+  if (typeof existingSettings.wallet_address_updated_at === 'number') {
+    const cooldownEndsAt = existingSettings.wallet_address_updated_at + WALLET_ADDRESS_UPDATE_COOLDOWN_MS;
+    if (cooldownEndsAt > now) {
+      throw new WalletAddressCooldownError(cooldownEndsAt);
+    }
+  }
 
   await db
     .prepare(
-        `
+      `
         UPDATE settings
-        SET withdrawal_address = ?, updated_at = ?
+        SET withdrawal_address = ?, wallet_address_updated_at = ?, updated_at = ?
         WHERE user_uid = ?
       `,
     )
-    .bind(normalizedAddress, now, userUid)
+    .bind(normalizedAddress, now, now, userUid)
     .run();
 
-  return normalizedAddress;
+  return {
+    withdrawalAddress: normalizedAddress,
+    walletAddressUpdatedAt: now,
+    walletAddressCooldownEndsAt: now + WALLET_ADDRESS_UPDATE_COOLDOWN_MS,
+    canUpdateWalletAddress: false,
+  };
 };
