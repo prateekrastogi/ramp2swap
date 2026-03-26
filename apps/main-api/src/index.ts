@@ -1,6 +1,11 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { callBoundRagAiService, type MainApiBindings } from './aisearch/client'
+import {
+  isWidgetExecutionEventName,
+  mapWidgetExecutionEvent,
+  mapWidgetExecutionEventToTransaction,
+} from './widget-events'
 
 const app = new Hono<{ Bindings: MainApiBindings }>()
 
@@ -60,17 +65,24 @@ app.post('/widget-event', async (c) => {
   const body = await c.req.json<{ eventName?: unknown; event?: unknown }>().catch(() => null)
   const eventName = typeof body?.eventName === 'string' ? body.eventName.trim() : ''
 
-  if (!eventName) {
+  if (!eventName || !isWidgetExecutionEventName(eventName)) {
     return c.json(
       {
         success: false,
-        error: 'eventName is required.'
+        error:
+          'eventName is required and must be one of RouteExecutionStarted, RouteExecutionCompleted, or RouteExecutionFailed.'
       },
       400
     )
   }
 
-  console.log(`[LI.FI Widget Event] ${eventName}`, body?.event)
+  const mappedEvent = mapWidgetExecutionEvent(eventName, body?.event)
+  const transaction = mapWidgetExecutionEventToTransaction(mappedEvent)
+
+  console.log(`[LI.FI Widget Event] ${mappedEvent.event}`, {
+    event: mappedEvent,
+    transaction
+  })
 
   return c.json(
     {
