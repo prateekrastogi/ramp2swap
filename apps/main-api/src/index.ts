@@ -56,4 +56,28 @@ app.post('/intent', async (c) => {
   }
 })
 
+app.post('/widget-event', async (c) => {
+  const body = await c.req.json<{ eventName?: unknown; event?: unknown }>().catch(() => null)
+  const eventName = typeof body?.eventName === 'string' ? body.eventName.trim() : ''
+
+  if (!eventName) {
+    return c.json(
+      {
+        success: false,
+        error: 'eventName is required.'
+      },
+      400
+    )
+  }
+
+  console.log(`[LI.FI Widget Event] ${eventName}`, body?.event)
+
+  return c.json(
+    {
+      success: true
+    },
+    200
+  )
+})
+
 export default app

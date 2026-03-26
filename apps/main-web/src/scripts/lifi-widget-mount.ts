@@ -1,4 +1,11 @@
-import { LiFiWidget, type FormState } from '@lifi/widget';
+import {
+  LiFiWidget,
+  WidgetEvent,
+  widgetEvents,
+  type FormState,
+  type Route,
+  type RouteSelected,
+} from '@lifi/widget';
 import { createElement, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
@@ -12,6 +19,70 @@ const HEADER_CONNECT_DESKTOP = 'Connect Wallet';
 const HEADER_CONNECT_MOBILE = 'Connect';
 const HEADER_CONNECTED = 'Connected';
 const widgetFormRef = createRef<FormState>();
+
+type WidgetEventLogPayload = {
+  eventName: 'AvailableRoutes' | 'RouteSelected';
+  event: Route[] | RouteSelected;
+};
+
+const LOCAL_MAIN_API_ORIGIN = 'http://127.0.0.1:7878';
+
+function getWidgetEventEndpoint() {
+  const isLocalHost =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
+
+  return isLocalHost ? `${LOCAL_MAIN_API_ORIGIN}/widget-event` : '/api/widget-event';
+}
+
+function serializeWidgetEventPayload(payload: WidgetEventLogPayload) {
+  const seen = new WeakSet<object>();
+
+  return JSON.stringify(payload, (_key, value) => {
+    if (typeof value === 'bigint') {
+      return value.toString();
+    }
+
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return '[Circular]';
+      }
+
+      seen.add(value);
+    }
+
+    return value;
+  });
+}
+
+async function sendWidgetEventToServer(payload: WidgetEventLogPayload) {
+  try {
+    await fetch(getWidgetEventEndpoint(), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: serializeWidgetEventPayload(payload),
+    });
+  } catch {}
+}
+
+function logAvailableRoutes(routes: Route[]) {
+  void sendWidgetEventToServer({
+    eventName: 'AvailableRoutes',
+    event: routes,
+  });
+}
+
+function logRouteSelected(event: RouteSelected) {
+  void sendWidgetEventToServer({
+    eventName: 'RouteSelected',
+    event,
+  });
+}
+
+widgetEvents.on(WidgetEvent.AvailableRoutes, logAvailableRoutes);
+widgetEvents.on(WidgetEvent.RouteSelected, logRouteSelected);
 
 type IntentWidgetFormValues = Partial<{
   fromAmount: string;

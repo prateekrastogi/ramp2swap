@@ -1,6 +1,16 @@
 import { Hono } from 'hono';
 import type { HonoRequest } from 'hono';
 import { createOtp, createRandomToken, createSessionToken, getSessionExpiry, hashOtp, isValidEmail, normalizeEmail, verifySessionToken } from './lib/auth';
+import {
+  consumeOtpAndCreateSession,
+  decrementOtpAttempts,
+  getActiveOtpCooldown,
+  getActiveSessionById,
+  getPendingOtp,
+  revokeSession,
+  touchSessionVerification,
+  upsertOtp,
+} from './lib/auth-db';
 import { sendOtpEmail } from './lib/email';
 import {
   ensurePartnerSettings,
@@ -9,21 +19,6 @@ import {
   WalletAddressCooldownError,
 } from './lib/partner-settings';
 import { deletePartnerLink, generatePartnerLink, listPartnerLinks } from './lib/partner-links';
-
-type AuthOtpRow = {
-  email: string;
-  code_hash: string;
-  salt: string;
-  expires_at: number;
-  resend_after: number;
-  attempts_remaining: number;
-};
-
-type AuthSessionRow = {
-  id: string;
-  email: string;
-  expires_at: number;
-};
 
 type Bindings = CloudflareBindings & {
   ASSETS: Fetcher;
@@ -96,18 +91,13 @@ const getAuthenticatedSession = async (
     return { error: jsonError('Session expired or invalid.', 401) } as const;
   }
 
-  const sessionRow = await db
-    .prepare('SELECT id, email, expires_at FROM auth_sessions WHERE id = ? AND revoked_at IS NULL')
-    .bind(payload.sid)
-    .first<AuthSessionRow>();
+  const sessionRow = await getActiveSessionById(db, payload.sid);
 
   if (!sessionRow || sessionRow.expires_at <= Date.now()) {
     return { error: jsonError('Session expired or invalid.', 401) } as const;
   }
 
-  await db.prepare('UPDATE auth_sessions SET last_verified_at = ? WHERE id = ?')
-    .bind(Date.now(), sessionRow.id)
-    .run();
+  await touchSessionVerification(db, sessionRow.id, Date.now());
 
   return { sessionRow } as const;
 };
@@ -115,10 +105,6 @@ const getAuthenticatedSession = async (
 app.use('*', async (c, next) => {
   c.header('Cache-Control', 'no-store');
   await next();
-});
-
-app.get('/message', (c) => {
-  return c.text('Hello Hono!');
 });
 
 app.get('/logo_horizontal.png', async (c) => {
@@ -140,11 +126,7 @@ app.post('/auth/request-otp', async (c) => {
   }
 
   const now = Date.now();
-  const existingOtp = await c.env.AUTH_DB.prepare(
-    'SELECT email, resend_after FROM auth_otps WHERE email = ? AND consumed_at IS NULL',
-  )
-    .bind(email)
-    .first<{ email: string; resend_after: number }>();
+  const existingOtp = await getActiveOtpCooldown(c.env.AUTH_DB, email);
 
   if (existingOtp && existingOtp.resend_after > now) {
     return jsonError('Please wait before requesting another OTP.', 429);
@@ -168,31 +150,15 @@ app.post('/auth/request-otp', async (c) => {
     return jsonError('Unable to send OTP right now. Please try again.', 502);
   }
 
-  await c.env.AUTH_DB.prepare(
-    `
-      INSERT INTO auth_otps (
-        email,
-        code_hash,
-        salt,
-        expires_at,
-        resend_after,
-        attempts_remaining,
-        requested_at,
-        consumed_at
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
-      ON CONFLICT(email) DO UPDATE SET
-        code_hash = excluded.code_hash,
-        salt = excluded.salt,
-        expires_at = excluded.expires_at,
-        resend_after = excluded.resend_after,
-        attempts_remaining = excluded.attempts_remaining,
-        requested_at = excluded.requested_at,
-        consumed_at = NULL
-    `,
-  )
-    .bind(email, codeHash, salt, now + OTP_TTL_MS, now + OTP_RESEND_COOLDOWN_MS, OTP_MAX_ATTEMPTS, now)
-    .run();
+  await upsertOtp(c.env.AUTH_DB, {
+    email,
+    codeHash,
+    salt,
+    expiresAt: now + OTP_TTL_MS,
+    resendAfter: now + OTP_RESEND_COOLDOWN_MS,
+    attemptsRemaining: OTP_MAX_ATTEMPTS,
+    requestedAt: now,
+  });
 
   return c.json({
     ok: true,
@@ -215,15 +181,7 @@ app.post('/auth/verify-otp', async (c) => {
   }
 
   const now = Date.now();
-  const otpRow = await c.env.AUTH_DB.prepare(
-    `
-      SELECT email, code_hash, salt, expires_at, resend_after, attempts_remaining
-      FROM auth_otps
-      WHERE email = ? AND consumed_at IS NULL
-    `,
-  )
-    .bind(email)
-    .first<AuthOtpRow>();
+  const otpRow = await getPendingOtp(c.env.AUTH_DB, email);
 
   if (!otpRow || otpRow.expires_at <= now) {
     return jsonError('This OTP has expired. Request a new one.', 401);
@@ -235,11 +193,7 @@ app.post('/auth/verify-otp', async (c) => {
 
   const candidateHash = await hashOtp(otp, otpRow.salt, c.env.SESSION_SECRET);
   if (candidateHash !== otpRow.code_hash) {
-    await c.env.AUTH_DB.prepare(
-      'UPDATE auth_otps SET attempts_remaining = attempts_remaining - 1 WHERE email = ?',
-    )
-      .bind(email)
-      .run();
+    await decrementOtpAttempts(c.env.AUTH_DB, email);
 
     return jsonError('Incorrect OTP.', 401);
   }
@@ -248,21 +202,14 @@ app.post('/auth/verify-otp', async (c) => {
   const sessionExpiry = getSessionExpiry();
   const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, email, now);
 
-  await c.env.AUTH_DB.batch([
-    c.env.AUTH_DB.prepare(
-      `
-        UPDATE auth_otps
-        SET consumed_at = ?
-        WHERE email = ?
-      `,
-    ).bind(now, email),
-    c.env.AUTH_DB.prepare(
-      `
-        INSERT INTO auth_sessions (id, email, created_at, expires_at, last_verified_at, revoked_at)
-        VALUES (?, ?, ?, ?, ?, NULL)
-      `,
-    ).bind(sessionId, email, now, sessionExpiry, now),
-  ]);
+  await consumeOtpAndCreateSession(c.env.AUTH_DB, {
+    email,
+    consumedAt: now,
+    sessionId,
+    sessionCreatedAt: now,
+    sessionExpiresAt: sessionExpiry,
+    sessionLastVerifiedAt: now,
+  });
 
   const sessionToken = await createSessionToken(
     {
@@ -301,9 +248,7 @@ app.post('/auth/logout', async (c) => {
     return c.json({ ok: true });
   }
 
-  await c.env.AUTH_DB.prepare('UPDATE auth_sessions SET revoked_at = ? WHERE id = ?')
-    .bind(Date.now(), payload.sid)
-    .run();
+  await revokeSession(c.env.AUTH_DB, payload.sid, Date.now());
 
   return c.json({ ok: true });
 });

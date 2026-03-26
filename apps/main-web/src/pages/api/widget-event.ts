@@ -2,14 +2,13 @@ import type { APIRoute } from 'astro';
 import { forwardToMainApi } from '../../lib/main-api-proxy';
 
 export const POST: APIRoute = async ({ request }) => {
-  const body = (await request.json().catch(() => null)) as { text?: unknown } | null;
-  const text = typeof body?.text === 'string' ? body.text.trim() : '';
+  const rawBody = await request.text().catch(() => '');
 
-  if (!text) {
+  if (!rawBody.trim()) {
     return new Response(
       JSON.stringify({
         success: false,
-        error: 'Intent text is required.',
+        error: 'Request body is required.',
       }),
       {
         status: 400,
@@ -25,8 +24,8 @@ export const POST: APIRoute = async ({ request }) => {
     headers: {
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ text }),
+    body: rawBody,
   };
 
-  return forwardToMainApi(request, '/intent', init);
+  return forwardToMainApi(request, '/widget-event', init);
 };
