@@ -9,6 +9,7 @@ import {
 import { createElement, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
+import { startSyntheticWidgetEvents } from '../lib/synthetic-widget-events';
 
 const rootElement = document.getElementById('lifi-widget-root');
 const headerConnectButton = document.getElementById('header-connect-wallet');
@@ -91,6 +92,10 @@ function logRouteExecutionFailed(event: RouteExecutionUpdate) {
 widgetEvents.on(WidgetEvent.RouteExecutionStarted, logRouteExecutionStarted);
 widgetEvents.on(WidgetEvent.RouteExecutionCompleted, logRouteExecutionCompleted);
 widgetEvents.on(WidgetEvent.RouteExecutionFailed, logRouteExecutionFailed);
+
+startSyntheticWidgetEvents((eventName, event) => {
+  widgetEvents.emit(eventName, event);
+}, window.location.hostname);
 
 type IntentWidgetFormValues = Partial<{
   fromAmount: string;
