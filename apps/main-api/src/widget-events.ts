@@ -26,6 +26,8 @@ export type WidgetTransactionLog = {
   transaction: string | null
   from: string | null
   to: string | null
+  walletAddress: string | null
+  timestamp: number
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -81,7 +83,8 @@ const getStringField = (value: unknown) =>
   typeof value === 'string' && value.trim() ? value : null
 
 export const mapWidgetExecutionEventToTransaction = (
-  mappedEvent: WidgetExecutionEventLog
+  mappedEvent: WidgetExecutionEventLog,
+  timestamp: number
 ): WidgetTransactionLog => {
   const route = mappedEvent.route
   const fromToken = route?.fromToken
@@ -92,6 +95,8 @@ export const mapWidgetExecutionEventToTransaction = (
     amount: getStringField(route?.fromAmountUSD),
     transaction: getStringField(route?.id),
     from: isRecord(fromToken) ? getStringField(fromToken.symbol) : null,
-    to: isRecord(toToken) ? getStringField(toToken.symbol) : null
+    to: isRecord(toToken) ? getStringField(toToken.symbol) : null,
+    walletAddress: getStringField(route?.fromAddress),
+    timestamp
   }
 }
