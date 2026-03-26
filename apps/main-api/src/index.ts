@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { callBoundRagAiService, type MainApiBindings } from './aisearch/client'
+import { mockTransactions } from './mock-transactions'
 import {
   isWidgetExecutionEventName,
   mapWidgetExecutionEvent,
@@ -8,6 +9,23 @@ import {
 } from './widget-events'
 
 const app = new Hono<{ Bindings: MainApiBindings }>()
+
+const MOCK_TRANSACTION_LOG_INTERVAL_MS = 30_000
+const globalLoggerState = globalThis as typeof globalThis & {
+  __lastMockTransactionLogAt__?: number
+}
+
+const logMockTransactionsIfDue = () => {
+  const now = Date.now()
+  const lastLoggedAt = globalLoggerState.__lastMockTransactionLogAt__ ?? 0
+
+  if (now - lastLoggedAt < MOCK_TRANSACTION_LOG_INTERVAL_MS) {
+    return
+  }
+
+  globalLoggerState.__lastMockTransactionLogAt__ = now
+  console.log('[Mock Transactions]', mockTransactions)
+}
 
 app.use(
   '*',
@@ -17,6 +35,11 @@ app.use(
     allowHeaders: ['Content-Type']
   })
 )
+
+app.use('*', async (_c, next) => {
+  logMockTransactionsIfDue()
+  await next()
+})
 
 app.post('/intent', async (c) => {
   const body = await c.req.json<{ text?: unknown }>().catch(() => null)
