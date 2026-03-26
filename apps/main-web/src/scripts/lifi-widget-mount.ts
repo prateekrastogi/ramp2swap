@@ -4,7 +4,7 @@ import {
   widgetEvents,
   type FormState,
   type Route,
-  type RouteSelected,
+  type RouteExecutionUpdate,
 } from '@lifi/widget';
 import { createElement, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -21,8 +21,8 @@ const HEADER_CONNECTED = 'Connected';
 const widgetFormRef = createRef<FormState>();
 
 type WidgetEventLogPayload = {
-  eventName: 'AvailableRoutes' | 'RouteSelected';
-  event: Route[] | RouteSelected;
+  eventName: 'RouteExecutionStarted' | 'RouteExecutionCompleted' | 'RouteExecutionFailed';
+  event: Route | RouteExecutionUpdate;
 };
 
 const LOCAL_MAIN_API_ORIGIN = 'http://127.0.0.1:7878';
@@ -67,22 +67,30 @@ async function sendWidgetEventToServer(payload: WidgetEventLogPayload) {
   } catch {}
 }
 
-function logAvailableRoutes(routes: Route[]) {
+function logRouteExecutionStarted(route: Route) {
   void sendWidgetEventToServer({
-    eventName: 'AvailableRoutes',
-    event: routes,
+    eventName: 'RouteExecutionStarted',
+    event: route,
   });
 }
 
-function logRouteSelected(event: RouteSelected) {
+function logRouteExecutionCompleted(route: Route) {
   void sendWidgetEventToServer({
-    eventName: 'RouteSelected',
+    eventName: 'RouteExecutionCompleted',
+    event: route,
+  });
+}
+
+function logRouteExecutionFailed(event: RouteExecutionUpdate) {
+  void sendWidgetEventToServer({
+    eventName: 'RouteExecutionFailed',
     event,
   });
 }
 
-widgetEvents.on(WidgetEvent.AvailableRoutes, logAvailableRoutes);
-widgetEvents.on(WidgetEvent.RouteSelected, logRouteSelected);
+widgetEvents.on(WidgetEvent.RouteExecutionStarted, logRouteExecutionStarted);
+widgetEvents.on(WidgetEvent.RouteExecutionCompleted, logRouteExecutionCompleted);
+widgetEvents.on(WidgetEvent.RouteExecutionFailed, logRouteExecutionFailed);
 
 type IntentWidgetFormValues = Partial<{
   fromAmount: string;
