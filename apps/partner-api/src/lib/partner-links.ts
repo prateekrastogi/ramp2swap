@@ -1,5 +1,7 @@
 import { createRandomToken } from './auth';
 
+const MAX_PARTNER_LINKS_PER_USER = 50;
+
 type PartnerLinkRow = {
   id: string;
   user_uid: string;
@@ -135,6 +137,22 @@ export const generatePartnerLink = async (
       duplicate: true,
       link: toPartnerLinkRecord(existingLink),
     };
+  }
+
+  const linkCountResult = await db
+    .prepare(
+      `
+        SELECT COUNT(*) AS count
+        FROM links
+        WHERE user_uid = ?
+      `,
+    )
+    .bind(userUid)
+    .first<{ count: number | string }>();
+
+  const existingLinkCount = Number(linkCountResult?.count ?? 0);
+  if (existingLinkCount >= MAX_PARTNER_LINKS_PER_USER) {
+    throw new Error('You can create a maximum of 50 links. Delete an existing link before generating another.');
   }
 
   const generatedUrl = buildGeneratedPartnerLink(baseUrl, username, normalizedCampaignTag);

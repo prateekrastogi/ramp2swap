@@ -1388,6 +1388,14 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             return;
           }
 
+          const existingRow = savedLinksList.querySelector(`[data-link-id="${link.id}"]`);
+          if (existingRow instanceof HTMLElement) {
+            savedLinksList.prepend(existingRow);
+            const nextCount = savedLinksList.querySelectorAll('[data-link-id]').length;
+            updateSavedLinksCount(nextCount);
+            return;
+          }
+
           savedLinksList.querySelector('[data-empty-links-state]')?.remove();
           savedLinksList.insertAdjacentHTML('afterbegin', renderSavedLinkRow(link));
           const insertedRow = savedLinksList.querySelector(`[data-link-id="${link.id}"]`);
@@ -1415,10 +1423,26 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
         if (generateLinkButton instanceof HTMLButtonElement) {
           generateLinkButton.addEventListener('click', async () => {
+            const validation = validateLinkInputs();
+            if (!validation.isValid) {
+              generatedLinkInput.value = '';
+              setGenerateButtonState('idle');
+              showLinkToast('Missing details', `${validation.missingLabels.join(' and ')} ${validation.missingLabels.length > 1 ? 'are' : 'is'} required.`, 'warning');
+              return;
+            }
+
+            if (!partnerUsername.trim()) {
+              generatedLinkInput.value = '';
+              setGenerateButtonState('idle');
+              showLinkToast('Username unavailable', 'Your partner username is required before a link can be generated.', 'warning');
+              return;
+            }
+
             setGenerateButtonState('pending');
             await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
             const url = buildGeneratedUrl();
             if (!url) {
+              setGenerateButtonState('idle');
               return;
             }
 
