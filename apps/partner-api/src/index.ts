@@ -401,4 +401,14 @@ app.post('/link/delete', async (c) => {
   }
 });
 
+app.post('/transaction', async (c) => {
+  const transaction = await parseRequestBody(c.req);
+
+  console.log('[Partner Transaction]', transaction);
+
+  return c.json({
+    ok: true,
+  });
+});
+
 export default app;

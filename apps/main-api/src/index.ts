@@ -8,6 +8,36 @@ import {
 } from './widget-events'
 
 const app = new Hono<{ Bindings: MainApiBindings }>()
+const DEFAULT_LOCAL_PARTNER_API_ORIGIN = 'http://127.0.0.1:8787'
+
+function getPartnerApiBaseUrl(env: MainApiBindings) {
+  const configuredBaseUrl = env.PARTNER_API_BASE_URL?.trim()
+  return configuredBaseUrl && configuredBaseUrl.length > 0
+    ? configuredBaseUrl.replace(/\/$/, '')
+    : DEFAULT_LOCAL_PARTNER_API_ORIGIN
+}
+
+async function forwardTransactionToPartnerApi(
+  env: MainApiBindings,
+  transaction: unknown
+) {
+  try {
+    const init: RequestInit = {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(transaction)
+    }
+
+    if (env.PARTNER_API) {
+      await env.PARTNER_API.fetch('https://partner-api/transaction', init)
+      return
+    }
+
+    await fetch(`${getPartnerApiBaseUrl(env)}/transaction`, init)
+  } catch {}
+}
 
 app.use(
   '*',
@@ -78,9 +108,7 @@ app.post('/widget-event', async (c) => {
 
   const transaction = mapWidgetTransaction(body?.transaction)
 
-  console.log(`[LI.FI Widget Event] ${eventName}`, {
-    transaction
-  })
+  c.executionCtx.waitUntil(forwardTransactionToPartnerApi(c.env, transaction))
 
   return c.json(
     {

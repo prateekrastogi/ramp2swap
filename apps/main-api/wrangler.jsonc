@@ -12,12 +12,19 @@
   "ai": {
     "binding": "AI"
   },
+  "services": [
+    {
+      "binding": "PARTNER_API",
+      "service": "partner-api"
+    }
+  ],
   "dev": {
     "port": 7878,
     "inspector_port": 9232
   },
   "vars": {
-    "RAG_AI_NAME": "rag-ai"
+    "RAG_AI_NAME": "rag-ai",
+    "PARTNER_API_BASE_URL": "https://api.partner.ramp2swap.com"
   },
   "env": {
     "staging": {
@@ -25,8 +32,15 @@
       "ai": {
         "binding": "AI"
       },
+      "services": [
+        {
+          "binding": "PARTNER_API",
+          "service": "partner-api-staging"
+        }
+      ],
       "vars": {
-        "RAG_AI_NAME": "rag-ai"
+        "RAG_AI_NAME": "rag-ai",
+        "PARTNER_API_BASE_URL": "https://staging.api.partner.ramp2swap.com"
       }
     }
   }

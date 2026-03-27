@@ -47,6 +47,8 @@ type AiBinding = {
 export type MainApiBindings = {
   AI?: AiBinding
   RAG_AI_NAME?: string
+  PARTNER_API_BASE_URL?: string
+  PARTNER_API?: Fetcher
 }
 
 const DEFAULT_RAG_AI_NAME = 'rag-ai'
