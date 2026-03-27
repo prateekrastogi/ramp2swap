@@ -456,8 +456,6 @@ app.post('/transaction', async (c) => {
     .bind(transactionId, status, amount, fromSymbol, toSymbol, walletAddress, timestamp, now, now)
     .run();
 
-  console.log('[Partner Transaction]', transaction);
-
   return c.json({
     ok: true,
   });
