@@ -83,7 +83,7 @@ check(
   `[Sidebar identity] ${relative(root, partnerHomePage)} must expose the sidebar avatar hook for the seeded identicon`
 );
 check(
-  partnerHomeContent.includes("'/api/settings/wallet-address'"),
+  partnerHomeContent.includes("'/api/setting/wallet-address'"),
   `[Settings persistence] ${relative(root, partnerHomePage)} must persist wallet address edits through the server route`
 );
 

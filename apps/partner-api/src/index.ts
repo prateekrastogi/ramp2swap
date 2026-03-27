@@ -278,7 +278,7 @@ app.post('/auth/session', async (c) => {
   });
 });
 
-app.post('/settings/wallet-address', async (c) => {
+app.post('/setting/wallet-address', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
@@ -327,7 +327,7 @@ app.post('/settings/wallet-address', async (c) => {
   });
 });
 
-app.post('/links', async (c) => {
+app.post('/link', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
@@ -344,7 +344,7 @@ app.post('/links', async (c) => {
   });
 });
 
-app.post('/links/generate', async (c) => {
+app.post('/link/generate', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
@@ -375,7 +375,7 @@ app.post('/links/generate', async (c) => {
   }
 });
 
-app.post('/links/delete', async (c) => {
+app.post('/link/delete', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);

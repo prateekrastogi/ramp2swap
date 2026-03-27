@@ -26,17 +26,23 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const payload = (await request.json().catch(() => null)) as { withdrawalAddress?: unknown } | null;
-  const withdrawalAddress = typeof payload?.withdrawalAddress === 'string' ? payload.withdrawalAddress : '-';
+  const payload = (await request.json().catch(() => null)) as {
+    campaignName?: unknown;
+    campaignTag?: unknown;
+  } | null;
 
   let response: Response;
   try {
-    response = await fetch(`${partnerApiBaseUrl}/settings/wallet-address`, {
+    response = await fetch(`${partnerApiBaseUrl}/link/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ sessionToken, withdrawalAddress }),
+      body: JSON.stringify({
+        sessionToken,
+        campaignName: typeof payload?.campaignName === 'string' ? payload.campaignName : '',
+        campaignTag: typeof payload?.campaignTag === 'string' ? payload.campaignTag : '',
+      }),
     });
   } catch {
     return new Response(JSON.stringify({ ok: false, error: 'Partner API is unavailable. Start partner-api and try again.' }), {

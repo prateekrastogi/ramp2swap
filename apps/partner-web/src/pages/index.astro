@@ -971,7 +971,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           setWalletEditMode(true);
 
           try {
-            const response = await fetch('/api/settings/wallet-address', {
+            const response = await fetch('/api/setting/wallet-address', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1356,7 +1356,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
               button.disabled = true;
 
               try {
-                const response = await fetch('/api/links/delete', {
+                const response = await fetch('/api/link/delete', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
@@ -1423,7 +1423,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             }
 
             try {
-              const response = await fetch('/api/links/generate', {
+              const response = await fetch('/api/link/generate', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

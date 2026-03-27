@@ -27,21 +27,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   const payload = (await request.json().catch(() => null)) as {
-    campaignName?: unknown;
-    campaignTag?: unknown;
+    linkId?: unknown;
   } | null;
 
   let response: Response;
   try {
-    response = await fetch(`${partnerApiBaseUrl}/links/generate`, {
+    response = await fetch(`${partnerApiBaseUrl}/link/delete`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         sessionToken,
-        campaignName: typeof payload?.campaignName === 'string' ? payload.campaignName : '',
-        campaignTag: typeof payload?.campaignTag === 'string' ? payload.campaignTag : '',
+        linkId: typeof payload?.linkId === 'string' ? payload.linkId : '',
       }),
     });
   } catch {
