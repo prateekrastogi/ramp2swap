@@ -495,8 +495,6 @@ app.post('/click', async (c) => {
     .bind(event, username, campaign, timestamp, now)
     .run();
 
-  console.log('[Partner Click]', click);
-
   return c.json({
     ok: true,
   });
@@ -504,8 +502,50 @@ app.post('/click', async (c) => {
 
 app.post('/conversion', async (c) => {
   const conversion = await parseRequestBody(c.req);
+  const event = typeof conversion.event === 'string' ? conversion.event.trim() : '';
+  const transactionId =
+    typeof conversion.transaction_id === 'string' ? conversion.transaction_id.trim() : '';
+  const username = typeof conversion.username === 'string' ? conversion.username.trim() : null;
+  const campaign = typeof conversion.campaign === 'string' ? conversion.campaign.trim() : null;
+  const timestamp =
+    typeof conversion.timestamp === 'number' && Number.isFinite(conversion.timestamp)
+      ? conversion.timestamp
+      : null;
+  const payout = typeof conversion.payout === 'string' ? conversion.payout.trim() : null;
 
-  console.log('[Partner Conversion]', conversion);
+  if (!event) {
+    return jsonError('event is required.');
+  }
+
+  if (!transactionId) {
+    return jsonError('transaction_id is required.');
+  }
+
+  if (timestamp === null) {
+    return jsonError('timestamp is required.');
+  }
+
+  await c.env.AUTH_DB.prepare(
+    `
+      INSERT INTO conversions (
+        transaction_id,
+        event,
+        username,
+        campaign,
+        timestamp,
+        payout
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(transaction_id) DO UPDATE SET
+        event = excluded.event,
+        username = excluded.username,
+        campaign = excluded.campaign,
+        timestamp = excluded.timestamp,
+        payout = excluded.payout
+    `,
+  )
+    .bind(transactionId, event, username, campaign, timestamp, payout)
+    .run();
 
   return c.json({
     ok: true,
