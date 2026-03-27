@@ -5,7 +5,6 @@ import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
 import type { AffiliateLandingEvent } from '../lib/referral-tracking';
-import mainPageScriptUrl from '../scripts/main-page.ts?url';
 
 type Props = {
   partnerPortalUrl: string;
@@ -144,6 +143,8 @@ const currentYear = new Date().getFullYear();
       </footer>
     </div>
     {affiliateEvent ? <script id="affiliate-event-data" type="application/json" set:html={JSON.stringify(affiliateEvent)}></script> : null}
-    <script type="module" src={mainPageScriptUrl}></script>
+    <script>
+      import '../scripts/main-page.ts';
+    </script>
   </body>
 </html>
