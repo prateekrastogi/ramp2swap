@@ -15,7 +15,6 @@ export type WidgetExecutionEventLog = {
   event: WidgetExecutionEventName
   route: RouteLike | null
   process: ProcessLike | null
-  rawEvent: unknown
 }
 
 export type WidgetTransactionStatus = 'PENDING' | 'COMPLETED' | 'FAILED'
@@ -40,14 +39,12 @@ const widgetEventMappers: Record<
   RouteExecutionStarted: (event) => ({
     event: 'RouteExecutionStarted',
     route: isRecord(event) ? event : null,
-    process: null,
-    rawEvent: event
+    process: null
   }),
   RouteExecutionCompleted: (event) => ({
     event: 'RouteExecutionCompleted',
     route: isRecord(event) ? event : null,
-    process: null,
-    rawEvent: event
+    process: null
   }),
   RouteExecutionFailed: (event) => {
     const payload = isRecord(event) ? (event as WidgetExecutionFailedPayload) : null
@@ -55,8 +52,7 @@ const widgetEventMappers: Record<
     return {
       event: 'RouteExecutionFailed',
       route: payload?.route && isRecord(payload.route) ? payload.route : null,
-      process: payload?.process && isRecord(payload.process) ? payload.process : null,
-      rawEvent: event
+      process: payload?.process && isRecord(payload.process) ? payload.process : null
     }
   }
 }

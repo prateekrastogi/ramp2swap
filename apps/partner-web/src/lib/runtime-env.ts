@@ -9,7 +9,7 @@ const readCloudflareEnv = async () => {
   }
 };
 
-const DEFAULT_LOCAL_PARTNER_LINK_BASE_URL = 'http://localhost:4321/r';
+const DEFAULT_LOCAL_PARTNER_LINK_BASE_URL = 'http://localhost:1234/r';
 const DEFAULT_PRODUCTION_PARTNER_LINK_BASE_URL = 'https://ramp2swap.com/r';
 
 export const getPartnerApiBaseUrl = async () => {

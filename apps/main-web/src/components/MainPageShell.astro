@@ -1,0 +1,149 @@
+---
+import '../styles/design-system.css';
+import { WidgetSkeleton } from '@lifi/widget/skeleton';
+import { createElement } from 'react';
+import { renderToString } from 'react-dom/server';
+import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
+import type { AffiliateLandingEvent } from '../lib/referral-tracking';
+import mainPageScriptUrl from '../scripts/main-page.ts?url';
+
+type Props = {
+  partnerPortalUrl: string;
+  affiliateEvent?: AffiliateLandingEvent | null;
+};
+
+const { partnerPortalUrl, affiliateEvent = null } = Astro.props;
+
+const runtime = getLiFiWidgetRuntimeConfig();
+const widgetMarkup = renderToString(createElement(WidgetSkeleton, { config: runtime.config }));
+const siteName = 'Ramp2Swap';
+const siteDescription = 'One Interface. All of DeFi.';
+const shareImage = '/logo.png';
+const currentYear = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={siteDescription} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{siteDescription}</title>
+    <link rel="icon" type="image/svg+xml" href="/Ramp2Swap.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={siteName} />
+    <meta property="og:description" content={siteDescription} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:alt" content="Ramp2Swap logo" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={siteName} />
+    <meta name="twitter:description" content={siteDescription} />
+    <meta name="twitter:image" content={shareImage} />
+    <meta name="twitter:image:alt" content="Ramp2Swap logo" />
+  </head>
+  <body class="page">
+    <div class="ambient-layer" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--mint-top"></div>
+      <div class="ambient-orb ambient-orb--blue-bottom"></div>
+      <div class="ambient-orb ambient-orb--mint-center"></div>
+    </div>
+
+    <div class="main-app content-layer">
+      <header class="main-header glass glass-tier-4-nav on-glass" aria-label="Primary header">
+        <div class="brand-nav main-header-nav">
+          <a class="brand-row main-header-brand" href="/" aria-label="Ramp2Swap home">
+            <img
+              class="logo-horizontal logo-nav-horizontal mobile-nav-horizontal-only main-header-logo"
+              src="/Horizontal_Logo.svg"
+              alt="Ramp2Swap"
+            />
+            <img class="logo-mark logo-mark-nav mobile-nav-mark-only" src="/Ramp2Swap.svg" alt="Ramp2Swap mark" />
+          </a>
+
+          <div class="main-header-actions">
+            <a
+              class="main-header-earn-link"
+              href={partnerPortalUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label="Open Earn in a new tab"
+            >
+              <span class="main-header-earn-link-copy">Earn</span>
+            </a>
+
+            <button
+              class="btn-primary btn-glass main-header-cta"
+              type="button"
+              id="header-connect-wallet"
+              data-wallet-state="disconnected"
+              aria-label="Connect Wallet"
+            >
+              <span class="main-header-cta-desktop" id="header-connect-wallet-label-desktop">Connect Wallet</span>
+              <span class="main-header-cta-mobile" id="header-connect-wallet-label-mobile">Connect</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-stage" aria-label="Main web preview">
+        <section class="widget-stage" aria-label="Swap widget">
+          <div class="widget-stage-shell card glass glass-tier-2 on-glass">
+            <div class="widget-stage-frame">
+              <div id="lifi-widget-root" class="lifi-widget-mount" set:html={widgetMarkup}></div>
+            </div>
+            <section class="conversation-stage-frame" aria-label="Conversation upload composer">
+              <div class="conversation-stage card glass glass-tier-1 glass-mint on-glass">
+                <label class="conversation-stage-label" for="conversation-upload-input">Intent AI</label>
+                <form id="conversation-stage-form" class="conversation-stage-input-shell">
+                  <textarea
+                    id="conversation-upload-input"
+                    class="conversation-stage-input"
+                    rows="1"
+                    placeholder="Describe Your Swap..."
+                    aria-label="Conversation input"
+                  ></textarea>
+                  <button
+                    id="conversation-stage-submit"
+                    class="btn-primary btn-glass conversation-stage-submit"
+                    type="submit"
+                    aria-label="Upload conversation to AI"
+                  >
+                    <img
+                      class="conversation-stage-submit-icon"
+                      src="/White_Ramp2Swap.svg"
+                      alt=""
+                      aria-hidden="true"
+                      width="20"
+                      height="20"
+                      decoding="async"
+                    />
+                  </button>
+                </form>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="main-footer glass glass-tier-4-nav on-glass" aria-label="Legal footer">
+        <div class="main-footer-shell">
+          <div class="main-footer-brand-row">
+            <img class="main-footer-brand-mark" src="/Ramp2Swap.svg" alt="Ramp2Swap" />
+            <p class="body-small main-footer-tagline">One Interface. All of DeFi.</p>
+          </div>
+
+          <p class="body-small main-footer-copyright">Copyright © {currentYear} Ramp2Swap</p>
+
+          <div class="main-footer-legal-row">
+            <a class="main-footer-link" href="/terms" target="_blank" rel="noreferrer noopener">Terms</a>
+            <a class="main-footer-link" href="/privacy" target="_blank" rel="noreferrer noopener">Privacy</a>
+            <a class="main-footer-link" href="/risk-disclosure" target="_blank" rel="noreferrer noopener">Risk Disclosure</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+    {affiliateEvent ? <script id="affiliate-event-data" type="application/json" set:html={JSON.stringify(affiliateEvent)}></script> : null}
+    <script type="module" src={mainPageScriptUrl}></script>
+  </body>
+</html>

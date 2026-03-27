@@ -2,7 +2,10 @@
 import MainPageShell from '../components/MainPageShell.astro';
 import { getPartnerPortalUrl } from '../lib/partner-portal-url';
 import { publicAppConfig } from '../lib/public-app-config';
+import { parseAffiliateLandingEvent } from '../lib/referral-tracking';
 
 const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
+const affiliateEvent = parseAffiliateLandingEvent(Astro.url);
 ---
-<MainPageShell partnerPortalUrl={partnerPortalUrl} />
+
+<MainPageShell partnerPortalUrl={partnerPortalUrl} affiliateEvent={affiliateEvent} />
