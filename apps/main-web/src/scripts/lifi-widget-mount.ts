@@ -10,6 +10,12 @@ import { createElement, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
 import { startSyntheticWidgetEvents } from '../lib/synthetic-widget-events';
+import {
+  mapWidgetExecutionEvent,
+  mapWidgetExecutionEventToTransaction,
+  type WidgetExecutionEventName,
+  type WidgetTransactionLog,
+} from '../lib/widget-events';
 
 const rootElement = document.getElementById('lifi-widget-root');
 const headerConnectButton = document.getElementById('header-connect-wallet');
@@ -22,8 +28,8 @@ const HEADER_CONNECTED = 'Connected';
 const widgetFormRef = createRef<FormState>();
 
 type WidgetEventLogPayload = {
-  eventName: 'RouteExecutionStarted' | 'RouteExecutionCompleted' | 'RouteExecutionFailed';
-  event: Route | RouteExecutionUpdate;
+  eventName: WidgetExecutionEventName;
+  transaction: WidgetTransactionLog;
 };
 
 const LOCAL_MAIN_API_ORIGIN = 'http://127.0.0.1:7878';
@@ -68,25 +74,40 @@ async function sendWidgetEventToServer(payload: WidgetEventLogPayload) {
   } catch {}
 }
 
+type WidgetEventHandler = (payload: WidgetEventLogPayload) => void | Promise<void>;
+
+const widgetEventHandlers: WidgetEventHandler[] = [sendWidgetEventToServer];
+
+export function registerWidgetEventHandler(handler: WidgetEventHandler) {
+  widgetEventHandlers.push(handler);
+}
+
+async function emitWidgetEvent(payload: WidgetEventLogPayload) {
+  await Promise.allSettled(widgetEventHandlers.map((handler) => handler(payload)));
+}
+
+function buildWidgetEventPayload(
+  eventName: WidgetExecutionEventName,
+  event: Route | RouteExecutionUpdate,
+): WidgetEventLogPayload {
+  const mappedEvent = mapWidgetExecutionEvent(eventName, event);
+
+  return {
+    eventName,
+    transaction: mapWidgetExecutionEventToTransaction(mappedEvent, Date.now()),
+  };
+}
+
 function logRouteExecutionStarted(route: Route) {
-  void sendWidgetEventToServer({
-    eventName: 'RouteExecutionStarted',
-    event: route,
-  });
+  void emitWidgetEvent(buildWidgetEventPayload('RouteExecutionStarted', route));
 }
 
 function logRouteExecutionCompleted(route: Route) {
-  void sendWidgetEventToServer({
-    eventName: 'RouteExecutionCompleted',
-    event: route,
-  });
+  void emitWidgetEvent(buildWidgetEventPayload('RouteExecutionCompleted', route));
 }
 
 function logRouteExecutionFailed(event: RouteExecutionUpdate) {
-  void sendWidgetEventToServer({
-    eventName: 'RouteExecutionFailed',
-    event,
-  });
+  void emitWidgetEvent(buildWidgetEventPayload('RouteExecutionFailed', event));
 }
 
 widgetEvents.on(WidgetEvent.RouteExecutionStarted, logRouteExecutionStarted);

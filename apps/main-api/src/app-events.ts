@@ -4,6 +4,7 @@ export type AffiliateAppEvent = {
   event: 'affiliate'
   username: string | null
   campaign: string | null
+  timestamp: number
 }
 
 export type AppEventLog = AffiliateAppEvent
@@ -21,7 +22,8 @@ const appEventMappers: Record<AppEventName, (event: unknown) => AppEventLog> = {
     return {
       event: 'affiliate',
       username: getStringField(payload?.username),
-      campaign: getStringField(payload?.campaign)
+      campaign: getStringField(payload?.campaign),
+      timestamp: Date.now()
     }
   }
 }

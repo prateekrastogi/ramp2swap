@@ -4,8 +4,7 @@ import { callBoundRagAiService, type MainApiBindings } from './aisearch/client'
 import { isAppEventName, mapAppEvent } from './app-events'
 import {
   isWidgetExecutionEventName,
-  mapWidgetExecutionEvent,
-  mapWidgetExecutionEventToTransaction,
+  mapWidgetTransaction,
 } from './widget-events'
 
 const app = new Hono<{ Bindings: MainApiBindings }>()
@@ -63,7 +62,7 @@ app.post('/intent', async (c) => {
 })
 
 app.post('/widget-event', async (c) => {
-  const body = await c.req.json<{ eventName?: unknown; event?: unknown }>().catch(() => null)
+  const body = await c.req.json<{ eventName?: unknown; transaction?: unknown }>().catch(() => null)
   const eventName = typeof body?.eventName === 'string' ? body.eventName.trim() : ''
 
   if (!eventName || !isWidgetExecutionEventName(eventName)) {
@@ -77,10 +76,9 @@ app.post('/widget-event', async (c) => {
     )
   }
 
-  const mappedEvent = mapWidgetExecutionEvent(eventName, body?.event)
-  const transaction = mapWidgetExecutionEventToTransaction(mappedEvent, Date.now())
+  const transaction = mapWidgetTransaction(body?.transaction)
 
-  console.log(`[LI.FI Widget Event] ${mappedEvent.event}`, {
+  console.log(`[LI.FI Widget Event] ${eventName}`, {
     transaction
   })
 
