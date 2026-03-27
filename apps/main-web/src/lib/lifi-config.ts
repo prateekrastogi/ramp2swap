@@ -6,9 +6,13 @@ type LiFiWidgetRuntimeConfig = {
   integrator: string;
 };
 
+const DEFAULT_WALLET_CONNECT_PROJECT_ID = '5432e3507d41270bee46b7b85bbc2ef8';
+
 export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
   const integrator = 'ramp2swap';
-  const { alchemyRpcUrls } = publicAppConfig;
+  const { alchemyRpcUrls, appDescription, appIconPath, appName, appUrl } = publicAppConfig;
+  const resolvedAppUrl = typeof window !== 'undefined' ? window.location.origin : appUrl;
+  const resolvedAppIconUrl = new URL(appIconPath, appUrl).toString();
   const rpcUrls = Object.fromEntries(
     [
       [ChainId.ETH, alchemyRpcUrls.ethereum],
@@ -39,6 +43,32 @@ export function getLiFiWidgetRuntimeConfig(): LiFiWidgetRuntimeConfig {
       },
       variant: 'compact',
       hiddenUI: ['appearance', 'poweredBy'],
+      walletConfig: {
+        walletConnect: {
+          projectId: DEFAULT_WALLET_CONNECT_PROJECT_ID,
+          metadata: {
+            name: appName,
+            description: appDescription,
+            url: resolvedAppUrl,
+            icons: [resolvedAppIconUrl],
+          },
+        },
+        coinbase: {
+          appName,
+          appLogoUrl: resolvedAppIconUrl,
+        },
+        baseAccount: {
+          appName,
+          appLogoUrl: resolvedAppIconUrl,
+        },
+        metaMask: {
+          dappMetadata: {
+            name: appName,
+            url: resolvedAppUrl,
+            iconUrl: resolvedAppIconUrl,
+          },
+        },
+      },
       theme: {
         header: {
           background: 'transparent',
