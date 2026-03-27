@@ -67,7 +67,7 @@ if (sessionToken && partnerApiBaseUrl) {
         },
         body: JSON.stringify({ sessionToken }),
       }),
-      fetch(`${partnerApiBaseUrl}/links`, {
+      fetch(`${partnerApiBaseUrl}/link`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1456,6 +1456,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
               generatedLinkInput.value = payload.link.generatedUrl;
 
               if (payload.duplicate) {
+                prependSavedLink(payload.link);
                 setGenerateButtonState('idle');
                 showLinkToast('Already generated', 'This campaign tag already has a saved link.', 'warning');
                 return;
