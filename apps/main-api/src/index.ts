@@ -39,6 +39,50 @@ async function forwardTransactionToPartnerApi(
   } catch {}
 }
 
+async function forwardAffiliateClickToPartnerApi(
+  env: MainApiBindings,
+  payload: unknown
+) {
+  try {
+    const init: RequestInit = {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+
+    if (env.PARTNER_API) {
+      await env.PARTNER_API.fetch('https://partner-api/click', init)
+      return
+    }
+
+    await fetch(`${getPartnerApiBaseUrl(env)}/click`, init)
+  } catch {}
+}
+
+async function forwardConversionToPartnerApi(
+  env: MainApiBindings,
+  payload: unknown
+) {
+  try {
+    const init: RequestInit = {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+
+    if (env.PARTNER_API) {
+      await env.PARTNER_API.fetch('https://partner-api/conversion', init)
+      return
+    }
+
+    await fetch(`${getPartnerApiBaseUrl(env)}/conversion`, init)
+  } catch {}
+}
+
 app.use(
   '*',
   cors({
@@ -134,6 +178,14 @@ app.post('/app-event', async (c) => {
   }
 
   const mappedEvent = mapAppEvent(eventName, body)
+
+  if (mappedEvent.event === 'affiliate') {
+    c.executionCtx.waitUntil(forwardAffiliateClickToPartnerApi(c.env, mappedEvent))
+  }
+
+  if (mappedEvent.event === 'conversion') {
+    c.executionCtx.waitUntil(forwardConversionToPartnerApi(c.env, mappedEvent))
+  }
 
   console.log(`[App Event] ${mappedEvent.event}`, {
     ...mappedEvent

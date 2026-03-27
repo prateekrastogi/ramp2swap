@@ -411,4 +411,24 @@ app.post('/transaction', async (c) => {
   });
 });
 
+app.post('/click', async (c) => {
+  const click = await parseRequestBody(c.req);
+
+  console.log('[Partner Click]', click);
+
+  return c.json({
+    ok: true,
+  });
+});
+
+app.post('/conversion', async (c) => {
+  const conversion = await parseRequestBody(c.req);
+
+  console.log('[Partner Conversion]', conversion);
+
+  return c.json({
+    ok: true,
+  });
+});
+
 export default app;
