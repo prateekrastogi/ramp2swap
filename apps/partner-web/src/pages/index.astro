@@ -9,7 +9,7 @@ import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-
 import { linkGeneratorDraft } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { payoutDisplaySettings } from '../data/settings-display';
-import { getPartnerApiBaseUrl } from '../lib/runtime-env';
+import { getPartnerApiBaseUrl, getPartnerLinkBaseUrl } from '../lib/runtime-env';
 import { transactionFeedItems } from '../data/transaction-feed-mock';
 
 type PartnerSessionPayload = {
@@ -36,6 +36,7 @@ type PartnerLink = {
 
 const sessionToken = Astro.cookies.get('partner_session')?.value ?? '';
 const partnerApiBaseUrl = await getPartnerApiBaseUrl();
+const partnerLinkBaseUrl = await getPartnerLinkBaseUrl();
 
 const partnerSettings = {
   email: 'partners@ramp2swap.com',
@@ -257,7 +258,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                 <div
                   class="link-form-grid"
                   data-link-generator
-                  data-base-url={linkGeneratorDraft.baseUrl}
+                  data-base-url={partnerLinkBaseUrl || linkGeneratorDraft.baseUrl}
                   data-partner-username={partnerSettings.username}
                 >
                   <div class="stack-12">

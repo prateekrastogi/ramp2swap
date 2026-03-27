@@ -49,10 +49,12 @@ writeEnvFile(partnerApiVarsPath, {
   AUTH_EMAIL_MODE: apiVars.AUTH_EMAIL_MODE || 'console',
   LOGIN_EMAIL_FROM: apiVars.LOGIN_EMAIL_FROM || 'Ramp2Swap Partners <auth@yourdomain.com>',
   RESEND_KEY: apiVars.RESEND_KEY || '',
+  PARTNER_LINK_BASE_URL: apiVars.PARTNER_LINK_BASE_URL || 'http://localhost:4321/r',
 });
 
 writeEnvFile(partnerWebEnvPath, {
   PARTNER_API_BASE_URL: webEnv.PARTNER_API_BASE_URL || 'http://127.0.0.1:8787',
+  PARTNER_LINK_BASE_URL: webEnv.PARTNER_LINK_BASE_URL || 'http://localhost:4321/r',
   SESSION_SECRET: sharedSecret,
 });
 

@@ -17,13 +17,15 @@
 		"enabled": true
 	},
 	"vars": {
-		"PARTNER_API_BASE_URL": "https://api.partner.ramp2swap.com"
+		"PARTNER_API_BASE_URL": "https://api.partner.ramp2swap.com",
+		"PARTNER_LINK_BASE_URL": "https://ramp2swap.com/r"
 	},
 	"env": {
 		"staging": {
 			"name": "partner-web-staging",
 			"vars": {
-				"PARTNER_API_BASE_URL": "https://staging.api.partner.ramp2swap.com"
+				"PARTNER_API_BASE_URL": "https://staging.api.partner.ramp2swap.com",
+				"PARTNER_LINK_BASE_URL": "https://staging.ramp2swap.com/r"
 			}
 		}
 	}
