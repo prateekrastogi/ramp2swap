@@ -81,7 +81,6 @@ app.post('/widget-event', async (c) => {
   const transaction = mapWidgetExecutionEventToTransaction(mappedEvent, Date.now())
 
   console.log(`[LI.FI Widget Event] ${mappedEvent.event}`, {
-    ...mappedEvent,
     transaction
   })
 

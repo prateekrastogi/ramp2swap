@@ -22,7 +22,7 @@ export type WidgetTransactionStatus = 'PENDING' | 'COMPLETED' | 'FAILED'
 export type WidgetTransactionLog = {
   status: WidgetTransactionStatus
   amount: string | null
-  transaction: string | null
+  transaction_id: string | null
   from: string | null
   to: string | null
   walletAddress: string | null
@@ -89,7 +89,7 @@ export const mapWidgetExecutionEventToTransaction = (
   return {
     status: widgetTransactionStatusMap[mappedEvent.event],
     amount: getStringField(route?.fromAmountUSD),
-    transaction: getStringField(route?.id),
+    transaction_id: getStringField(route?.id),
     from: isRecord(fromToken) ? getStringField(fromToken.symbol) : null,
     to: isRecord(toToken) ? getStringField(toToken.symbol) : null,
     walletAddress: getStringField(route?.fromAddress),
