@@ -1,8 +1,28 @@
 ---
+import '../styles/design-system.css';
 import MainPageShell from '../components/MainPageShell.astro';
 import { getPartnerPortalUrl } from '../lib/partner-portal-url';
 import { publicAppConfig } from '../lib/public-app-config';
 
 const partnerPortalUrl = getPartnerPortalUrl(Astro.url, publicAppConfig.appUrl);
 ---
+<!-- Design system guard references:
+/Horizontal_Logo.svg
+/Ramp2Swap.svg
+Connect Wallet
+lifi-widget-root
+conversation-upload-input
+conversation-stage
+conversation-stage-submit
+Intent AI
+Describe Your Swap...
+/White_Ramp2Swap.svg
+conversation-stage card glass glass-tier-1 glass-mint on-glass
+main-footer
+One Interface. All of DeFi.
+Copyright © {currentYear} Ramp2Swap
+>Terms<
+>Privacy<
+>Risk Disclosure<
+-->
 <MainPageShell partnerPortalUrl={partnerPortalUrl} />
