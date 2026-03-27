@@ -1,4 +1,7 @@
-import './lifi-widget-mount';
+import {
+  registerWidgetEventHandler,
+  type WidgetEventLogPayload,
+} from './lifi-widget-mount';
 
 type IntentWidgetFormValues = {
   fromAmount?: string;
@@ -25,6 +28,11 @@ type AffiliateLandingEvent = {
 
 type AppEventRequest = {
   event: 'affiliate';
+  username: string;
+  campaign: string;
+} | {
+  event: 'conversion';
+  transaction_id: string;
   username: string;
   campaign: string;
 };
@@ -89,6 +97,22 @@ if (affiliateEvent) {
     event: 'affiliate',
     username: affiliateEvent.username,
     campaign: affiliateEvent.campaign,
+  });
+}
+
+if (affiliateEvent) {
+  registerWidgetEventHandler((payload: WidgetEventLogPayload) => {
+    const transactionId = payload.transaction.transaction_id;
+    if (!transactionId) {
+      return;
+    }
+
+    return sendAppEventToServer({
+      event: 'conversion',
+      transaction_id: transactionId,
+      username: affiliateEvent.username,
+      campaign: affiliateEvent.campaign,
+    });
   });
 }
 

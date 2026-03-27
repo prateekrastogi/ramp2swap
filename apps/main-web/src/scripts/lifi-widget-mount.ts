@@ -27,7 +27,7 @@ const HEADER_CONNECT_MOBILE = 'Connect';
 const HEADER_CONNECTED = 'Connected';
 const widgetFormRef = createRef<FormState>();
 
-type WidgetEventLogPayload = {
+export type WidgetEventLogPayload = {
   eventName: WidgetExecutionEventName;
   transaction: WidgetTransactionLog;
 };

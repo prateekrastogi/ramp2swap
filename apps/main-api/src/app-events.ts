@@ -1,4 +1,4 @@
-export type AppEventName = 'affiliate'
+export type AppEventName = 'affiliate' | 'conversion'
 
 export type AffiliateAppEvent = {
   event: 'affiliate'
@@ -7,7 +7,15 @@ export type AffiliateAppEvent = {
   timestamp: number
 }
 
-export type AppEventLog = AffiliateAppEvent
+export type ConversionAppEvent = {
+  event: 'conversion'
+  transaction_id: string | null
+  username: string | null
+  campaign: string | null
+  timestamp: number
+}
+
+export type AppEventLog = AffiliateAppEvent | ConversionAppEvent
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
@@ -21,6 +29,17 @@ const appEventMappers: Record<AppEventName, (event: unknown) => AppEventLog> = {
 
     return {
       event: 'affiliate',
+      username: getStringField(payload?.username),
+      campaign: getStringField(payload?.campaign),
+      timestamp: Date.now()
+    }
+  },
+  conversion: (event) => {
+    const payload = isRecord(event) ? event : null
+
+    return {
+      event: 'conversion',
+      transaction_id: getStringField(payload?.transaction_id),
       username: getStringField(payload?.username),
       campaign: getStringField(payload?.campaign),
       timestamp: Date.now()
