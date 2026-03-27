@@ -403,6 +403,58 @@ app.post('/link/delete', async (c) => {
 
 app.post('/transaction', async (c) => {
   const transaction = await parseRequestBody(c.req);
+  const transactionId =
+    typeof transaction.transaction_id === 'string' ? transaction.transaction_id.trim() : '';
+  const status = typeof transaction.status === 'string' ? transaction.status.trim() : '';
+  const amount = typeof transaction.amount === 'string' ? transaction.amount.trim() : null;
+  const fromSymbol = typeof transaction.from === 'string' ? transaction.from.trim() : null;
+  const toSymbol = typeof transaction.to === 'string' ? transaction.to.trim() : null;
+  const walletAddress =
+    typeof transaction.walletAddress === 'string' ? transaction.walletAddress.trim() : null;
+  const timestamp =
+    typeof transaction.timestamp === 'number' && Number.isFinite(transaction.timestamp)
+      ? transaction.timestamp
+      : null;
+  const now = Date.now();
+
+  if (!transactionId) {
+    return jsonError('transaction_id is required.');
+  }
+
+  if (!status) {
+    return jsonError('status is required.');
+  }
+
+  if (timestamp === null) {
+    return jsonError('timestamp is required.');
+  }
+
+  await c.env.AUTH_DB.prepare(
+    `
+      INSERT INTO transactions (
+        transaction_id,
+        status,
+        amount,
+        from_symbol,
+        to_symbol,
+        wallet_address,
+        timestamp,
+        created_at,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(transaction_id) DO UPDATE SET
+        status = excluded.status,
+        amount = excluded.amount,
+        from_symbol = excluded.from_symbol,
+        to_symbol = excluded.to_symbol,
+        wallet_address = excluded.wallet_address,
+        timestamp = excluded.timestamp,
+        updated_at = excluded.updated_at
+    `,
+  )
+    .bind(transactionId, status, amount, fromSymbol, toSymbol, walletAddress, timestamp, now, now)
+    .run();
 
   console.log('[Partner Transaction]', transaction);
 
