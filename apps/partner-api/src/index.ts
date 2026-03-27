@@ -463,6 +463,37 @@ app.post('/transaction', async (c) => {
 
 app.post('/click', async (c) => {
   const click = await parseRequestBody(c.req);
+  const event = typeof click.event === 'string' ? click.event.trim() : '';
+  const username = typeof click.username === 'string' ? click.username.trim() : null;
+  const campaign = typeof click.campaign === 'string' ? click.campaign.trim() : null;
+  const timestamp =
+    typeof click.timestamp === 'number' && Number.isFinite(click.timestamp)
+      ? click.timestamp
+      : null;
+  const now = Date.now();
+
+  if (!event) {
+    return jsonError('event is required.');
+  }
+
+  if (timestamp === null) {
+    return jsonError('timestamp is required.');
+  }
+
+  await c.env.AUTH_DB.prepare(
+    `
+      INSERT INTO clicks (
+        event,
+        username,
+        campaign,
+        timestamp,
+        created_at
+      )
+      VALUES (?, ?, ?, ?, ?)
+    `,
+  )
+    .bind(event, username, campaign, timestamp, now)
+    .run();
 
   console.log('[Partner Click]', click);
 
