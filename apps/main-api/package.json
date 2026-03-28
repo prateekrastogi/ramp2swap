@@ -2,12 +2,13 @@
   "name": "main-api",
   "type": "module",
   "scripts": {
+    "check:design-system": "node ./scripts/check-design-system.mjs",
     "sync-system-prompt": "node ./scripts/sync-system-prompt.mjs",
     "predev": "npm run sync-system-prompt",
     "dev": "wrangler dev",
-    "predeploy": "npm run sync-system-prompt",
+    "predeploy": "npm run check:design-system && npm run sync-system-prompt",
     "deploy": "wrangler deploy --minify",
-    "precf-typegen": "npm run sync-system-prompt",
+    "precf-typegen": "npm run check:design-system && npm run sync-system-prompt",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {

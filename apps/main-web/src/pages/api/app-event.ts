@@ -2,7 +2,15 @@ import type { APIRoute } from 'astro';
 import { buildMainApiProxyHeaders, forwardToMainApi } from '../../lib/main-api-proxy';
 
 export const POST: APIRoute = async ({ request }) => {
-  const rawBody = await request.text().catch(() => '');
+  const requestClone = request.clone();
+  let rawBody = await request.text().catch(() => '');
+
+  if (!rawBody.trim()) {
+    const parsedBody = await requestClone.json().catch(() => null);
+    if (parsedBody && typeof parsedBody === 'object') {
+      rawBody = JSON.stringify(parsedBody);
+    }
+  }
 
   if (!rawBody.trim()) {
     return new Response(

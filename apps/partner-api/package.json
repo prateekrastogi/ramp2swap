@@ -2,13 +2,14 @@
 	"name": "partner-api",
 	"type": "module",
 	"scripts": {
+		"check:design-system": "node ./scripts/check-design-system.mjs",
 		"migrate:local": "wrangler d1 migrations apply AUTH_DB --local",
 		"migrate:staging": "wrangler d1 migrations apply AUTH_DB --remote --env staging",
 		"migrate:prod": "wrangler d1 migrations apply AUTH_DB --remote",
 		"setup:auth-local": "node ../../scripts/setup-partner-auth-local.mjs && npm run migrate:local",
 		"dev": "npm run setup:auth-local && wrangler dev --local",
-		"deploy:staging": "node ./scripts/deploy-with-migrations.mjs --env staging --minify",
-		"deploy": "node ./scripts/deploy-with-migrations.mjs --minify",
+		"deploy:staging": "npm run check:design-system && node ./scripts/deploy-with-migrations.mjs --env staging --minify",
+		"deploy": "npm run check:design-system && node ./scripts/deploy-with-migrations.mjs --minify",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings"
 	},
 	"dependencies": {

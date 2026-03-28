@@ -71,9 +71,19 @@ function getAffiliateEventFromLocation() {
 }
 
 const affiliateEvent = getAffiliateEventFromDom() ?? getAffiliateEventFromLocation();
+const LOCAL_MAIN_API_ORIGIN = 'http://127.0.0.1:7878';
+
+function getAppEventEndpoint() {
+  const isLocalHost =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
+
+  return isLocalHost ? `${LOCAL_MAIN_API_ORIGIN}/app-event` : '/api/app-event';
+}
+
 async function sendAppEventToServer(payload: AppEventRequest) {
   try {
-    await fetch('/api/app-event', {
+    await fetch(getAppEventEndpoint(), {
       method: 'POST',
       headers: buildLocalDebugCountryHeaders(window.location.hostname),
       body: JSON.stringify(payload),

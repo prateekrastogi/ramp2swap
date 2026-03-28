@@ -89,7 +89,7 @@ app.use(
   cors({
     origin: ['http://localhost:1234', 'http://127.0.0.1:1234'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
-    allowHeaders: ['Content-Type']
+    allowHeaders: ['Content-Type', 'x-debug-country']
   })
 )
 
@@ -191,10 +191,6 @@ app.post('/app-event', async (c) => {
   if (mappedEvent.event === 'conversion') {
     c.executionCtx.waitUntil(forwardConversionToPartnerApi(c.env, mappedEvent))
   }
-
-  console.log(`[App Event] ${mappedEvent.event}`, {
-    ...mappedEvent
-  })
 
   return c.json(
     {
