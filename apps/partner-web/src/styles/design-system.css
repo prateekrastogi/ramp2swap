@@ -487,19 +487,133 @@
   font-weight: 400;
 }
 
-.analytics-top-links-card .progress-row .data-small {
+.analytics-geo-card .progress-list {
+  padding: 12px;
+  border: 1px solid var(--white-a-08);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+    rgba(15, 20, 25, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 12px 30px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(22px) saturate(150%);
+}
+
+.analytics-top-links-card .progress-row {
+  padding: 0;
+}
+
+.analytics-geo-card .progress-row {
+  padding: 0;
+}
+
+.analytics-top-links-card .progress-row .data-small,
+.analytics-breakdown-card .progress-row .body-small,
+.analytics-breakdown-card .progress-row .data-small {
   color: var(--slate-100);
 }
 
-.analytics-top-links-card .progress-track {
+.analytics-top-links-card .progress-track,
+.analytics-breakdown-card .progress-track {
   background: rgba(15, 20, 25, 0.55);
   border-color: var(--mint-border-soft);
 }
 
-.analytics-top-links-card .progress-fill {
+.analytics-top-links-card .progress-fill,
+.analytics-breakdown-card .progress-fill {
   background: linear-gradient(90deg, var(--mint-tint-strong), var(--mint-tint-soft));
   border-right: 1px solid var(--mint-500);
   box-shadow: 0 0 18px var(--mint-ring-soft);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.analytics-breakdown-button {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+
+.analytics-geo-card .analytics-breakdown-button {
+  padding: 10px 0;
+}
+
+.analytics-breakdown-button::after {
+  content: attr(data-breakdown-label) '\A' attr(data-breakdown-clicks) ' clicks' '\A' attr(data-breakdown-conversions) ' conversions' '\A' 'Conversion ' attr(data-breakdown-conversion) '\A' 'Share ' attr(data-breakdown-percent);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  transform: translateX(-50%) translateY(6px);
+  min-width: 144px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(20, 28, 36, 0.92);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: var(--slate-100);
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  line-height: 1.55;
+  text-align: left;
+  white-space: pre-line;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 4;
+}
+
+.analytics-breakdown-button::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(20, 28, 36, 0.92);
+  transform: translateX(-50%) rotate(45deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 3;
+}
+
+.analytics-breakdown-button:hover::after,
+.analytics-breakdown-button:hover::before,
+.analytics-breakdown-button:focus::after,
+.analytics-breakdown-button:focus::before,
+.analytics-breakdown-button:focus-visible::after,
+.analytics-breakdown-button:focus-visible::before {
+  opacity: 1;
+}
+
+.analytics-breakdown-button:hover::after,
+.analytics-breakdown-button:focus::after,
+.analytics-breakdown-button:focus-visible::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+.analytics-breakdown-button:hover .progress-fill,
+.analytics-breakdown-button:focus-visible .progress-fill {
+  background: linear-gradient(90deg, rgba(0, 229, 160, 0.28), rgba(0, 229, 160, 0.12));
+  border-right-color: rgba(0, 229, 160, 0.35);
+  box-shadow: 0 0 20px rgba(0, 229, 160, 0.14);
+  transform: translateY(-2px);
+}
+
+.analytics-breakdown-button:hover .progress-track,
+.analytics-breakdown-button:focus-visible .progress-track {
+  border-color: rgba(0, 229, 160, 0.35);
 }
 
 .analytics-empty-state {

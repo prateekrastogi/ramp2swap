@@ -45,14 +45,17 @@ type AnalyticsSummary = {
 type AnalyticsBreakdownItem = {
   label: string;
   pct: number;
+  clicks: number;
+  conversions: number;
+  conversionRate: string;
 };
 
 type PartnerAnalyticsPayload = {
   ok?: boolean;
   username?: string;
   ranges?: Partial<Record<AnalyticsRangeKey, AnalyticsSummary>>;
-  topLinks?: AnalyticsBreakdownItem[];
-  geography?: AnalyticsBreakdownItem[];
+  topLinks?: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>>;
+  geography?: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>>;
 };
 
 const sessionToken = Astro.cookies.get('partner_session')?.value ?? '';
@@ -71,8 +74,8 @@ const partnerSettings = {
 let savedPartnerLinks: PartnerLink[] = [];
 let transactionFeedItems: TransactionFeedItem[] = [];
 let analyticsSummaries: Partial<Record<AnalyticsRangeKey, AnalyticsSummary>> = {};
-let topPerformingLinks: AnalyticsBreakdownItem[] = [];
-let geographicBreakdown: AnalyticsBreakdownItem[] = [];
+let topPerformingLinksByRange: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>> = {};
+let geographicBreakdownByRange: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>> = {};
 
 const formatCompactDate = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -134,8 +137,14 @@ if (sessionToken && partnerApiBaseUrl) {
     const analyticsPayload = (await analyticsResponse.json().catch(() => null)) as PartnerAnalyticsPayload | null;
     if (analyticsResponse.ok && analyticsPayload?.ok) {
       analyticsSummaries = analyticsPayload.ranges ?? analyticsSummaries;
-      topPerformingLinks = Array.isArray(analyticsPayload.topLinks) ? analyticsPayload.topLinks : topPerformingLinks;
-      geographicBreakdown = Array.isArray(analyticsPayload.geography) ? analyticsPayload.geography : geographicBreakdown;
+      topPerformingLinksByRange =
+        analyticsPayload.topLinks && typeof analyticsPayload.topLinks === 'object'
+          ? analyticsPayload.topLinks
+          : topPerformingLinksByRange;
+      geographicBreakdownByRange =
+        analyticsPayload.geography && typeof analyticsPayload.geography === 'object'
+          ? analyticsPayload.geography
+          : geographicBreakdownByRange;
     }
 
     transactionFeedItems = loadedTransactionFeed;
@@ -171,7 +180,47 @@ const renderAnalyticsBars = (points: AnalyticsChartPoint[]) =>
     )
     .join('');
 
+const escapeAnalyticsHtml = (value: string | number) =>
+  String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+
+const formatAnalyticsPct = (pct: number) => `${Number.isInteger(pct) ? pct.toFixed(0) : pct.toFixed(1)}%`;
+
+const renderAnalyticsBreakdownRows = (items: AnalyticsBreakdownItem[]) =>
+  items
+    .map(
+      (item) => `
+        <div class="progress-row">
+          <button
+            class="analytics-breakdown-button"
+            type="button"
+            data-breakdown-label="${escapeAnalyticsHtml(item.label)}"
+            data-breakdown-clicks="${item.clicks}"
+            data-breakdown-conversions="${item.conversions}"
+            data-breakdown-conversion="${escapeAnalyticsHtml(item.conversionRate)}"
+            data-breakdown-percent="${formatAnalyticsPct(item.pct)}"
+            aria-label="${escapeAnalyticsHtml(item.label)}: ${item.clicks} clicks, ${item.conversions} conversions, ${escapeAnalyticsHtml(item.conversionRate)} conversion rate, ${formatAnalyticsPct(item.pct)} share"
+          >
+            <div class="row-12 analytics-progress-head">
+              <span class="body-small">${escapeAnalyticsHtml(item.label)}</span>
+              <span class="data-small">${formatAnalyticsPct(item.pct)}</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: ${item.pct}%;"></div>
+            </div>
+          </button>
+        </div>
+      `,
+    )
+    .join('');
+
 const analyticsRangeOrder: AnalyticsRangeKey[] = ['30D', '10D', '90D'];
+const analyticsRangeFallbackKey =
+  analyticsRangeOrder.find((rangeKey) => analyticsSummaries[rangeKey] || topPerformingLinksByRange[rangeKey] || geographicBreakdownByRange[rangeKey]) ?? '30D';
 const analyticsChartDefaultRange =
   analyticsRangeOrder
     .map((rangeKey) => analyticsSummaries[rangeKey] ?? null)
@@ -181,8 +230,14 @@ const analyticsChartDefaultRange =
   analyticsSummaries['90D'] ??
   null;
 const analyticsHasChartData = analyticsChartDefaultRange !== null && analyticsChartDefaultRange.points.some((point) => point.clicks > 0);
-const analyticsHasTopLinks = topPerformingLinks.length > 0;
-const analyticsHasGeography = geographicBreakdown.length > 0;
+const analyticsTopLinksDefaultRangeKey =
+  analyticsRangeOrder.find((rangeKey) => (topPerformingLinksByRange[rangeKey] ?? []).length > 0) ?? analyticsRangeFallbackKey;
+const analyticsGeoDefaultRangeKey =
+  analyticsRangeOrder.find((rangeKey) => (geographicBreakdownByRange[rangeKey] ?? []).length > 0) ?? analyticsRangeFallbackKey;
+const analyticsTopLinksDefaultItems = topPerformingLinksByRange[analyticsTopLinksDefaultRangeKey] ?? [];
+const analyticsGeoDefaultItems = geographicBreakdownByRange[analyticsGeoDefaultRangeKey] ?? [];
+const analyticsHasTopLinks = analyticsTopLinksDefaultItems.length > 0;
+const analyticsHasGeography = analyticsGeoDefaultItems.length > 0;
 ---
 
 <!doctype html>
@@ -642,24 +697,23 @@ const analyticsHasGeography = geographicBreakdown.length > 0;
                 )}
               </article>
 
-              <article class="card glass glass-tier-1 glass-interactive analytics-top-links-card on-glass">
+              <article
+                class="card glass glass-tier-1 glass-interactive analytics-top-links-card on-glass"
+                data-analytics-breakdown-card="top-links"
+                data-analytics-breakdown-ranges={analyticsHasTopLinks ? JSON.stringify(topPerformingLinksByRange) : undefined}
+              >
                 <div class="widget-header">
                   <p class="heading-card">Top Performing Links</p>
+                  {analyticsHasTopLinks ? (
+                    <div class="analytics-range-toggle" role="tablist" aria-label="Top performing links range">
+                      <button class={`analytics-range-button ${analyticsTopLinksDefaultRangeKey === '10D' ? 'analytics-range-button-active' : ''}`} type="button" data-breakdown-range-toggle="10D">10D</button>
+                      <button class={`analytics-range-button ${analyticsTopLinksDefaultRangeKey === '30D' ? 'analytics-range-button-active' : ''}`} type="button" data-breakdown-range-toggle="30D">30D</button>
+                      <button class={`analytics-range-button ${analyticsTopLinksDefaultRangeKey === '90D' ? 'analytics-range-button-active' : ''}`} type="button" data-breakdown-range-toggle="90D">90D</button>
+                    </div>
+                  ) : null}
                 </div>
                 {analyticsHasTopLinks ? (
-                  <div class="progress-list">
-                    {topPerformingLinks.map((item) => (
-                      <div class="progress-row">
-                        <div class="row-12 analytics-progress-head">
-                          <span class="body-small">{item.label}</span>
-                          <span class="data-small">{item.pct}%</span>
-                        </div>
-                        <div class="progress-track">
-                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <div class="progress-list" data-analytics-breakdown-body set:html={renderAnalyticsBreakdownRows(analyticsTopLinksDefaultItems)}></div>
                 ) : (
                   <div class="analytics-empty-state">
                     <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
@@ -669,24 +723,23 @@ const analyticsHasGeography = geographicBreakdown.length > 0;
                 )}
               </article>
 
-              <article class="card glass glass-tier-1 glass-interactive on-glass analytics-breakdown-card analytics-geo-card">
+              <article
+                class="card glass glass-tier-1 glass-interactive on-glass analytics-breakdown-card analytics-geo-card"
+                data-analytics-breakdown-card="geography"
+                data-analytics-breakdown-ranges={analyticsHasGeography ? JSON.stringify(geographicBreakdownByRange) : undefined}
+              >
                 <div class="widget-header">
                   <p class="heading-card">Geographic Breakdown</p>
+                  {analyticsHasGeography ? (
+                    <div class="analytics-range-toggle" role="tablist" aria-label="Geographic breakdown range">
+                      <button class={`analytics-range-button ${analyticsGeoDefaultRangeKey === '10D' ? 'analytics-range-button-active' : ''}`} type="button" data-breakdown-range-toggle="10D">10D</button>
+                      <button class={`analytics-range-button ${analyticsGeoDefaultRangeKey === '30D' ? 'analytics-range-button-active' : ''}`} type="button" data-breakdown-range-toggle="30D">30D</button>
+                      <button class={`analytics-range-button ${analyticsGeoDefaultRangeKey === '90D' ? 'analytics-range-button-active' : ''}`} type="button" data-breakdown-range-toggle="90D">90D</button>
+                    </div>
+                  ) : null}
                 </div>
                 {analyticsHasGeography ? (
-                  <div class="progress-list">
-                    {geographicBreakdown.map((item) => (
-                      <div class="progress-row">
-                        <div class="row-12 analytics-progress-head">
-                          <span class="body-small">{item.label}</span>
-                          <span class="data-small">{item.pct}%</span>
-                        </div>
-                        <div class="progress-track">
-                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <div class="progress-list analytics-geo-list" data-analytics-breakdown-body set:html={renderAnalyticsBreakdownRows(analyticsGeoDefaultItems)}></div>
                 ) : (
                   <div class="analytics-empty-state">
                     <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
@@ -1902,6 +1955,98 @@ const analyticsHasGeography = geographicBreakdown.length > 0;
           console.warn('[partner-web] failed to initialize analytics chart', error);
         }
       }
+
+      document.querySelectorAll('[data-analytics-breakdown-card]').forEach((card) => {
+        if (!(card instanceof HTMLElement)) {
+          return;
+        }
+
+        const body = card.querySelector('[data-analytics-breakdown-body]');
+        const rangeButtons = card.querySelectorAll('[data-breakdown-range-toggle]');
+        const rangesJson = card.dataset.analyticsBreakdownRanges ?? '';
+
+        const escapeBreakdownHtml = (value) =>
+          String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+
+        const formatBreakdownPct = (pct) => {
+          const numeric = Number(pct) || 0;
+          return Number.isInteger(numeric) ? `${numeric.toFixed(0)}%` : `${numeric.toFixed(1)}%`;
+        };
+
+        const renderBreakdownRows = (items) =>
+          items
+            .map(
+              (item) => `
+                <div class="progress-row">
+                  <button
+                    class="analytics-breakdown-button"
+                    type="button"
+                    data-breakdown-label="${escapeBreakdownHtml(item.label)}"
+                    data-breakdown-clicks="${Number(item.clicks) || 0}"
+                    data-breakdown-conversions="${Number(item.conversions) || 0}"
+                    data-breakdown-conversion="${escapeBreakdownHtml(item.conversionRate)}"
+                    data-breakdown-percent="${formatBreakdownPct(item.pct)}"
+                    aria-label="${escapeBreakdownHtml(item.label)}: ${Number(item.clicks) || 0} clicks, ${Number(item.conversions) || 0} conversions, ${escapeBreakdownHtml(item.conversionRate)} conversion rate, ${formatBreakdownPct(item.pct)} share"
+                  >
+                    <div class="row-12 analytics-progress-head">
+                      <span class="body-small">${escapeBreakdownHtml(item.label)}</span>
+                      <span class="data-small">${formatBreakdownPct(item.pct)}</span>
+                    </div>
+                    <div class="progress-track">
+                      <div class="progress-fill" style="width: ${Math.max(0, Number(item.pct) || 0)}%;"></div>
+                    </div>
+                  </button>
+                </div>
+              `,
+            )
+            .join('');
+
+        try {
+          const parsedRanges = JSON.parse(rangesJson);
+          const getRangeItems = (rangeKey) => {
+            if (!parsedRanges || typeof parsedRanges !== 'object') {
+              return null;
+            }
+
+            const candidate = parsedRanges[rangeKey];
+            if (!Array.isArray(candidate)) {
+              return null;
+            }
+
+            return candidate;
+          };
+
+          const setActiveRange = (rangeKey) => {
+            const nextItems = getRangeItems(rangeKey);
+            if (!Array.isArray(nextItems) || !(body instanceof HTMLElement)) {
+              return;
+            }
+
+            body.innerHTML = renderBreakdownRows(nextItems);
+            rangeButtons.forEach((button) => {
+              button.classList.toggle('analytics-range-button-active', button.getAttribute('data-breakdown-range-toggle') === rangeKey);
+            });
+          };
+
+          rangeButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+              const rangeKey = button.getAttribute('data-breakdown-range-toggle');
+              if (!rangeKey) {
+                return;
+              }
+
+              setActiveRange(rangeKey);
+            });
+          });
+        } catch (error) {
+          console.warn('[partner-web] failed to initialize analytics breakdown card', error);
+        }
+      });
 
     </script>
   </body>
