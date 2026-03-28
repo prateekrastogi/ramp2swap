@@ -28,17 +28,22 @@ This file is the partner-web addendum to the shared Ramp2Swap design system.
 4. Re-check both docs before finalizing.
 5. Build and verify no regressions.
 
+## Current Doc Corrections
+- `.glass-highlight-soft` is a shared Ramp2Swap glass primitive defined in `packages/design-system/src/styles/foundation.css`, not a partner-only variant.
+- Partner-web may compose that shared primitive for dashboard emphasis, but must not describe it as app-owned.
+
 ## Partner Web Layer
 Partner-web owns:
 - dashboard shell and sidebar behavior
 - login screen layout and showcase treatment
 - analytics, earnings, settings, and referral-management composition
-- partner-only spotlight card variants such as `.glass-highlight-soft`
+- partner-only composition around shared glass primitives
 
 Partner-web does not own:
 - global palette tokens
 - global typography scale
 - shared glass tiers
+- shared glass highlight/mint primitives
 - reusable logo primitives
 - generic cards, tables, chips, buttons, inputs, and status styles
 
@@ -59,9 +64,21 @@ Partner-web does not own:
 
 ## Analytics And Settings
 - Analytics and settings layouts may customize composition locally, but should continue using shared primitives for typography, chips, tables, buttons, and form controls.
-- Highlighted insight surfaces may use `.glass-highlight-soft`; that variant is partner-web specific until another app needs it.
+- Highlighted insight surfaces may use the shared `.glass-highlight-soft` primitive.
 - Empty states in analytics, link management, and transaction views must use the shared `.empty-state-copy` utility and shared semantic tokens from `packages/design-system/src/styles/foundation.css`.
 - Do not introduce partner-local palette guesses such as undefined `--slate-*` steps for muted text; promote a shared semantic token first if the existing one is insufficient.
+- Analytics cards that support time windows must keep range behavior explicit per card and only show blank states when the authenticated partner truly has no data for that surface.
+- Tooltip content for analytics comparisons must be calculated from real backend values, not hardcoded percentages or placeholder conversion rates.
+
+## Referral Stream Rules
+- The transaction/referral stream must avoid horizontal overflow at every breakpoint.
+- Desktop keeps the full table.
+- The transient range between mobile and full tablet collapses to 4 visible columns:
+  - `Transaction`
+  - `Status`
+  - `AMOUNT($)`
+  - `Pair`
+- Mobile may collapse further, but visible-row count must remain intentional and variable-driven rather than hardcoded pixel guesses.
 
 ## Canonical Files
 - Shared CSS: `packages/design-system/src/styles/foundation.css`

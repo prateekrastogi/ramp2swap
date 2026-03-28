@@ -1864,6 +1864,21 @@
   }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  .transaction-table-wrap {
+    overflow-x: hidden;
+  }
+
+  .transaction-table-wrap .table {
+    min-width: 0;
+  }
+
+  .transaction-table-wrap .table th:nth-child(n + 5),
+  .transaction-table-wrap .table td:nth-child(n + 5) {
+    display: none;
+  }
+}
+
 @media (max-width: 767px) {
   .login-shell {
     padding: 20px 0 28px;

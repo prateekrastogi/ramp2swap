@@ -78,6 +78,11 @@ Do not reference undefined CSS variables. If a UI need is semantic, add a named 
 - Empty-state copy should use `--text-empty-state` and the shared `.empty-state-copy` utility instead of card-specific text overrides.
 - App styles may change layout around empty states, but should not redefine empty-state text color unless the shared token itself is being intentionally updated.
 
+## Responsive Data-Dense Surface Rules
+- Shared table primitives must allow app-level viewport tuning, but app styles should size scroll regions with semantic variables instead of hardcoded one-off heights when a surface has a fixed visible-row requirement.
+- If a data surface intentionally collapses columns across breakpoints, define the visible-column behavior explicitly per breakpoint rather than relying on overflow.
+- Product-local responsive table behavior belongs in the owning app docs when it is specific to that workflow.
+
 ## Logo System (Strict)
 Two approved reusable variants:
 - Logomark: square mint mark only
@@ -154,6 +159,10 @@ Use `.glass-mint` for action surfaces only.
 - `.input-glass:focus-visible`
 - `.btn-glass:active`
 - `.on-glass` type adjustments
+
+### App Composition Rule
+- Shared glass primitives such as `.glass-tier-*`, `.glass-mint`, and `.glass-highlight-soft` may be composed locally by apps, but their visual language remains shared and must be documented here first.
+- App styles may tune layout, density, or breakpoint behavior around those primitives, but should not redefine them as app-owned variants.
 
 ### Responsive Blur Performance Rules
 - Desktop: Tier1 `20px`, Tier2 `40px`, Tier3 `60px`, Nav `20px`
