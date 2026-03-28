@@ -26,10 +26,11 @@ export const insertClickQuery = `
     event,
     username,
     campaign,
+    country,
     timestamp,
     created_at
   )
-  VALUES (?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?)
 `;
 
 export const upsertConversionQuery = `
@@ -38,14 +39,16 @@ export const upsertConversionQuery = `
     event,
     username,
     campaign,
+    country,
     timestamp,
     payout
   )
-  VALUES (?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(transaction_id) DO UPDATE SET
     event = excluded.event,
     username = excluded.username,
     campaign = excluded.campaign,
+    country = excluded.country,
     timestamp = excluded.timestamp,
     payout = excluded.payout
 `;

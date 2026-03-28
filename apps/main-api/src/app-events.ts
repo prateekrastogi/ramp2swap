@@ -4,6 +4,7 @@ export type AffiliateAppEvent = {
   event: 'affiliate'
   username: string | null
   campaign: string | null
+  country: string | null
   timestamp: number
 }
 
@@ -12,6 +13,7 @@ export type ConversionAppEvent = {
   transaction_id: string | null
   username: string | null
   campaign: string | null
+  country: string | null
   timestamp: number
 }
 
@@ -23,6 +25,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const getStringField = (value: unknown) =>
   typeof value === 'string' && value.trim() ? value.trim() : null
 
+const getNullableCountry = (value: unknown) => {
+  const country = getStringField(value)?.toUpperCase() ?? null
+  return country && /^[A-Z]{2}$/.test(country) ? country : null
+}
+
 const appEventMappers: Record<AppEventName, (event: unknown) => AppEventLog> = {
   affiliate: (event) => {
     const payload = isRecord(event) ? event : null
@@ -31,6 +38,7 @@ const appEventMappers: Record<AppEventName, (event: unknown) => AppEventLog> = {
       event: 'affiliate',
       username: getStringField(payload?.username),
       campaign: getStringField(payload?.campaign),
+      country: getNullableCountry(payload?.country),
       timestamp: Date.now()
     }
   },
@@ -42,6 +50,7 @@ const appEventMappers: Record<AppEventName, (event: unknown) => AppEventLog> = {
       transaction_id: getStringField(payload?.transaction_id),
       username: getStringField(payload?.username),
       campaign: getStringField(payload?.campaign),
+      country: getNullableCountry(payload?.country),
       timestamp: Date.now()
     }
   }

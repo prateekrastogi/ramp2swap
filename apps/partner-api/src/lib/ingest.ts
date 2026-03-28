@@ -38,19 +38,21 @@ export const saveClick = async (
     event,
     username,
     campaign,
+    country,
     timestamp,
     now,
   }: {
     event: string;
     username: string | null;
     campaign: string | null;
+    country: string | null;
     timestamp: number;
     now: number;
   },
 ) => {
   await db
     .prepare(insertClickQuery)
-    .bind(event, username, campaign, timestamp, now)
+    .bind(event, username, campaign, country, timestamp, now)
     .run();
 };
 
@@ -61,6 +63,7 @@ export const saveConversion = async (
     event,
     username,
     campaign,
+    country,
     timestamp,
     payout,
   }: {
@@ -68,12 +71,13 @@ export const saveConversion = async (
     event: string;
     username: string | null;
     campaign: string | null;
+    country: string | null;
     timestamp: number;
     payout: string | null;
   },
 ) => {
   await db
     .prepare(upsertConversionQuery)
-    .bind(transactionId, event, username, campaign, timestamp, payout)
+    .bind(transactionId, event, username, campaign, country, timestamp, payout)
     .run();
 };

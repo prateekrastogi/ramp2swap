@@ -481,6 +481,7 @@ app.post('/click', async (c) => {
   const event = typeof click.event === 'string' ? click.event.trim() : '';
   const username = typeof click.username === 'string' ? click.username.trim() : null;
   const campaign = typeof click.campaign === 'string' ? click.campaign.trim() : null;
+  const country = typeof click.country === 'string' ? click.country.trim().toUpperCase() : null;
   const timestamp =
     typeof click.timestamp === 'number' && Number.isFinite(click.timestamp)
       ? click.timestamp
@@ -499,6 +500,7 @@ app.post('/click', async (c) => {
     event,
     username,
     campaign,
+    country,
     timestamp,
     now,
   });
@@ -515,6 +517,8 @@ app.post('/conversion', async (c) => {
     typeof conversion.transaction_id === 'string' ? conversion.transaction_id.trim() : '';
   const username = typeof conversion.username === 'string' ? conversion.username.trim() : null;
   const campaign = typeof conversion.campaign === 'string' ? conversion.campaign.trim() : null;
+  const country =
+    typeof conversion.country === 'string' ? conversion.country.trim().toUpperCase() : null;
   const timestamp =
     typeof conversion.timestamp === 'number' && Number.isFinite(conversion.timestamp)
       ? conversion.timestamp
@@ -538,6 +542,7 @@ app.post('/conversion', async (c) => {
     event,
     username,
     campaign,
+    country,
     timestamp,
     payout,
   });

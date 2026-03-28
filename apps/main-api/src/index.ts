@@ -6,6 +6,7 @@ import {
   isWidgetExecutionEventName,
   mapWidgetTransaction,
 } from './widget-events'
+import { getRequestCountry } from './lib/request-country'
 
 const app = new Hono<{ Bindings: MainApiBindings }>()
 const DEFAULT_LOCAL_PARTNER_API_ORIGIN = 'http://127.0.0.1:8787'
@@ -177,7 +178,11 @@ app.post('/app-event', async (c) => {
     )
   }
 
-  const mappedEvent = mapAppEvent(eventName, body)
+  const country = getRequestCountry(c.req.raw)
+  const mappedEvent = mapAppEvent(eventName, {
+    ...(body ?? {}),
+    country
+  })
 
   if (mappedEvent.event === 'affiliate') {
     c.executionCtx.waitUntil(forwardAffiliateClickToPartnerApi(c.env, mappedEvent))

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { forwardToMainApi } from '../../lib/main-api-proxy';
+import { buildMainApiProxyHeaders, forwardToMainApi } from '../../lib/main-api-proxy';
 
 export const POST: APIRoute = async ({ request }) => {
   const rawBody = await request.text().catch(() => '');
@@ -21,9 +21,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const init: RequestInit = {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
+    headers: buildMainApiProxyHeaders(request),
     body: rawBody,
   };
 
