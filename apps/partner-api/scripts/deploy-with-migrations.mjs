@@ -18,7 +18,6 @@ const getEnvName = (argv) => {
 };
 
 const envName = getEnvName(args);
-const migrateScript = envName === 'staging' ? 'migrate:staging' : 'migrate:prod';
 
 const run = (command, commandArgs) => {
   const result = spawnSync(command, commandArgs, {
@@ -35,10 +34,14 @@ const run = (command, commandArgs) => {
   }
 };
 
-run('npm', ['run', migrateScript]);
+if (envName === 'staging') {
+  run('wrangler', ['d1', 'migrations', 'apply', 'AUTH_DB', '--remote', '--env', 'staging']);
+} else {
+  run('wrangler', ['d1', 'migrations', 'apply', 'AUTH_DB', '--remote']);
+}
 
 if (envName === 'staging') {
-  run('npm', ['run', 'testbench:ensure:staging']);
+  run('node', ['./test/ensure-test-bench.mjs', '--env', 'staging']);
 }
 
 run('wrangler', ['deploy', ...args]);

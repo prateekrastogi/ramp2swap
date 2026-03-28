@@ -29,4 +29,4 @@ This file defines the design-system boundary for `apps/partner-api`.
 ## Change Protocol
 1. Update `packages/design-system` first when the change affects shared brand language.
 2. Update this file when partner-api adds or changes a visual surface.
-3. Re-run `npm run check:design-system --workspace apps/partner-api`.
+3. Re-run `node ./scripts/check-design-system.mjs` from `apps/partner-api`.

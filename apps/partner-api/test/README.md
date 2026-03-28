@@ -12,18 +12,13 @@ This folder contains a deterministic database test bench for `partner-api`.
 
 ## Environment sets
 - Local:
-  - `LOCAL_TEST_EMAIL_1`
-  - `LOCAL_TEST_EMAIL_2`
-  - `LOCAL_TEST_EMAIL_3`
+  - `LOCAL_TEST_EMAIL_1=test1@gmail.com`
+  - `LOCAL_TEST_EMAIL_2=test2@gmail.com`
+  - `LOCAL_TEST_EMAIL_3=test3@gmail.com`
 - Staging:
-  - `STAGING_TEST_EMAIL_1`
-  - `STAGING_TEST_EMAIL_2`
-  - `STAGING_TEST_EMAIL_3`
-
-## Important note
-- The original request listed `test1@gmail.com` twice for local.
-- `auth_users.email` is unique, so the example env uses `test2@gmail.com` for `LOCAL_TEST_EMAIL_2`.
-- If you really need a different second local address, replace the env value and regenerate.
+  - `STAGING_TEST_EMAIL_1=prastogi34@gmail.com`
+  - `STAGING_TEST_EMAIL_2=prtk6592@gmail.com`
+  - `STAGING_TEST_EMAIL_3=p.rastogi@outlook.com`
 
 ## Generated outputs
 - `partner-testbench.local.sql`
@@ -37,21 +32,15 @@ The generator works automatically in this order:
 2. `test/.env` if present
 3. built-in defaults
 
-That means the default local and staging email sets already work out of the box.
-
-Generate only:
-1. Run `npm run testbench:generate`.
-
-Apply end-to-end:
-1. Local: `npm run testbench:apply:local`
-2. Staging: `npm run testbench:apply:staging`
+That means the default local and staging email sets already work out of the box, and you only need overrides if you want different seed identities.
 
 Automatic ensure behavior:
-- Local startup (`npm run dev`) now runs `testbench:ensure:local` after migrations.
-- Staging deploy (`npm run deploy:staging`) now runs `testbench:ensure:staging` after migrations and before deploy.
+- Local startup (`npm run dev`) now runs local migrations and then automatically ensures the local test bench.
+- Staging deploy (`npm run deploy:staging`) now runs staging migrations and then automatically ensures the staging test bench before deploy.
 - The ensure step checks whether the expected seeded users and their bench data are already present in the correct order.
 - If the bench is missing or drifted, it reapplies the generated SQL automatically.
 - Seed SQL is targeted to the test-bench identities so email collisions are refreshed instead of failing on unique constraints.
+- The generator is called internally by the ensure step, so there is no separate package script required for it.
 
 Manual SQL apply is still available if needed:
 - Local: `wrangler d1 execute AUTH_DB --local --file=./test/partner-testbench.local.sql`
