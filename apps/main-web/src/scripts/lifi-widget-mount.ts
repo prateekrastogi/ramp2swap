@@ -9,14 +9,12 @@ import {
 import { createElement, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { getLiFiWidgetRuntimeConfig } from '../lib/lifi-config';
-import { startSyntheticWidgetEvents } from '../lib/synthetic-widget-events';
 import {
   mapWidgetExecutionEvent,
   mapWidgetExecutionEventToTransaction,
   type WidgetExecutionEventName,
   type WidgetTransactionLog,
 } from '../lib/widget-events';
-import { buildLocalDebugCountryHeaders } from '../lib/local-debug-country';
 
 const rootElement = document.getElementById('lifi-widget-root');
 const headerConnectButton = document.getElementById('header-connect-wallet');
@@ -67,7 +65,9 @@ async function sendWidgetEventToServer(payload: WidgetEventLogPayload) {
   try {
     await fetch(getWidgetEventEndpoint(), {
       method: 'POST',
-      headers: buildLocalDebugCountryHeaders(window.location.hostname),
+      headers: {
+        'content-type': 'application/json',
+      },
       body: serializeWidgetEventPayload(payload),
     });
   } catch {}
@@ -112,10 +112,6 @@ function logRouteExecutionFailed(event: RouteExecutionUpdate) {
 widgetEvents.on(WidgetEvent.RouteExecutionStarted, logRouteExecutionStarted);
 widgetEvents.on(WidgetEvent.RouteExecutionCompleted, logRouteExecutionCompleted);
 widgetEvents.on(WidgetEvent.RouteExecutionFailed, logRouteExecutionFailed);
-
-startSyntheticWidgetEvents((eventName, event) => {
-  widgetEvents.emit(eventName, event);
-}, window.location.hostname);
 
 type IntentWidgetFormValues = Partial<{
   fromAmount: string;

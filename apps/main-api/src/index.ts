@@ -89,7 +89,7 @@ app.use(
   cors({
     origin: ['http://localhost:1234', 'http://127.0.0.1:1234'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'x-debug-country']
+    allowHeaders: ['Content-Type']
   })
 )
 

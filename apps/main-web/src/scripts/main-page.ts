@@ -2,7 +2,6 @@ import {
   registerWidgetEventHandler,
   type WidgetEventLogPayload,
 } from './lifi-widget-mount';
-import { buildLocalDebugCountryHeaders } from '../lib/local-debug-country';
 
 type IntentWidgetFormValues = {
   fromAmount?: string;
@@ -16,8 +15,6 @@ type IntentWidgetFormValues = {
 type IntentResponse = {
   success: boolean;
   receivedText?: string;
-  delayMs?: number;
-  mock?: boolean;
   widgetFormValues?: IntentWidgetFormValues;
 };
 
@@ -85,7 +82,9 @@ async function sendAppEventToServer(payload: AppEventRequest) {
   try {
     await fetch(getAppEventEndpoint(), {
       method: 'POST',
-      headers: buildLocalDebugCountryHeaders(window.location.hostname),
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify(payload),
     });
   } catch {}
