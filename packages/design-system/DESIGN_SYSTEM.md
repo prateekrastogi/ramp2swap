@@ -23,6 +23,7 @@ This shared package does not own:
 
 ## Color Palette Rules (Strict)
 Use only the colors below. Do not add new hex/rgb values outside these approved palette and system-state entries.
+Do not reference undefined CSS variables. If a UI need is semantic, add a named semantic token in `:root` that maps to an approved palette token instead of inventing palette steps such as `--slate-400`.
 
 ### 60% Obsidian
 - `#0A0D0F` page canvas and deepest backgrounds
@@ -70,6 +71,12 @@ Use only the colors below. Do not add new hex/rgb values outside these approved 
 ### Approved System State Colors
 - `#F59E0B` amber: pending and warning states only
 - `#EF4444` red: error and failed states only
+
+## Semantic Token Rules
+- When multiple surfaces share the same intent, expose that value through a semantic token instead of repeating raw palette references in app styles.
+- Semantic tokens must still resolve to approved palette/system tokens in `src/styles/foundation.css`.
+- Empty-state copy should use `--text-empty-state` and the shared `.empty-state-copy` utility instead of card-specific text overrides.
+- App styles may change layout around empty states, but should not redefine empty-state text color unless the shared token itself is being intentionally updated.
 
 ## Logo System (Strict)
 Two approved reusable variants:

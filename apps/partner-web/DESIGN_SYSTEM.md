@@ -60,6 +60,8 @@ Partner-web does not own:
 ## Analytics And Settings
 - Analytics and settings layouts may customize composition locally, but should continue using shared primitives for typography, chips, tables, buttons, and form controls.
 - Highlighted insight surfaces may use `.glass-highlight-soft`; that variant is partner-web specific until another app needs it.
+- Empty states in analytics, link management, and transaction views must use the shared `.empty-state-copy` utility and shared semantic tokens from `packages/design-system/src/styles/foundation.css`.
+- Do not introduce partner-local palette guesses such as undefined `--slate-*` steps for muted text; promote a shared semantic token first if the existing one is insufficient.
 
 ## Canonical Files
 - Shared CSS: `packages/design-system/src/styles/foundation.css`

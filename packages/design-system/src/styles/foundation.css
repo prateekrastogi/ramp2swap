@@ -16,6 +16,7 @@
   --slate-300: #7A98B3;
   --slate-500: #3D5269;
   --slate-700: #243040;
+  --text-empty-state: var(--slate-500);
   --ivory-100: #FDF6E3;
   --platinum-500: #C0CDD9;
   --platinum-tint-soft: rgba(192, 205, 217, 0.12);
@@ -518,6 +519,10 @@ body {
   font-weight: 300;
   line-height: 1.65;
   color: var(--slate-500);
+}
+
+.empty-state-copy {
+  color: var(--text-empty-state) !important;
 }
 
 .btn-primary {

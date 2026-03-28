@@ -303,6 +303,7 @@
 .revenue-summary-card,
 .payout-history-card,
 .analytics-chart-card,
+.analytics-top-links-card,
 .analytics-breakdown-card {
   display: grid;
   gap: 18px;
@@ -464,6 +465,12 @@
   min-height: 318px;
 }
 
+.analytics-chart-card,
+.analytics-top-links-card,
+.analytics-breakdown-card {
+  grid-template-rows: auto 1fr;
+}
+
 .analytics-breakdown-card {
   grid-column: 2;
 }
@@ -475,12 +482,12 @@
   min-width: 0;
 }
 
-.analytics-top-links-card .body-small {
+.analytics-top-links-card .progress-row .body-small {
   color: var(--slate-100);
   font-weight: 400;
 }
 
-.analytics-top-links-card .data-small {
+.analytics-top-links-card .progress-row .data-small {
   color: var(--slate-100);
 }
 
@@ -493,6 +500,15 @@
   background: linear-gradient(90deg, var(--mint-tint-strong), var(--mint-tint-soft));
   border-right: 1px solid var(--mint-500);
   box-shadow: 0 0 18px var(--mint-ring-soft);
+}
+
+.analytics-empty-state {
+  display: grid;
+  min-height: 0;
+}
+
+.analytics-empty-card {
+  min-height: 100%;
 }
 
 .settings-grid {
@@ -1034,7 +1050,7 @@
   justify-content: center;
   min-height: 128px;
   text-align: center;
-  color: var(--slate-400);
+  color: var(--text-empty-state);
 }
 
 .link-campaign-meta {
@@ -1086,7 +1102,7 @@
   border: 1px solid var(--white-a-07);
   border-radius: 10px;
   background: rgba(15, 20, 25, 0.48);
-  color: var(--slate-400);
+  color: var(--slate-500);
   display: inline-flex;
   align-items: center;
   justify-content: center;

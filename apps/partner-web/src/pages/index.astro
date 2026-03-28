@@ -1,10 +1,5 @@
 ---
 import '../styles/design-system.css';
-import {
-  analyticsSummaries,
-  geographicBreakdown,
-  topPerformingLinks,
-} from '../data/analytics-mock';
 import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { payoutDisplaySettings } from '../data/settings-display';
@@ -112,25 +107,6 @@ const generatedLinkPlaceholder =
   partnerLinkBaseUrl && partnerSettings.username
     ? `${partnerLinkBaseUrl}?pid=${partnerSettings.username}&cmp=satoshi-nakamoto`
     : 'Generated referral link will appear here';
-
-const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
-  analyticsSummaries[rangeKey].points
-    .map(
-      (point) => `
-        <button
-          class="bar-button"
-          type="button"
-          data-bar-label="${point.label}"
-          data-bar-clicks="${point.clicks}"
-          data-bar-conversion="${point.conversionRate}"
-          aria-label="${point.label}: ${point.clicks} clicks, ${point.conversionRate} conversion rate"
-          style="height: ${point.height}%"
-        >
-          <span class="bar-fill"></span>
-        </button>
-      `,
-    )
-    .join('');
 ---
 
 <!doctype html>
@@ -385,7 +361,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                   ))
                   ) : (
                     <article class="link-campaign-row link-campaign-row-empty" data-empty-links-state>
-                      <p class="body-small">Generated links will appear here as soon as you create your first campaign.</p>
+                      <p class="body-small empty-state-copy">Generated links will appear here as soon as you create your first campaign.</p>
                     </article>
                   )}
                 </div>
@@ -432,7 +408,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                   {transactionFeedItems.length === 0 ? (
                     <div class="transaction-empty-state">
                       <article class="link-campaign-row link-campaign-row-empty transaction-empty-card">
-                        <p class="body-small">No attributed transactions yet.</p>
+                        <p class="body-small empty-state-copy">No attributed transactions yet.</p>
                       </article>
                     </div>
                   ) : (
@@ -556,65 +532,37 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             </div>
 
             <div class="analytics-grid">
-              <article
-                class="card glass glass-tier-1 glass-interactive on-glass analytics-chart-card"
-                data-analytics-chart
-                data-analytics-ranges={JSON.stringify(analyticsSummaries)}
-              >
+              <article class="card glass glass-tier-1 glass-interactive on-glass analytics-chart-card">
                 <div class="widget-header">
                   <p class="heading-card">Clicks Over Time</p>
-                  <div class="analytics-range-toggle" role="tablist" aria-label="Analytics range">
-                    <button class="analytics-range-button" type="button" data-range-toggle="10D">10D</button>
-                    <button class="analytics-range-button analytics-range-button-active" type="button" data-range-toggle="30D">30D</button>
-                    <button class="analytics-range-button" type="button" data-range-toggle="90D">90D</button>
-                  </div>
                 </div>
 
-                <div class="chart-placeholder">
-                  <p class="data-small" data-analytics-range-label>{analyticsSummaries['30D'].timeRangeLabel}</p>
-                  <div
-                    class="chart-bars"
-                    data-analytics-bars
-                    set:html={renderAnalyticsBars('30D')}
-                  ></div>
+                <div class="analytics-empty-state">
+                  <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
+                    <p class="body-small empty-state-copy">Clicks over time will appear here once your referral traffic starts coming in.</p>
+                  </article>
                 </div>
               </article>
 
-              <article class="card glass glass-tier-2 glass-interactive glass-highlight-soft analytics-top-links-card on-glass">
-                <div class="stack-12">
+              <article class="card glass glass-tier-1 glass-interactive analytics-top-links-card on-glass">
+                <div class="widget-header">
                   <p class="heading-card">Top Performing Links</p>
-                  <div class="progress-list">
-                    {topPerformingLinks.map((item) => (
-                      <div class="progress-row">
-                        <div class="row-12 analytics-progress-head">
-                          <span class="body-small">{item.label}</span>
-                          <span class="data-small">{item.pct}%</span>
-                        </div>
-                        <div class="progress-track">
-                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                </div>
+                <div class="analytics-empty-state">
+                  <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
+                    <p class="body-small empty-state-copy">Your best-performing referral links will surface here after attributed clicks are recorded.</p>
+                  </article>
                 </div>
               </article>
 
               <article class="card glass glass-tier-1 glass-interactive on-glass analytics-breakdown-card analytics-geo-card">
-                <div class="stack-12">
+                <div class="widget-header">
                   <p class="heading-card">Geographic Breakdown</p>
-                  <div class="progress-list">
-                    {geographicBreakdown.map((item) => (
-                      <div class="progress-row">
-                        <div class="row-12 analytics-progress-head">
-                          <span class="body-small">{item.label}</span>
-                          <span class="data-small">{item.pct}%</span>
-                        </div>
-                        <div class="progress-track">
-                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                </div>
+                <div class="analytics-empty-state">
+                  <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
+                    <p class="body-small empty-state-copy">Regional traffic distribution will appear here when click geography becomes available.</p>
+                  </article>
                 </div>
               </article>
             </div>
@@ -1417,7 +1365,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
           savedLinksList.innerHTML = `
             <article class="link-campaign-row link-campaign-row-empty" data-empty-links-state>
-              <p class="body-small">Generated links will appear here as soon as you create your first campaign.</p>
+              <p class="body-small empty-state-copy">Generated links will appear here as soon as you create your first campaign.</p>
             </article>
           `;
         };
@@ -1585,7 +1533,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         }
       }
 
-      const analyticsChart = document.querySelector('[data-analytics-chart]');
       const transactionFeed = document.querySelector('[data-transaction-feed]');
       if (transactionFeed instanceof HTMLElement) {
         const refreshButton = document.querySelector('[data-refresh-transactions]');
@@ -1645,7 +1592,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             transactionFeedBody.innerHTML = `
               <div class="transaction-empty-state">
                 <article class="link-campaign-row link-campaign-row-empty transaction-empty-card">
-                  <p class="body-small">No attributed transactions yet.</p>
+                  <p class="body-small empty-state-copy">No attributed transactions yet.</p>
                 </article>
               </div>
             `;
@@ -1744,56 +1691,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         }
       }
 
-      if (analyticsChart instanceof HTMLElement) {
-        const analyticsRangeLabel = analyticsChart.querySelector('[data-analytics-range-label]');
-        const analyticsBarsContainer = analyticsChart.querySelector('[data-analytics-bars]');
-        const analyticsRangeButtons = analyticsChart.querySelectorAll('[data-range-toggle]');
-        const analyticsRangeData = JSON.parse(analyticsChart.dataset.analyticsRanges ?? '{}');
-
-        const renderAnalyticsBars = (points) =>
-          points
-            .map(
-              (point) => `
-                <button
-                  class="bar-button"
-                  type="button"
-                  data-bar-label="${point.label}"
-                  data-bar-clicks="${point.clicks}"
-                  data-bar-conversion="${point.conversionRate}"
-                  aria-label="${point.label}: ${point.clicks} clicks, ${point.conversionRate} conversion rate"
-                  style="height: ${point.height}%"
-                >
-                  <span class="bar-fill"></span>
-                </button>
-              `,
-            )
-            .join('');
-
-        const setAnalyticsRange = (rangeKey) => {
-          const range = analyticsRangeData[rangeKey];
-          if (!range) return;
-
-          analyticsRangeButtons.forEach((button) => {
-            button.classList.toggle('analytics-range-button-active', button.getAttribute('data-range-toggle') === rangeKey);
-          });
-
-          if (analyticsRangeLabel instanceof HTMLElement) {
-            analyticsRangeLabel.textContent = range.timeRangeLabel;
-          }
-
-          if (analyticsBarsContainer instanceof HTMLElement) {
-            analyticsBarsContainer.innerHTML = renderAnalyticsBars(range.points);
-          }
-        };
-
-        analyticsRangeButtons.forEach((button) => {
-          button.addEventListener('click', () => {
-            const rangeKey = button.getAttribute('data-range-toggle');
-            if (!rangeKey) return;
-            setAnalyticsRange(rangeKey);
-          });
-        });
-      }
     </script>
   </body>
 </html>
