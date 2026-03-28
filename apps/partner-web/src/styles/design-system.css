@@ -342,6 +342,8 @@
 }
 
 .transaction-table-wrap {
+  --transaction-feed-row-height: 56px;
+  --transaction-feed-visible-rows: 10;
   background: rgba(15, 20, 25, 0.32);
 }
 
@@ -358,9 +360,13 @@
   table-layout: fixed;
 }
 
+.transaction-table-wrap .table tbody tr {
+  height: var(--transaction-feed-row-height);
+}
+
 .transaction-table-wrap .table tbody {
   display: block;
-  max-height: 560px;
+  max-height: calc(var(--transaction-feed-row-height) * var(--transaction-feed-visible-rows));
   overflow-y: auto;
   padding-right: 4px;
   scrollbar-width: thin;
@@ -1926,6 +1932,7 @@
   }
 
   .transaction-table-wrap {
+    --transaction-feed-visible-rows: 8;
     overflow-x: hidden;
   }
 
