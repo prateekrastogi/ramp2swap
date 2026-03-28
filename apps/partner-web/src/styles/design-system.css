@@ -1131,9 +1131,11 @@
 }
 
 .link-campaign-list {
+  --saved-link-row-height: 188px;
+  --saved-link-visible-rows: 4;
   display: grid;
   gap: 12px;
-  max-height: 688px;
+  max-height: calc((var(--saved-link-row-height) * var(--saved-link-visible-rows)) + (12px * (var(--saved-link-visible-rows) - 1)));
   overflow-y: auto;
   padding-right: 4px;
   align-content: start;
@@ -1169,6 +1171,10 @@
   background: rgba(15, 20, 25, 0.36);
   box-shadow: inset 0 1px 0 var(--white-a-06);
   align-content: start;
+}
+
+.link-campaign-row:not(.link-campaign-row-empty) {
+  height: var(--saved-link-row-height);
 }
 
 .link-campaign-row-empty {

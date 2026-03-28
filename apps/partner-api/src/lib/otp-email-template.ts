@@ -37,6 +37,8 @@ export const buildOtpEmailHtml = ({
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="supported-color-schemes" content="dark" />
   <title>Your Ramp2Swap Partner Portal Login OTP</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&family=Syne:wght@700;800&display=swap');
@@ -170,6 +172,11 @@ export const buildOtpEmailHtml = ({
       color: var(--slate-300);
       font-size: 14px;
       line-height: 1.8;
+    }
+
+    .intro-email {
+      color: var(--slate-300) !important;
+      font-weight: 500;
     }
 
     .glass {
@@ -352,7 +359,7 @@ export const buildOtpEmailHtml = ({
         <div class="body">
           <div class="title">Your login verification code</div>
           <div class="intro">
-            Use the one-time password below to complete your sign-in for <strong>${safeEmail}</strong>. This code is short-lived and can only be used once.
+            Use the one-time password below to complete your sign-in for <strong class="intro-email" style="color: #7A98B3 !important;">${safeEmail}</strong>. This code is short-lived and can only be used once.
           </div>
 
           <div class="otp-block glass glass-mint">
