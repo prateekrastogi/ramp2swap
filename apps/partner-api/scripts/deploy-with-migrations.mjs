@@ -36,4 +36,9 @@ const run = (command, commandArgs) => {
 };
 
 run('npm', ['run', migrateScript]);
+
+if (envName === 'staging') {
+  run('npm', ['run', 'testbench:ensure:staging']);
+}
+
 run('wrangler', ['deploy', ...args]);
