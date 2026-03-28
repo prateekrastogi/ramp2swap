@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * DAY_MS;
 const MAX_TRANSACTION_CENTS = 1_000_000;
 const MIN_TRANSACTION_CENTS = 10_000;
 const DEFAULT_REFERENCE_ISO = '2026-03-28T12:00:00.000Z';
@@ -215,6 +216,10 @@ function formatUsd(cents) {
   return (cents / 100).toFixed(2);
 }
 
+function getWeekBucketStart(timestamp) {
+  return Math.floor(timestamp / WEEK_MS) * WEEK_MS;
+}
+
 function buildAmountPlan(totalCents, count, rng) {
   let remaining = totalCents;
   const amounts = [];
@@ -342,9 +347,10 @@ function createClicksRows(envName, users, referenceTimestamp, rng) {
         event: 'affiliate',
         username: user.username,
         campaign: campaignTag,
+        country: COUNTRIES[randomInt(rng, 0, COUNTRIES.length - 1)],
+        week_bucket_start: getWeekBucketStart(timestamp),
         timestamp,
         created_at: timestamp + randomInt(rng, 0, 1_800_000),
-        country: COUNTRIES[randomInt(rng, 0, COUNTRIES.length - 1)],
       });
     }
   }
@@ -484,7 +490,7 @@ function buildSql(envName, selectedEmails, config) {
     ),
     ...insertStatement(
       'clicks',
-      ['event', 'username', 'campaign', 'timestamp', 'created_at', 'country'],
+      ['event', 'username', 'campaign', 'country', 'week_bucket_start', 'timestamp', 'created_at'],
       clicks,
     ),
     ...insertStatement(

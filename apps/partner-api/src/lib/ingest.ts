@@ -1,8 +1,17 @@
 import {
   insertClickQuery,
+  pruneClicksQuery,
   upsertConversionQuery,
   upsertTransactionQuery,
 } from '../queries/ingest';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const CLICK_RETENTION_DAYS = 91;
+const CLICK_BUCKET_DAYS = 7;
+const CLICK_BUCKET_MS = CLICK_BUCKET_DAYS * DAY_MS;
+const CLICK_RETENTION_MS = CLICK_RETENTION_DAYS * DAY_MS;
+
+const getWeekBucketStart = (timestamp: number) => Math.floor(timestamp / CLICK_BUCKET_MS) * CLICK_BUCKET_MS;
 
 export const saveTransaction = async (
   db: D1Database,
@@ -50,9 +59,13 @@ export const saveClick = async (
     now: number;
   },
 ) => {
+  const retentionCutoff = now - CLICK_RETENTION_MS;
+  const weekBucketStart = getWeekBucketStart(timestamp);
+
+  await db.prepare(pruneClicksQuery).bind(retentionCutoff).run();
   await db
     .prepare(insertClickQuery)
-    .bind(event, username, campaign, country, timestamp, now)
+    .bind(event, username, campaign, country, weekBucketStart, timestamp, now)
     .run();
 };
 

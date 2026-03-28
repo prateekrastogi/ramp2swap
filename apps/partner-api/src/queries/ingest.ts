@@ -27,10 +27,16 @@ export const insertClickQuery = `
     username,
     campaign,
     country,
+    week_bucket_start,
     timestamp,
     created_at
   )
-  VALUES (?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
+`;
+
+export const pruneClicksQuery = `
+  DELETE FROM clicks
+  WHERE timestamp < ?
 `;
 
 export const upsertConversionQuery = `
