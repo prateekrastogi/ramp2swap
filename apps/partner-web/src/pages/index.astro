@@ -1128,12 +1128,15 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           complete: 'Generated',
         };
         let toastTimer = null;
+        let hasAttemptedGenerate = false;
 
         if (
           campaignNameInput instanceof HTMLInputElement &&
           campaignTagInput instanceof HTMLInputElement &&
           generatedLinkInput instanceof HTMLInputElement
         ) {
+        const defaultGeneratedLinkPlaceholder = generatedLinkInput.getAttribute('placeholder') ?? '';
+
         const setGenerateButtonState = (state) => {
           if (!(generateLinkButton instanceof HTMLButtonElement)) {
             return;
@@ -1200,13 +1203,15 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           input.closest('[data-link-field]')?.toggleAttribute('data-invalid', isInvalid);
         };
 
-        const validateLinkInputs = () => {
+        const validateLinkInputs = ({ showWarnings = false } = {}) => {
           const requiredInputs = [campaignNameInput, campaignTagInput];
           const missingLabels = [];
 
           requiredInputs.forEach((input) => {
             const isEmpty = input.value.trim().length === 0;
-            setFieldWarning(input, isEmpty);
+            if (showWarnings) {
+              setFieldWarning(input, isEmpty);
+            }
             if (isEmpty) {
               missingLabels.push(getFieldLabel(input));
             }
@@ -1218,6 +1223,46 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           };
         };
 
+        const buildPreviewUrl = () => {
+          if (!partnerUsername.trim()) {
+            return '';
+          }
+
+          const campaignTag = campaignTagInput.value.trim();
+          if (!campaignTag) {
+            return '';
+          }
+
+          const url = new URL(baseUrl);
+          url.searchParams.set('pid', partnerUsername.trim());
+          url.searchParams.set('cmp', campaignTag);
+          return url.toString();
+        };
+
+        const syncGeneratedUrlDisplay = () => {
+          if (!(generatedLinkInput instanceof HTMLInputElement)) {
+            return;
+          }
+
+          const previewUrl = buildPreviewUrl();
+          const hasCampaignName = campaignNameInput.value.trim().length > 0;
+
+          if (!previewUrl) {
+            generatedLinkInput.value = '';
+            generatedLinkInput.placeholder = defaultGeneratedLinkPlaceholder;
+            return;
+          }
+
+          if (hasCampaignName) {
+            generatedLinkInput.value = previewUrl;
+            generatedLinkInput.placeholder = defaultGeneratedLinkPlaceholder;
+            return;
+          }
+
+          generatedLinkInput.value = '';
+          generatedLinkInput.placeholder = previewUrl;
+        };
+
         const buildGeneratedUrl = () => {
           if (
             !(generatedLinkInput instanceof HTMLInputElement)
@@ -1225,9 +1270,9 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             return '';
           }
 
-          const validation = validateLinkInputs();
+          const validation = validateLinkInputs({ showWarnings: hasAttemptedGenerate });
           if (!validation.isValid) {
-            generatedLinkInput.value = '';
+            syncGeneratedUrlDisplay();
             setGenerateButtonState('idle');
             return '';
           }
@@ -1238,33 +1283,14 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             return '';
           }
 
-          const url = new URL(baseUrl);
-          const campaignTag = campaignTagInput.value.trim();
-          url.searchParams.set('pid', partnerUsername.trim());
-          if (campaignTag) {
-            url.searchParams.set('cmp', campaignTag);
-          } else {
-            url.searchParams.delete('cmp');
-          }
-          generatedLinkInput.value = url.toString();
+          const previewUrl = buildPreviewUrl();
+          generatedLinkInput.placeholder = defaultGeneratedLinkPlaceholder;
+          generatedLinkInput.value = previewUrl;
           return generatedLinkInput.value;
         };
 
         const refreshGeneratedUrlPreview = () => {
-          if (!(generatedLinkInput instanceof HTMLInputElement)) {
-            return;
-          }
-
-          const validation = validateLinkInputs();
-          if (!validation.isValid || !partnerUsername.trim()) {
-            generatedLinkInput.value = '';
-            return;
-          }
-
-          const url = new URL(baseUrl);
-          url.searchParams.set('pid', partnerUsername.trim());
-          url.searchParams.set('cmp', campaignTagInput.value.trim());
-          generatedLinkInput.value = url.toString();
+          syncGeneratedUrlDisplay();
         };
 
         const copyText = async (text) => {
@@ -1468,7 +1494,8 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         [campaignNameInput, campaignTagInput].forEach((input) => {
           if (input instanceof HTMLInputElement) {
             input.addEventListener('input', () => {
-              setFieldWarning(input, input.value.trim().length === 0);
+              hasAttemptedGenerate = false;
+              setFieldWarning(input, false);
               refreshGeneratedUrlPreview();
               setGenerateButtonState('idle');
             });
@@ -1477,7 +1504,8 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
 
         if (generateLinkButton instanceof HTMLButtonElement) {
           generateLinkButton.addEventListener('click', async () => {
-            const validation = validateLinkInputs();
+            hasAttemptedGenerate = true;
+            const validation = validateLinkInputs({ showWarnings: true });
             if (!validation.isValid) {
               generatedLinkInput.value = '';
               setGenerateButtonState('idle');
