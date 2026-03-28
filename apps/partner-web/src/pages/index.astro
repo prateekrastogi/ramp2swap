@@ -9,7 +9,7 @@ import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { payoutDisplaySettings } from '../data/settings-display';
 import { getPartnerApiBaseUrl, getPartnerLinkBaseUrl } from '../lib/runtime-env';
-import { transactionFeedItems } from '../data/transaction-feed-mock';
+import { loadTransactionFeed, type TransactionFeedItem } from '../data/transaction-feed';
 
 type PartnerSessionPayload = {
   ok?: boolean;
@@ -47,6 +47,7 @@ const partnerSettings = {
   canUpdateWalletAddress: true,
 };
 let savedPartnerLinks: PartnerLink[] = [];
+let transactionFeedItems: TransactionFeedItem[] = [];
 
 const formatCompactDate = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -58,22 +59,13 @@ const formatCompactDate = (timestamp: number) => {
 
 if (sessionToken && partnerApiBaseUrl) {
   try {
-    const [sessionResponse, linksResponse] = await Promise.all([
-      fetch(`${partnerApiBaseUrl}/auth/session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sessionToken }),
-      }),
-      fetch(`${partnerApiBaseUrl}/link`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sessionToken }),
-      }),
-    ]);
+    const sessionResponse = await fetch(`${partnerApiBaseUrl}/auth/session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionToken }),
+    });
 
     const payload = (await sessionResponse.json().catch(() => null)) as PartnerSessionPayload | null;
     if (sessionResponse.ok && payload?.ok) {
@@ -87,10 +79,27 @@ if (sessionToken && partnerApiBaseUrl) {
       partnerSettings.canUpdateWalletAddress = payload.settings?.canUpdateWalletAddress ?? partnerSettings.canUpdateWalletAddress;
     }
 
+    const [linksResponse, loadedTransactionFeed] = await Promise.all([
+      fetch(`${partnerApiBaseUrl}/link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionToken }),
+      }),
+      loadTransactionFeed({
+        partnerApiBaseUrl,
+        sessionToken,
+        username: partnerSettings.username,
+      }),
+    ]);
+
     const linksPayload = (await linksResponse.json().catch(() => null)) as { ok?: boolean; links?: PartnerLink[] } | null;
     if (linksResponse.ok && linksPayload?.ok && Array.isArray(linksPayload.links)) {
       savedPartnerLinks = linksPayload.links;
     }
+
+    transactionFeedItems = loadedTransactionFeed;
   } catch (error) {
     console.warn('[partner-web] failed to load partner settings', error);
   }
@@ -99,6 +108,10 @@ if (sessionToken && partnerApiBaseUrl) {
 const EMPTY_WALLET_ADDRESS_DISPLAY = 'Editable once every 7 days';
 const walletAddressDisplayValue =
   partnerSettings.withdrawalAddress === '' ? EMPTY_WALLET_ADDRESS_DISPLAY : partnerSettings.withdrawalAddress;
+const generatedLinkPlaceholder =
+  partnerLinkBaseUrl && partnerSettings.username
+    ? `${partnerLinkBaseUrl}?pid=${partnerSettings.username}&cmp=satoshi-nakamoto`
+    : 'Generated referral link will appear here';
 
 const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
   analyticsSummaries[rangeKey].points
@@ -306,6 +319,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         class="input input-glass link-output-input"
                         data-generated-link
                         value=""
+                        placeholder={generatedLinkPlaceholder}
                         readonly
                       />
                       <div class="link-output-actions">
@@ -393,38 +407,67 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
             <article class="card glass glass-tier-1 glass-interactive on-glass transaction-feed-card">
               <div class="widget-header">
                 <p class="heading-card">Referral Stream</p>
-                <span class="chip">{transactionFeedItems.length} recent entries</span>
+                <div class="transaction-feed-header-actions">
+                  <span class="chip" data-transaction-count>{transactionFeedItems.length} recent entries</span>
+                  <button
+                    class="link-action-button transaction-refresh-button"
+                    type="button"
+                    data-refresh-transactions
+                    data-state="idle"
+                    aria-label="Refresh referral stream"
+                    title="Refresh referral stream"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M21 3v6h-6"></path>
+                      <path d="M3 21v-6h6"></path>
+                      <path d="M21 9a9 9 0 0 0-15.5-3.36L3 9"></path>
+                      <path d="M3 15a9 9 0 0 0 15.5 3.36L21 15"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
 
-              <div class="table-wrap transaction-table-wrap">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Transaction</th>
-                      <th>Status</th>
-                      <th>Amount</th>
-                      <th>Pair</th>
-                      <th>Timestamp</th>
-                      <th>User</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactionFeedItems.map((tx) => (
-                      <tr>
-                        <td>{tx.id}</td>
-                        <td>
-                          <span class={`status ${tx.status === 'completed' ? 'status-completed' : tx.status === 'pending' ? 'status-pending' : 'status-failed'}`}>
-                            {tx.status}
-                          </span>
-                        </td>
-                        <td>{tx.amount}</td>
-                        <td>{tx.pair}</td>
-                        <td>{tx.timestamp}</td>
-                        <td>{tx.user}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div data-transaction-feed data-transaction-username={partnerSettings.username}>
+                <div data-transaction-feed-body>
+                  {transactionFeedItems.length === 0 ? (
+                    <div class="transaction-empty-state">
+                      <article class="link-campaign-row link-campaign-row-empty transaction-empty-card">
+                        <p class="body-small">No attributed transactions yet.</p>
+                      </article>
+                    </div>
+                  ) : (
+                    <div class="table-wrap transaction-table-wrap">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Transaction</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Pair</th>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {transactionFeedItems.map((tx) => (
+                            <tr>
+                              <td>{tx.id}</td>
+                              <td>
+                                <span class={`status ${tx.status === 'completed' ? 'status-completed' : tx.status === 'pending' ? 'status-pending' : 'status-failed'}`}>
+                                  {tx.status}
+                                </span>
+                              </td>
+                              <td>{tx.amount}</td>
+                              <td>{tx.pair}</td>
+                              <td>{tx.timestamp}</td>
+                              <td>{tx.user}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             </article>
           </section>
@@ -1515,6 +1558,164 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
       }
 
       const analyticsChart = document.querySelector('[data-analytics-chart]');
+      const transactionFeed = document.querySelector('[data-transaction-feed]');
+      if (transactionFeed instanceof HTMLElement) {
+        const refreshButton = document.querySelector('[data-refresh-transactions]');
+        const transactionCount = document.querySelector('[data-transaction-count]');
+        const transactionFeedBody = transactionFeed.querySelector('[data-transaction-feed-body]');
+        const toastNode = document.querySelector('[data-link-toast]');
+        const toastTitleNode = document.querySelector('[data-link-toast-title]');
+        const toastCopyNode = document.querySelector('[data-link-toast-copy]');
+        const username = transactionFeed.dataset.transactionUsername ?? '';
+        let transactionToastTimer = null;
+
+        const showTransactionToast = (title, copy, tone = 'success') => {
+          if (
+            !(toastNode instanceof HTMLElement) ||
+            !(toastTitleNode instanceof HTMLElement) ||
+            !(toastCopyNode instanceof HTMLElement)
+          ) {
+            return;
+          }
+
+          toastTitleNode.textContent = title;
+          toastCopyNode.textContent = copy;
+          toastNode.dataset.tone = tone;
+          toastNode.hidden = false;
+          toastNode.dataset.visible = 'true';
+
+          if (transactionToastTimer !== null) {
+            window.clearTimeout(transactionToastTimer);
+          }
+
+          transactionToastTimer = window.setTimeout(() => {
+            toastNode.dataset.visible = 'false';
+            window.setTimeout(() => {
+              toastNode.hidden = true;
+            }, 220);
+          }, 2800);
+        };
+
+        const escapeHtml = (value) =>
+          String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+
+        const renderTransactionFeed = (items) => {
+          if (!(transactionFeedBody instanceof HTMLElement)) {
+            return;
+          }
+
+          if (transactionCount instanceof HTMLElement) {
+            transactionCount.textContent = `${items.length} recent entries`;
+          }
+
+          if (items.length === 0) {
+            transactionFeedBody.innerHTML = `
+              <div class="transaction-empty-state">
+                <article class="link-campaign-row link-campaign-row-empty transaction-empty-card">
+                  <p class="body-small">No attributed transactions yet.</p>
+                </article>
+              </div>
+            `;
+            return;
+          }
+
+          transactionFeedBody.innerHTML = `
+            <div class="table-wrap transaction-table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Transaction</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Pair</th>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${items
+                    .map(
+                      (tx) => `
+                        <tr>
+                          <td>${escapeHtml(tx.id)}</td>
+                          <td>
+                            <span class="status ${tx.status === 'completed' ? 'status-completed' : tx.status === 'pending' ? 'status-pending' : 'status-failed'}">
+                              ${escapeHtml(tx.status)}
+                            </span>
+                          </td>
+                          <td>${escapeHtml(tx.amount)}</td>
+                          <td>${escapeHtml(tx.pair)}</td>
+                          <td>${escapeHtml(tx.timestamp)}</td>
+                          <td>${escapeHtml(tx.user)}</td>
+                        </tr>
+                      `,
+                    )
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        };
+
+        if (refreshButton instanceof HTMLButtonElement) {
+          refreshButton.addEventListener('click', async () => {
+            if (!username.trim()) {
+              showTransactionToast('Refresh unavailable', 'Partner username is required to refresh the referral stream.', 'warning');
+              return;
+            }
+
+            refreshButton.disabled = true;
+            refreshButton.dataset.state = 'pending';
+
+            try {
+              const response = await fetch('/api/transaction/feed', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username }),
+              });
+
+              const payload = (await response.json().catch(() => null)) as
+                | {
+                    ok?: boolean;
+                    error?: string;
+                    transactions?: Array<{
+                      id: string;
+                      status: string;
+                      amount: string;
+                      pair: string;
+                      timestamp: string;
+                      user: string;
+                    }>;
+                  }
+                | null;
+
+              if (!response.ok || !payload?.ok || !Array.isArray(payload.transactions)) {
+                throw new Error(payload?.error ?? 'Unable to refresh referral stream.');
+              }
+
+              renderTransactionFeed(payload.transactions);
+              showTransactionToast('Referral stream refreshed', 'Latest attributed transactions loaded.');
+            } catch (error) {
+              showTransactionToast(
+                'Refresh failed',
+                error instanceof Error ? error.message : 'Unable to refresh referral stream.',
+                'warning',
+              );
+            } finally {
+              refreshButton.disabled = false;
+              refreshButton.dataset.state = 'idle';
+            }
+          });
+        }
+      }
+
       if (analyticsChart instanceof HTMLElement) {
         const analyticsRangeLabel = analyticsChart.querySelector('[data-analytics-range-label]');
         const analyticsBarsContainer = analyticsChart.querySelector('[data-analytics-bars]');

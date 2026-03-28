@@ -340,6 +340,115 @@
   background: rgba(15, 20, 25, 0.32);
 }
 
+.transaction-table-wrap .table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.transaction-table-wrap .table thead,
+.transaction-table-wrap .table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.transaction-table-wrap .table tbody {
+  display: block;
+  max-height: 560px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--slate-500) var(--obsidian-700);
+}
+
+.transaction-table-wrap .table tbody::-webkit-scrollbar {
+  width: 10px;
+}
+
+.transaction-table-wrap .table tbody::-webkit-scrollbar-track {
+  background: var(--obsidian-700);
+  border-radius: 999px;
+}
+
+.transaction-table-wrap .table tbody::-webkit-scrollbar-thumb {
+  background: var(--slate-500);
+  border-radius: 999px;
+  border: 2px solid var(--obsidian-700);
+}
+
+.transaction-table-wrap .table tbody::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-300);
+}
+
+.transaction-table-wrap .table th:nth-child(5),
+.transaction-table-wrap .table td:nth-child(5) {
+  width: 168px;
+  white-space: nowrap;
+}
+
+.transaction-table-wrap .table th:nth-child(1),
+.transaction-table-wrap .table td:nth-child(1) {
+  width: 132px;
+  white-space: nowrap;
+}
+
+.transaction-feed-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.link-action-button.transaction-refresh-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(30, 41, 59, 0.44);
+  color: var(--slate-300);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 24px rgba(2, 6, 23, 0.16);
+}
+
+.link-action-button.transaction-refresh-button:hover,
+.link-action-button.transaction-refresh-button:focus-visible {
+  border-color: rgba(148, 163, 184, 0.36);
+  background: rgba(51, 65, 85, 0.62);
+  color: var(--slate-100);
+}
+
+.link-action-button.transaction-refresh-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.link-action-button.transaction-refresh-button[data-state='pending'] {
+  cursor: progress;
+}
+
+.link-action-button.transaction-refresh-button[data-state='pending'] svg {
+  animation: transaction-refresh-spin 0.9s linear infinite;
+}
+
+.transaction-empty-state {
+  display: grid;
+}
+
+.transaction-empty-card {
+  min-height: 220px;
+}
+
+@keyframes transaction-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .earnings-payouts-grid,
 .analytics-grid {
   display: grid;
@@ -784,6 +893,11 @@
   letter-spacing: 0.01em;
 }
 
+.link-output-input::placeholder {
+  color: var(--slate-500);
+  opacity: 1;
+}
+
 .link-output-actions .btn-primary[data-state='complete'] {
   border-color: var(--mint-border-soft);
   background: var(--mint-tint-strong);
@@ -914,7 +1028,10 @@
 }
 
 .link-campaign-row-empty {
+  display: grid;
   place-items: center;
+  align-content: center;
+  justify-content: center;
   min-height: 128px;
   text-align: center;
   color: var(--slate-400);

@@ -19,6 +19,8 @@ import {
   WalletAddressCooldownError,
 } from './lib/partner-settings';
 import { deletePartnerLink, generatePartnerLink, listPartnerLinks } from './lib/partner-links';
+import { listPartnerTransactionFeed } from './lib/transaction-feed';
+import { saveClick, saveConversion, saveTransaction } from './lib/ingest';
 
 type Bindings = CloudflareBindings & {
   ASSETS: Fetcher;
@@ -430,35 +432,47 @@ app.post('/transaction', async (c) => {
     return jsonError('timestamp is required.');
   }
 
-  await c.env.AUTH_DB.prepare(
-    `
-      INSERT INTO transactions (
-        transaction_id,
-        status,
-        amount,
-        from_symbol,
-        to_symbol,
-        wallet_address,
-        timestamp,
-        created_at,
-        updated_at
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(transaction_id) DO UPDATE SET
-        status = excluded.status,
-        amount = excluded.amount,
-        from_symbol = excluded.from_symbol,
-        to_symbol = excluded.to_symbol,
-        wallet_address = excluded.wallet_address,
-        timestamp = excluded.timestamp,
-        updated_at = excluded.updated_at
-    `,
-  )
-    .bind(transactionId, status, amount, fromSymbol, toSymbol, walletAddress, timestamp, now, now)
-    .run();
+  await saveTransaction(c.env.AUTH_DB, {
+    transactionId,
+    status,
+    amount,
+    fromSymbol,
+    toSymbol,
+    walletAddress,
+    timestamp,
+    now,
+  });
 
   return c.json({
     ok: true,
+  });
+});
+
+app.post('/transaction/feed', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  const requestedUsername = typeof body.username === 'string' ? body.username.trim() : '';
+  const username = requestedUsername || partnerSettings.username;
+
+  if (username !== partnerSettings.username) {
+    return jsonError('Username does not match authenticated partner.', 403);
+  }
+
+  const transactions = await listPartnerTransactionFeed(c.env.AUTH_DB, {
+    username,
+    secret: c.env.SESSION_SECRET,
+  });
+
+  return c.json({
+    ok: true,
+    username,
+    transactions,
   });
 });
 
@@ -481,20 +495,13 @@ app.post('/click', async (c) => {
     return jsonError('timestamp is required.');
   }
 
-  await c.env.AUTH_DB.prepare(
-    `
-      INSERT INTO clicks (
-        event,
-        username,
-        campaign,
-        timestamp,
-        created_at
-      )
-      VALUES (?, ?, ?, ?, ?)
-    `,
-  )
-    .bind(event, username, campaign, timestamp, now)
-    .run();
+  await saveClick(c.env.AUTH_DB, {
+    event,
+    username,
+    campaign,
+    timestamp,
+    now,
+  });
 
   return c.json({
     ok: true,
@@ -526,27 +533,14 @@ app.post('/conversion', async (c) => {
     return jsonError('timestamp is required.');
   }
 
-  await c.env.AUTH_DB.prepare(
-    `
-      INSERT INTO conversions (
-        transaction_id,
-        event,
-        username,
-        campaign,
-        timestamp,
-        payout
-      )
-      VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(transaction_id) DO UPDATE SET
-        event = excluded.event,
-        username = excluded.username,
-        campaign = excluded.campaign,
-        timestamp = excluded.timestamp,
-        payout = excluded.payout
-    `,
-  )
-    .bind(transactionId, event, username, campaign, timestamp, payout)
-    .run();
+  await saveConversion(c.env.AUTH_DB, {
+    transactionId,
+    event,
+    username,
+    campaign,
+    timestamp,
+    payout,
+  });
 
   return c.json({
     ok: true,
