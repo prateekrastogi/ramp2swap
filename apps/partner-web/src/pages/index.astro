@@ -28,6 +28,33 @@ type PartnerLink = {
   updatedAt: number;
 };
 
+type AnalyticsRangeKey = '10D' | '30D' | '90D';
+
+type AnalyticsChartPoint = {
+  label: string;
+  clicks: number;
+  conversionRate: string;
+  height: number;
+};
+
+type AnalyticsSummary = {
+  timeRangeLabel: string;
+  points: AnalyticsChartPoint[];
+};
+
+type AnalyticsBreakdownItem = {
+  label: string;
+  pct: number;
+};
+
+type PartnerAnalyticsPayload = {
+  ok?: boolean;
+  username?: string;
+  ranges?: Partial<Record<AnalyticsRangeKey, AnalyticsSummary>>;
+  topLinks?: AnalyticsBreakdownItem[];
+  geography?: AnalyticsBreakdownItem[];
+};
+
 const sessionToken = Astro.cookies.get('partner_session')?.value ?? '';
 const partnerApiBaseUrl = await getPartnerApiBaseUrl();
 const partnerLinkBaseUrl = await getPartnerLinkBaseUrl();
@@ -43,6 +70,9 @@ const partnerSettings = {
 };
 let savedPartnerLinks: PartnerLink[] = [];
 let transactionFeedItems: TransactionFeedItem[] = [];
+let analyticsSummaries: Partial<Record<AnalyticsRangeKey, AnalyticsSummary>> = {};
+let topPerformingLinks: AnalyticsBreakdownItem[] = [];
+let geographicBreakdown: AnalyticsBreakdownItem[] = [];
 
 const formatCompactDate = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -74,7 +104,7 @@ if (sessionToken && partnerApiBaseUrl) {
       partnerSettings.canUpdateWalletAddress = payload.settings?.canUpdateWalletAddress ?? partnerSettings.canUpdateWalletAddress;
     }
 
-    const [linksResponse, loadedTransactionFeed] = await Promise.all([
+    const [linksResponse, loadedTransactionFeed, analyticsResponse] = await Promise.all([
       fetch(`${partnerApiBaseUrl}/link`, {
         method: 'POST',
         headers: {
@@ -87,11 +117,25 @@ if (sessionToken && partnerApiBaseUrl) {
         sessionToken,
         username: partnerSettings.username,
       }),
+      fetch(`${partnerApiBaseUrl}/analytics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionToken }),
+      }),
     ]);
 
     const linksPayload = (await linksResponse.json().catch(() => null)) as { ok?: boolean; links?: PartnerLink[] } | null;
     if (linksResponse.ok && linksPayload?.ok && Array.isArray(linksPayload.links)) {
       savedPartnerLinks = linksPayload.links;
+    }
+
+    const analyticsPayload = (await analyticsResponse.json().catch(() => null)) as PartnerAnalyticsPayload | null;
+    if (analyticsResponse.ok && analyticsPayload?.ok) {
+      analyticsSummaries = analyticsPayload.ranges ?? analyticsSummaries;
+      topPerformingLinks = Array.isArray(analyticsPayload.topLinks) ? analyticsPayload.topLinks : topPerformingLinks;
+      geographicBreakdown = Array.isArray(analyticsPayload.geography) ? analyticsPayload.geography : geographicBreakdown;
     }
 
     transactionFeedItems = loadedTransactionFeed;
@@ -107,6 +151,38 @@ const generatedLinkPlaceholder =
   partnerLinkBaseUrl && partnerSettings.username
     ? `${partnerLinkBaseUrl}?pid=${partnerSettings.username}&cmp=satoshi-nakamoto`
     : 'Generated referral link will appear here';
+
+const renderAnalyticsBars = (points: AnalyticsChartPoint[]) =>
+  points
+    .map(
+      (point) => `
+        <button
+          class="bar-button"
+          type="button"
+          data-bar-label="${point.label}"
+          data-bar-clicks="${point.clicks}"
+          data-bar-conversion="${point.conversionRate}"
+          aria-label="${point.label}: ${point.clicks} clicks, ${point.conversionRate} conversion rate"
+          style="height: ${point.height}%"
+        >
+          <span class="bar-fill"></span>
+        </button>
+      `,
+    )
+    .join('');
+
+const analyticsRangeOrder: AnalyticsRangeKey[] = ['30D', '10D', '90D'];
+const analyticsChartDefaultRange =
+  analyticsRangeOrder
+    .map((rangeKey) => analyticsSummaries[rangeKey] ?? null)
+    .find((range) => range !== null && range.points.some((point) => point.clicks > 0)) ??
+  analyticsSummaries['30D'] ??
+  analyticsSummaries['10D'] ??
+  analyticsSummaries['90D'] ??
+  null;
+const analyticsHasChartData = analyticsChartDefaultRange !== null && analyticsChartDefaultRange.points.some((point) => point.clicks > 0);
+const analyticsHasTopLinks = topPerformingLinks.length > 0;
+const analyticsHasGeography = geographicBreakdown.length > 0;
 ---
 
 <!doctype html>
@@ -532,38 +608,92 @@ const generatedLinkPlaceholder =
             </div>
 
             <div class="analytics-grid">
-              <article class="card glass glass-tier-1 glass-interactive on-glass analytics-chart-card">
+              <article
+                class="card glass glass-tier-1 glass-interactive on-glass analytics-chart-card"
+                data-analytics-chart={analyticsHasChartData ? 'true' : undefined}
+                data-analytics-ranges={analyticsHasChartData ? JSON.stringify(analyticsSummaries) : undefined}
+              >
                 <div class="widget-header">
                   <p class="heading-card">Clicks Over Time</p>
+                  {analyticsHasChartData ? (
+                    <div class="analytics-range-toggle" role="tablist" aria-label="Analytics range">
+                      <button class={`analytics-range-button ${analyticsChartDefaultRange === analyticsSummaries['10D'] ? 'analytics-range-button-active' : ''}`} type="button" data-range-toggle="10D">10D</button>
+                      <button class={`analytics-range-button ${analyticsChartDefaultRange === analyticsSummaries['30D'] ? 'analytics-range-button-active' : ''}`} type="button" data-range-toggle="30D">30D</button>
+                      <button class={`analytics-range-button ${analyticsChartDefaultRange === analyticsSummaries['90D'] ? 'analytics-range-button-active' : ''}`} type="button" data-range-toggle="90D">90D</button>
+                    </div>
+                  ) : null}
                 </div>
 
-                <div class="analytics-empty-state">
-                  <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
-                    <p class="body-small empty-state-copy">Clicks over time will appear here once your referral traffic starts coming in.</p>
-                  </article>
-                </div>
+                {analyticsHasChartData && analyticsChartDefaultRange ? (
+                  <div class="chart-placeholder">
+                    <p class="data-small" data-analytics-range-label>{analyticsChartDefaultRange.timeRangeLabel}</p>
+                    <div
+                      class="chart-bars"
+                      data-analytics-bars
+                      set:html={renderAnalyticsBars(analyticsChartDefaultRange.points)}
+                    ></div>
+                  </div>
+                ) : (
+                  <div class="analytics-empty-state">
+                    <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
+                      <p class="body-small empty-state-copy">Clicks over time will appear here once your referral traffic starts coming in.</p>
+                    </article>
+                  </div>
+                )}
               </article>
 
               <article class="card glass glass-tier-1 glass-interactive analytics-top-links-card on-glass">
                 <div class="widget-header">
                   <p class="heading-card">Top Performing Links</p>
                 </div>
-                <div class="analytics-empty-state">
-                  <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
-                    <p class="body-small empty-state-copy">Your best-performing referral links will surface here after attributed clicks are recorded.</p>
-                  </article>
-                </div>
+                {analyticsHasTopLinks ? (
+                  <div class="progress-list">
+                    {topPerformingLinks.map((item) => (
+                      <div class="progress-row">
+                        <div class="row-12 analytics-progress-head">
+                          <span class="body-small">{item.label}</span>
+                          <span class="data-small">{item.pct}%</span>
+                        </div>
+                        <div class="progress-track">
+                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="analytics-empty-state">
+                    <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
+                      <p class="body-small empty-state-copy">Your best-performing referral links will surface here after attributed clicks are recorded.</p>
+                    </article>
+                  </div>
+                )}
               </article>
 
               <article class="card glass glass-tier-1 glass-interactive on-glass analytics-breakdown-card analytics-geo-card">
                 <div class="widget-header">
                   <p class="heading-card">Geographic Breakdown</p>
                 </div>
-                <div class="analytics-empty-state">
-                  <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
-                    <p class="body-small empty-state-copy">Regional traffic distribution will appear here when click geography becomes available.</p>
-                  </article>
-                </div>
+                {analyticsHasGeography ? (
+                  <div class="progress-list">
+                    {geographicBreakdown.map((item) => (
+                      <div class="progress-row">
+                        <div class="row-12 analytics-progress-head">
+                          <span class="body-small">{item.label}</span>
+                          <span class="data-small">{item.pct}%</span>
+                        </div>
+                        <div class="progress-track">
+                          <div class="progress-fill" style={`width: ${item.pct}%;`}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="analytics-empty-state">
+                    <article class="link-campaign-row link-campaign-row-empty analytics-empty-card">
+                      <p class="body-small empty-state-copy">Regional traffic distribution will appear here when click geography becomes available.</p>
+                    </article>
+                  </div>
+                )}
               </article>
             </div>
           </section>
@@ -1688,6 +1818,88 @@ const generatedLinkPlaceholder =
               refreshButton.dataset.state = 'idle';
             }
           });
+        }
+      }
+
+      const analyticsChart = document.querySelector('[data-analytics-chart]');
+      if (analyticsChart instanceof HTMLElement) {
+        const rangeLabel = analyticsChart.querySelector('[data-analytics-range-label]');
+        const barsContainer = analyticsChart.querySelector('[data-analytics-bars]');
+        const rangeButtons = analyticsChart.querySelectorAll('[data-range-toggle]');
+        const rangesJson = analyticsChart.dataset.analyticsRanges ?? '';
+
+        const escapeAnalyticsHtml = (value) =>
+          String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+
+        const renderAnalyticsBars = (points) =>
+          points
+            .map(
+              (point) => `
+                <button
+                  class="bar-button"
+                  type="button"
+                  data-bar-label="${escapeAnalyticsHtml(point.label)}"
+                  data-bar-clicks="${Number(point.clicks) || 0}"
+                  data-bar-conversion="${escapeAnalyticsHtml(point.conversionRate)}"
+                  aria-label="${escapeAnalyticsHtml(point.label)}: ${Number(point.clicks) || 0} clicks, ${escapeAnalyticsHtml(point.conversionRate)} conversion rate"
+                  style="height: ${Math.max(0, Number(point.height) || 0)}%"
+                >
+                  <span class="bar-fill"></span>
+                </button>
+              `,
+            )
+            .join('');
+
+        try {
+          const parsedRanges = JSON.parse(rangesJson);
+          const getRange = (rangeKey) => {
+            if (!parsedRanges || typeof parsedRanges !== 'object') {
+              return null;
+            }
+
+            const candidate = parsedRanges[rangeKey];
+            if (
+              !candidate ||
+              typeof candidate !== 'object' ||
+              !Array.isArray(candidate.points) ||
+              typeof candidate.timeRangeLabel !== 'string'
+            ) {
+              return null;
+            }
+
+            return candidate;
+          };
+
+          const setActiveRange = (rangeKey) => {
+            const nextRange = getRange(rangeKey);
+            if (!nextRange || !(rangeLabel instanceof HTMLElement) || !(barsContainer instanceof HTMLElement)) {
+              return;
+            }
+
+            rangeLabel.textContent = nextRange.timeRangeLabel;
+            barsContainer.innerHTML = renderAnalyticsBars(nextRange.points);
+            rangeButtons.forEach((button) => {
+              button.classList.toggle('analytics-range-button-active', button.getAttribute('data-range-toggle') === rangeKey);
+            });
+          };
+
+          rangeButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+              const rangeKey = button.getAttribute('data-range-toggle');
+              if (!rangeKey) {
+                return;
+              }
+
+              setActiveRange(rangeKey);
+            });
+          });
+        } catch (error) {
+          console.warn('[partner-web] failed to initialize analytics chart', error);
         }
       }
 

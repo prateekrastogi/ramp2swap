@@ -440,10 +440,10 @@ function buildSql(envName, selectedEmails, config) {
   const statements = [
     `-- Generated partner-api test bench for ${envName}`,
     `-- Reference timestamp: ${new Date(referenceTimestamp).toISOString()}`,
-    'BEGIN TRANSACTION;',
     `DELETE FROM conversions WHERE username IN (${sqlList(usernames)});`,
     `DELETE FROM clicks WHERE username IN (${sqlList(usernames)});`,
     `DELETE FROM links WHERE user_uid IN (${sqlList(userUids)});`,
+    `DELETE FROM settings WHERE user_uid IN (${sqlList(userUids)}) OR username IN (${sqlList(usernames)});`,
     `DELETE FROM auth_sessions WHERE email IN (${sqlList(emails)});`,
     `DELETE FROM auth_otps WHERE email IN (${sqlList(emails)});`,
     `DELETE FROM auth_users WHERE email IN (${sqlList(emails)});`,
@@ -507,7 +507,6 @@ function buildSql(envName, selectedEmails, config) {
       ['transaction_id', 'event', 'username', 'campaign', 'timestamp', 'payout', 'country'],
       conversions,
     ),
-    'COMMIT;',
   ];
 
   return `${statements.join('\n\n')}\n`;

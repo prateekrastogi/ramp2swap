@@ -21,6 +21,7 @@ import {
 import { deletePartnerLink, generatePartnerLink, listPartnerLinks } from './lib/partner-links';
 import { listPartnerTransactionFeed } from './lib/transaction-feed';
 import { saveClick, saveConversion, saveTransaction } from './lib/ingest';
+import { getPartnerAnalytics } from './lib/analytics';
 
 type Bindings = CloudflareBindings & {
   ASSETS: Fetcher;
@@ -473,6 +474,34 @@ app.post('/transaction/feed', async (c) => {
     ok: true,
     username,
     transactions,
+  });
+});
+
+app.post('/analytics', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  const requestedUsername = typeof body.username === 'string' ? body.username.trim() : '';
+  if (requestedUsername && requestedUsername !== partnerSettings.username) {
+    return jsonError('Username does not match authenticated partner.', 403);
+  }
+
+  const analytics = await getPartnerAnalytics(c.env.AUTH_DB, {
+    userUid: partnerSettings.uid,
+    username: partnerSettings.username,
+  });
+
+  return c.json({
+    ok: true,
+    username: analytics.username,
+    ranges: analytics.ranges,
+    topLinks: analytics.topLinks,
+    geography: analytics.geography,
   });
 });
 
