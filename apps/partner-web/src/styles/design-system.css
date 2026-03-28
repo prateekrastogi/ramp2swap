@@ -195,6 +195,10 @@
   max-width: 760px;
 }
 
+.analytics-section-copy {
+  max-width: 100%;
+}
+
 .transaction-feed-copy,
 .earnings-payouts-copy {
   max-width: 100%;
@@ -469,6 +473,10 @@
 .analytics-top-links-card,
 .analytics-breakdown-card {
   grid-template-rows: auto 1fr;
+}
+
+.analytics-chart-card .chart-placeholder .data-small {
+  color: var(--slate-100);
 }
 
 .analytics-breakdown-card {
