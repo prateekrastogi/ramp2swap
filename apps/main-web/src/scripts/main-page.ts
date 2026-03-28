@@ -2,6 +2,7 @@ import {
   registerWidgetEventHandler,
   type WidgetEventLogPayload,
 } from './lifi-widget-mount';
+import { buildLocalDebugCountryHeaders } from '../lib/local-debug-country';
 
 type IntentWidgetFormValues = {
   fromAmount?: string;
@@ -70,23 +71,11 @@ function getAffiliateEventFromLocation() {
 }
 
 const affiliateEvent = getAffiliateEventFromDom() ?? getAffiliateEventFromLocation();
-const LOCAL_MAIN_API_ORIGIN = 'http://127.0.0.1:7878';
-
-function getAppEventEndpoint() {
-  const isLocalHost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-
-  return isLocalHost ? `${LOCAL_MAIN_API_ORIGIN}/app-event` : '/api/app-event';
-}
-
 async function sendAppEventToServer(payload: AppEventRequest) {
   try {
-    await fetch(getAppEventEndpoint(), {
+    await fetch('/api/app-event', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: buildLocalDebugCountryHeaders(window.location.hostname),
       body: JSON.stringify(payload),
     });
   } catch {}

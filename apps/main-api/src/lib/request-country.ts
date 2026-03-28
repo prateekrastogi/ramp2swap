@@ -1,4 +1,5 @@
 const DEBUG_COUNTRY_HEADER = 'x-debug-country';
+const FORWARDED_COUNTRY_HEADER = 'x-ramp-country';
 
 const normalizeCountry = (value: string | null | undefined) => {
   const candidate = value?.trim().toUpperCase() ?? '';
@@ -19,6 +20,11 @@ const isLocalHostname = (hostname: string) =>
   hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
 
 export const getRequestCountry = (request: Request) => {
+  const forwardedCountry = normalizeCountry(request.headers.get(FORWARDED_COUNTRY_HEADER));
+  if (forwardedCountry) {
+    return forwardedCountry;
+  }
+
   const cloudflareCountry = getCloudflareCountry(request);
   if (cloudflareCountry) {
     return cloudflareCountry;

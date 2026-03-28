@@ -1,5 +1,21 @@
 const DEFAULT_LOCAL_MAIN_API_ORIGIN = 'http://127.0.0.1:7878';
 const DEBUG_COUNTRY_HEADER = 'x-debug-country';
+const FORWARDED_COUNTRY_HEADER = 'x-ramp-country';
+
+const normalizeCountry = (value: string | null | undefined) => {
+  const candidate = value?.trim().toUpperCase() ?? '';
+  return /^[A-Z]{2}$/.test(candidate) ? candidate : null;
+};
+
+const getCloudflareCountry = (request: Request) => {
+  const requestWithCf = request as Request & {
+    cf?: {
+      country?: string;
+    };
+  };
+
+  return normalizeCountry(requestWithCf.cf?.country);
+};
 
 function getLocalMainApiOrigin() {
   const configuredOrigin = import.meta.env.MAIN_API_LOCAL_ORIGIN?.trim();
@@ -34,6 +50,11 @@ export function buildMainApiProxyHeaders(request: Request) {
   const headers = new Headers({
     'content-type': 'application/json',
   });
+
+  const forwardedCountry = getCloudflareCountry(request);
+  if (forwardedCountry) {
+    headers.set(FORWARDED_COUNTRY_HEADER, forwardedCountry);
+  }
 
   const debugCountry = request.headers.get(DEBUG_COUNTRY_HEADER);
   if (debugCountry) {

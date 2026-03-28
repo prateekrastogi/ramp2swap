@@ -16,6 +16,7 @@ import {
   type WidgetExecutionEventName,
   type WidgetTransactionLog,
 } from '../lib/widget-events';
+import { buildLocalDebugCountryHeaders } from '../lib/local-debug-country';
 
 const rootElement = document.getElementById('lifi-widget-root');
 const headerConnectButton = document.getElementById('header-connect-wallet');
@@ -31,16 +32,6 @@ export type WidgetEventLogPayload = {
   eventName: WidgetExecutionEventName;
   transaction: WidgetTransactionLog;
 };
-
-const LOCAL_MAIN_API_ORIGIN = 'http://127.0.0.1:7878';
-
-function getWidgetEventEndpoint() {
-  const isLocalHost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-
-  return isLocalHost ? `${LOCAL_MAIN_API_ORIGIN}/widget-event` : '/api/widget-event';
-}
 
 function serializeWidgetEventPayload(payload: WidgetEventLogPayload) {
   const seen = new WeakSet<object>();
@@ -64,11 +55,9 @@ function serializeWidgetEventPayload(payload: WidgetEventLogPayload) {
 
 async function sendWidgetEventToServer(payload: WidgetEventLogPayload) {
   try {
-    await fetch(getWidgetEventEndpoint(), {
+    await fetch('/api/widget-event', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: buildLocalDebugCountryHeaders(window.location.hostname),
       body: serializeWidgetEventPayload(payload),
     });
   } catch {}
