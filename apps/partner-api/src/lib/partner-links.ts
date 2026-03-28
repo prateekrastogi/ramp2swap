@@ -21,6 +21,8 @@ export type PartnerLinkRecord = {
   updatedAt: number;
 };
 
+type DuplicateField = 'campaignName' | 'campaignTag' | 'campaignNameAndTag';
+
 export const normalizeCampaignName = (value: string) => value.trim();
 export const normalizeCampaignTag = (value: string) => value.trim();
 
@@ -32,6 +34,21 @@ const toPartnerLinkRecord = (row: PartnerLinkRow): PartnerLinkRecord => ({
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
+
+const getDuplicateField = (
+  row: PartnerLinkRow,
+  campaignName: string,
+  campaignTag: string,
+): DuplicateField => {
+  const nameMatches = row.campaign_name === campaignName;
+  const tagMatches = row.campaign_tag === campaignTag;
+
+  if (nameMatches && tagMatches) {
+    return 'campaignNameAndTag';
+  }
+
+  return nameMatches ? 'campaignName' : 'campaignTag';
+};
 
 export const buildGeneratedPartnerLink = (baseUrl: string, username: string, campaignTag: string) => {
   const url = new URL(baseUrl);
@@ -135,6 +152,7 @@ export const generatePartnerLink = async (
   if (existingLink) {
     return {
       duplicate: true,
+      duplicateField: getDuplicateField(existingLink, normalizedCampaignName, normalizedCampaignTag),
       link: toPartnerLinkRecord(existingLink),
     };
   }
@@ -223,6 +241,7 @@ export const generatePartnerLink = async (
   if (racedDuplicate && racedDuplicate.id !== id) {
     return {
       duplicate: true,
+      duplicateField: getDuplicateField(racedDuplicate, normalizedCampaignName, normalizedCampaignTag),
       link: toPartnerLinkRecord(racedDuplicate),
     };
   }
@@ -245,6 +264,7 @@ export const generatePartnerLink = async (
 
   return {
     duplicate: false,
+    duplicateField: null,
     link: toPartnerLinkRecord(createdLink),
   };
 };

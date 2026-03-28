@@ -6,7 +6,6 @@ import {
   topPerformingLinks,
 } from '../data/analytics-mock';
 import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
-import { linkGeneratorDraft } from '../data/link-generator-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { payoutDisplaySettings } from '../data/settings-display';
 import { getPartnerApiBaseUrl, getPartnerLinkBaseUrl } from '../lib/runtime-env';
@@ -258,7 +257,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                 <div
                   class="link-form-grid"
                   data-link-generator
-                  data-base-url={partnerLinkBaseUrl || linkGeneratorDraft.baseUrl}
+                  data-base-url={partnerLinkBaseUrl}
                   data-partner-username={partnerSettings.username}
                 >
                   <div class="stack-12">
@@ -268,7 +267,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         id="campaign-name"
                         class="input input-glass"
                         data-link-campaign-name
-                        value={linkGeneratorDraft.campaignName}
+                        placeholder="Main_Yield_Launch_V1"
                       />
                       <span class="link-input-warning" data-link-warning-icon aria-hidden="true">
                         <svg viewBox="0 0 24 24" focusable="false">
@@ -287,7 +286,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                         id="campaign-tag"
                         class="input input-glass"
                         data-link-campaign-tag
-                        value={linkGeneratorDraft.campaignTag}
+                        placeholder="satoshi-nakamoto"
                       />
                       <span class="link-input-warning" data-link-warning-icon aria-hidden="true">
                         <svg viewBox="0 0 24 24" focusable="false">
@@ -1137,6 +1136,18 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
           return input.id === 'campaign-name' ? 'Campaign name' : 'Campaign tag';
         };
 
+        const getDuplicateToastCopy = (duplicateField) => {
+          if (duplicateField === 'campaignName') {
+            return 'This campaign name already has a saved link.';
+          }
+
+          if (duplicateField === 'campaignNameAndTag') {
+            return 'This campaign name and campaign tag already have saved links.';
+          }
+
+          return 'This campaign tag already has a saved link.';
+        };
+
         const setFieldWarning = (input, isInvalid) => {
           if (!(input instanceof HTMLInputElement)) {
             return;
@@ -1463,6 +1474,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
                     ok?: boolean;
                     error?: string;
                     duplicate?: boolean;
+                    duplicateField?: 'campaignName' | 'campaignTag' | 'campaignNameAndTag' | null;
                     link?: {
                       id: string;
                       campaignName: string;
@@ -1482,7 +1494,7 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
               if (payload.duplicate) {
                 prependSavedLink(payload.link);
                 setGenerateButtonState('idle');
-                showLinkToast('Already generated', 'This campaign tag already has a saved link.', 'warning');
+                showLinkToast('Already generated', getDuplicateToastCopy(payload.duplicateField), 'warning');
                 return;
               }
 
@@ -1499,8 +1511,6 @@ const renderAnalyticsBars = (rangeKey: keyof typeof analyticsSummaries) =>
         bindCopyButtons();
         bindQrButtons();
         bindDeleteButtons();
-        validateLinkInputs();
-        refreshGeneratedUrlPreview();
         }
       }
 

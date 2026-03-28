@@ -368,6 +368,7 @@ app.post('/link/generate', async (c) => {
     return c.json({
       ok: true,
       duplicate: result.duplicate,
+      duplicateField: result.duplicateField,
       link: result.link,
     });
   } catch (error) {
