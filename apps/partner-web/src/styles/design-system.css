@@ -705,14 +705,18 @@
 .settings-feature-card {
   display: grid;
   gap: 18px;
+  background: linear-gradient(180deg, var(--mint-tint-faint), rgba(20, 28, 36, 0.85) 42%);
+  box-shadow:
+    0 16px 64px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 var(--mint-tint-strong);
 }
 
 .settings-feature-card::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 10%;
-  right: 10%;
+  left: 14%;
+  right: 14%;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
   pointer-events: none;
@@ -1013,6 +1017,11 @@
 .revenue-summary-card .kpi-grid,
 .revenue-summary-card .kpi-card {
   overflow: visible;
+}
+
+.link-generator-card.glass-mint::before,
+.revenue-summary-card.glass-mint::before {
+  content: none;
 }
 
 .revenue-summary-card.glass-interactive:hover,
