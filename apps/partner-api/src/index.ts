@@ -24,6 +24,7 @@ import { saveClick, saveConversion, saveTransaction } from './lib/ingest';
 import { getPartnerAnalytics } from './lib/analytics';
 import { getPartnerEarningsSummary } from './lib/earnings';
 import { backfillMissingConversionPayouts } from './lib/payouts';
+import { getPartnerOverviewSummary } from './lib/overview';
 
 type Bindings = CloudflareBindings & {
   ASSETS: Fetcher;
@@ -526,9 +527,32 @@ app.post('/earnings', async (c) => {
     ok: true,
     username: earnings.username,
     currentCommissionBps: earnings.currentCommissionBps,
+    currentBalance: earnings.currentBalance,
     pendingBalance: earnings.pendingBalance,
     availableBalance: earnings.availableBalance,
     totalEarnings: earnings.totalEarnings,
+  });
+});
+
+app.post('/overview', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  await backfillMissingConversionPayouts(c.env.AUTH_DB);
+
+  const overview = await getPartnerOverviewSummary(c.env.AUTH_DB, {
+    username: partnerSettings.username,
+  });
+
+  return c.json({
+    ok: true,
+    username: overview.username,
+    metrics: overview.metrics,
   });
 });
 

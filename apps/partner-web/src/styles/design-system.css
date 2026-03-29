@@ -221,6 +221,24 @@
   align-content: space-between;
 }
 
+.performance-metric-card-empty {
+  grid-template-rows: auto 1fr;
+  align-content: stretch;
+}
+
+.performance-metric-empty-state {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  text-align: center;
+}
+
+.performance-metric-empty-copy {
+  max-width: 28ch;
+  margin: 0;
+  color: var(--text-empty-state);
+}
+
 .glass-highlight-soft {
   contain: paint;
   background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);

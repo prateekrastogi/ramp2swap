@@ -1,6 +1,5 @@
 ---
 import '../styles/design-system.css';
-import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { payoutDisplaySettings } from '../data/settings-display';
 import { getPartnerApiBaseUrl, getPartnerLinkBaseUrl } from '../lib/runtime-env';
 import { loadTransactionFeed, type TransactionFeedItem } from '../data/transaction-feed';
@@ -61,9 +60,32 @@ type PartnerEarningsPayload = {
   ok?: boolean;
   username?: string;
   currentCommissionBps?: number;
+  currentBalance?: string;
   pendingBalance?: string;
   availableBalance?: string;
   totalEarnings?: string;
+};
+
+type OverviewMetricShell = {
+  id: string;
+  label: string;
+  emptyMessage: string;
+  accent?: 'mint';
+};
+
+type OverviewMetricSummary = {
+  id: string;
+  label: string;
+  value: string;
+  detail: string;
+  delta: string;
+  accent?: 'mint';
+};
+
+type PartnerOverviewPayload = {
+  ok?: boolean;
+  username?: string;
+  metrics?: OverviewMetricSummary[];
 };
 
 const sessionToken = Astro.cookies.get('partner_session')?.value ?? '';
@@ -86,10 +108,36 @@ let topPerformingLinksByRange: Partial<Record<AnalyticsRangeKey, AnalyticsBreakd
 let geographicBreakdownByRange: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>> = {};
 let earningsSummary = {
   currentCommissionBps: 15,
+  currentBalance: '$0.00',
   pendingBalance: '$0.00',
   availableBalance: '$0.00',
   totalEarnings: '$0.00',
 };
+let overviewMetrics: OverviewMetricSummary[] = [];
+
+const overviewMetricShells: OverviewMetricShell[] = [
+  {
+    id: 'total-clicks',
+    label: 'Total Clicks',
+    emptyMessage: 'Click totals for the last 30 days across all referral links will appear here.',
+  },
+  {
+    id: 'conversions',
+    label: 'Conversions',
+    emptyMessage: 'Completed attributed ramp transactions for the last 30 days will appear here.',
+  },
+  {
+    id: 'volume-driven',
+    label: 'Volume Driven',
+    emptyMessage: 'Total partner-driven fiat to crypto volume for the last 30 days will appear here.',
+  },
+  {
+    id: 'commission-balance',
+    label: 'Commission Balance',
+    emptyMessage: 'Available and pending commission earnings will appear here.',
+    accent: 'mint',
+  },
+];
 
 const formatCompactDate = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -121,7 +169,7 @@ if (sessionToken && partnerApiBaseUrl) {
       partnerSettings.canUpdateWalletAddress = payload.settings?.canUpdateWalletAddress ?? partnerSettings.canUpdateWalletAddress;
     }
 
-    const [linksResponse, loadedTransactionFeed, analyticsResponse, earningsResponse] = await Promise.all([
+    const [linksResponse, loadedTransactionFeed, analyticsResponse, earningsResponse, overviewResponse] = await Promise.all([
       fetch(`${partnerApiBaseUrl}/link`, {
         method: 'POST',
         headers: {
@@ -142,6 +190,13 @@ if (sessionToken && partnerApiBaseUrl) {
         body: JSON.stringify({ sessionToken }),
       }),
       fetch(`${partnerApiBaseUrl}/earnings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionToken }),
+      }),
+      fetch(`${partnerApiBaseUrl}/overview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,10 +231,16 @@ if (sessionToken && partnerApiBaseUrl) {
           Number.isFinite(earningsPayload.currentCommissionBps)
             ? earningsPayload.currentCommissionBps
             : earningsSummary.currentCommissionBps,
+        currentBalance: earningsPayload.currentBalance ?? earningsSummary.currentBalance,
         pendingBalance: earningsPayload.pendingBalance ?? earningsSummary.pendingBalance,
         availableBalance: earningsPayload.availableBalance ?? earningsSummary.availableBalance,
         totalEarnings: earningsPayload.totalEarnings ?? earningsSummary.totalEarnings,
       };
+    }
+
+    const overviewPayload = (await overviewResponse.json().catch(() => null)) as PartnerOverviewPayload | null;
+    if (overviewResponse.ok && overviewPayload?.ok && Array.isArray(overviewPayload.metrics)) {
+      overviewMetrics = overviewPayload.metrics;
     }
 
     transactionFeedItems = loadedTransactionFeed;
@@ -273,6 +334,7 @@ const analyticsTopLinksDefaultItems = topPerformingLinksByRange[analyticsTopLink
 const analyticsGeoDefaultItems = geographicBreakdownByRange[analyticsGeoDefaultRangeKey] ?? [];
 const analyticsHasTopLinks = analyticsTopLinksDefaultItems.length > 0;
 const analyticsHasGeography = analyticsGeoDefaultItems.length > 0;
+const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, metric]));
 ---
 
 <!doctype html>
@@ -372,22 +434,43 @@ const analyticsHasGeography = analyticsGeoDefaultItems.length > 0;
                 <p class="ui-label">Overview</p>
                 <h1 class="heading-card heading-section dashboard-section-title">Partner Performance Snapshot</h1>
                 <p class="body dashboard-section-copy">
-                  Core referral performance metrics for the current reporting window.
+                  Core referral performance metrics for the rolling 30-day reporting window.
                 </p>
               </div>
             </div>
 
             <div class="performance-metrics-grid">
-              {performanceSnapshotMetrics.map((metric) => (
-                <article class={`card performance-metric-card glass glass-interactive ${metric.accent === 'mint' ? 'glass-tier-2 glass-highlight-soft performance-metric-card-highlight' : 'glass-tier-1'} on-glass`}>
-                  <div class="performance-metric-card-top">
-                    <p class="ui-label">{metric.label}</p>
-                    <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>{metric.delta}</span>
-                  </div>
-                  <p class="data-large performance-metric-value">{metric.value}</p>
-                  <p class="body-small performance-metric-detail">{metric.detail}</p>
+              {overviewMetricShells.map((metric) => {
+                const overviewMetric = overviewMetricsById.get(metric.id);
+
+                return (
+                <article class={`card performance-metric-card ${overviewMetric ? '' : 'performance-metric-card-empty'} glass glass-interactive ${metric.accent === 'mint' ? 'glass-tier-2 glass-highlight-soft performance-metric-card-highlight' : 'glass-tier-1'} on-glass`}>
+                  {overviewMetric ? (
+                    <>
+                      <div class="performance-metric-card-top">
+                        <p class="ui-label">{overviewMetric.label}</p>
+                        <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>
+                          {overviewMetric.delta}
+                        </span>
+                      </div>
+                      <p class="data-large performance-metric-value">{overviewMetric.value}</p>
+                      <p class="body-small performance-metric-detail">{overviewMetric.detail}</p>
+                    </>
+                  ) : (
+                    <>
+                      <div class="performance-metric-card-top">
+                        <p class="ui-label">{metric.label}</p>
+                      </div>
+                      <div class="performance-metric-empty-state">
+                        <p class="body-small performance-metric-empty-copy empty-state-copy">
+                          {metric.emptyMessage}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </article>
-              ))}
+                );
+              })}
             </div>
           </section>
 

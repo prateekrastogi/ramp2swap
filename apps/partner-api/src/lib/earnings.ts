@@ -67,6 +67,7 @@ export const getPartnerEarningsSummary = async (
     return {
       username: normalizedUsername,
       currentCommissionBps: 15,
+      currentBalance: '$0.00',
       pendingBalance: '$0.00',
       availableBalance: '$0.00',
       totalEarnings: '$0.00',
@@ -109,6 +110,7 @@ export const getPartnerEarningsSummary = async (
   return {
     username: normalizedUsername,
     currentCommissionBps: getCommissionBpsFromPrecedingVolume(currentRollingVolume),
+    currentBalance: formatUsd(pendingBalance.plus(availableBalance)),
     pendingBalance: formatUsd(pendingBalance),
     availableBalance: formatUsd(availableBalance),
     totalEarnings: formatUsd(totalEarnings),
