@@ -496,6 +496,16 @@
   min-width: 0;
 }
 
+.analytics-top-links-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--mint-glow-strong), transparent);
+}
+
 .analytics-top-links-card .progress-row .body-small {
   color: var(--slate-100);
   font-weight: 400;
@@ -965,6 +975,32 @@
 .revenue-summary-card .kpi-grid,
 .revenue-summary-card .kpi-card {
   overflow: visible;
+}
+
+.revenue-summary-card.glass-interactive:hover,
+.revenue-summary-card.glass-interactive:focus-within,
+.link-generator-card.glass-interactive:hover,
+.link-generator-card.glass-interactive:focus-within {
+  background: var(--mint-tint-faint);
+  border-color: rgba(0, 229, 160, 0.28);
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(0, 229, 160, 0.2),
+    0 0 0 2px rgba(0, 229, 160, 0.08),
+    inset 0 1px 0 rgba(0, 229, 160, 0.18);
+}
+
+.performance-metric-card-highlight.glass-interactive:hover,
+.performance-metric-card-highlight.glass-interactive:focus-within,
+.analytics-top-links-card.glass-interactive:hover,
+.analytics-top-links-card.glass-interactive:focus-within {
+  background: linear-gradient(180deg, var(--mint-tint-faint), rgba(15, 20, 25, 0.72) 42%);
+  border-color: rgba(0, 229, 160, 0.28);
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(0, 229, 160, 0.2),
+    0 0 0 2px rgba(0, 229, 160, 0.08),
+    inset 0 1px 0 rgba(0, 229, 160, 0.18);
 }
 
 .earnings-info-icon {
