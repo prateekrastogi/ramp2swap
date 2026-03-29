@@ -618,15 +618,13 @@ app.post('/conversion', async (c) => {
     typeof conversion.transaction_id === 'string' ? conversion.transaction_id.trim() : '';
   const username = typeof conversion.username === 'string' ? conversion.username.trim() : null;
   const campaign = typeof conversion.campaign === 'string' ? conversion.campaign.trim() : null;
-  const verified = typeof conversion.verified === 'string' ? conversion.verified.trim() : null;
-  const withdrawn =
-    typeof conversion.withdrawn === 'string' ? conversion.withdrawn.trim() : null;
   const country =
     typeof conversion.country === 'string' ? conversion.country.trim().toUpperCase() : null;
   const timestamp =
     typeof conversion.timestamp === 'number' && Number.isFinite(conversion.timestamp)
       ? conversion.timestamp
       : null;
+  const now = Date.now();
 
   if (!event) {
     return jsonError('event is required.');
@@ -647,8 +645,7 @@ app.post('/conversion', async (c) => {
     campaign,
     country,
     timestamp,
-    verified,
-    withdrawn,
+    now,
   });
 
   return c.json({

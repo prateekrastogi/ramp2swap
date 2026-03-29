@@ -57,8 +57,5 @@ export const upsertConversionQuery = `
     username = excluded.username,
     campaign = excluded.campaign,
     country = excluded.country,
-    timestamp = excluded.timestamp,
-    payout = excluded.payout,
-    verified = excluded.verified,
-    withdrawn = excluded.withdrawn
+    timestamp = excluded.timestamp
 `;

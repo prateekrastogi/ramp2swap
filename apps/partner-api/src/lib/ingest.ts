@@ -8,6 +8,7 @@ import {
   backfillMissingConversionPayouts,
   recalculateConversionPayoutsForTransaction,
 } from './payouts';
+import { processPendingConversionVerifications } from './conversion-verification';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CLICK_RETENTION_DAYS = 91;
@@ -85,8 +86,7 @@ export const saveConversion = async (
     campaign,
     country,
     timestamp,
-    verified,
-    withdrawn,
+    now,
   }: {
     transactionId: string;
     event: string;
@@ -94,15 +94,15 @@ export const saveConversion = async (
     campaign: string | null;
     country: string | null;
     timestamp: number;
-    verified: string | null;
-    withdrawn: string | null;
+    now: number;
   },
 ) => {
   await db
     .prepare(upsertConversionQuery)
-    .bind(transactionId, event, username, campaign, country, timestamp, null, verified, withdrawn)
+    .bind(transactionId, event, username, campaign, country, timestamp, null, null, 'false')
     .run();
 
   await recalculateConversionPayoutsForTransaction(db, transactionId);
   await backfillMissingConversionPayouts(db);
+  await processPendingConversionVerifications(db, now);
 };

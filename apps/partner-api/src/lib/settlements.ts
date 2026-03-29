@@ -95,7 +95,7 @@ export const listPartnerSettlements = async (
     amount: formatUsd(row.amount),
     status: normalizeSettlementStatus(row.status),
     destination: maskWalletAddress(row.wallet_address),
-    meta: 'Settlement ledger record',
+    meta: 'USDC',
     date: formatSettlementDate(row.date),
   }));
 };
