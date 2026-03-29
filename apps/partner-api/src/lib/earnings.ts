@@ -96,7 +96,9 @@ export const getPartnerEarningsSummary = async (
     const payout = parseDecimal(row.payout);
     if (payout) {
       if (row.timestamp >= pendingCutoff) {
-        pendingBalance = pendingBalance.plus(payout);
+        if (!isTrueFlag(row.withdrawn)) {
+          pendingBalance = pendingBalance.plus(payout);
+        }
       } else {
         if (isTrueFlag(row.verified)) {
           totalEarnings = totalEarnings.plus(payout);
