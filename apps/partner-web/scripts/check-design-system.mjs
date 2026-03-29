@@ -180,9 +180,63 @@ for (const requiredLocalDocSection of [
   '## Partner Web Layer',
   '## Login Experience',
   '## Dashboard Shell',
+  '## Stable Dashboard Cards',
+  '## Empty Shell Rules',
+  '## Mint Surface Hover Rules',
+  '## Tooltip Rules',
 ]) {
   check(localDocs.includes(requiredLocalDocSection), `[Missing partner docs section] apps/partner-web/DESIGN_SYSTEM.md must include: ${requiredLocalDocSection}`);
 }
+
+for (const requiredSharedDocSection of [
+  '## Empty Shell Rules',
+  '### Interactive Mint Surface Rules',
+]) {
+  check(sharedDocs.includes(requiredSharedDocSection), `[Missing shared docs section] packages/design-system/DESIGN_SYSTEM.md must include: ${requiredSharedDocSection}`);
+}
+
+check(
+  partnerHomeContent.includes("fetch(`${partnerApiBaseUrl}/overview`"),
+  `[Overview data source] ${relative(root, partnerHomePage)} must load overview metrics from the overview API route`
+);
+check(
+  partnerHomeContent.includes('const overviewMetricShells: OverviewMetricShell[] = ['),
+  `[Stable overview shells] ${relative(root, partnerHomePage)} must declare canonical overview card shells for empty-state fallback`
+);
+check(
+  partnerHomeContent.includes('performance-metric-card-empty'),
+  `[Stable overview shells] ${relative(root, partnerHomePage)} must preserve the dedicated overview empty-shell layout hook`
+);
+check(
+  !partnerHomeContent.includes('>No data yet<'),
+  `[Overview placeholders] ${relative(root, partnerHomePage)} must not use generic "No data yet" placeholders inside overview metric cards`
+);
+check(
+  !partnerHomeContent.includes('performance-metric-value">--'),
+  `[Overview placeholders] ${relative(root, partnerHomePage)} must not render "--" as the empty overview metric value placeholder`
+);
+check(
+  partnerHomeContent.includes('glass-tier-2 glass-highlight-soft glass-interactive analytics-top-links-card on-glass'),
+  `[Mint analytics shell] ${relative(root, partnerHomePage)} must keep Top Performing Links on the shared mint-highlight shell`
+);
+
+for (const requiredLocalCssRule of [
+  '.performance-metric-card-empty',
+  '.performance-metric-empty-state',
+  '.revenue-summary-card.glass-interactive:hover',
+  '.link-generator-card.glass-interactive:hover',
+  '.performance-metric-card-highlight.glass-interactive:hover',
+  '.analytics-top-links-card.glass-interactive:hover',
+]) {
+  check(localCss.includes(requiredLocalCssRule), `[Mint/empty-state rule] partner-web design-system.css must include ${requiredLocalCssRule}`);
+}
+
+check(
+  localCss.includes('.analytics-top-links-card::before') &&
+    localCss.includes('left: 14%;') &&
+    localCss.includes('right: 14%;'),
+  '[Mint flare parity] Top Performing Links must preserve the same top flare width as other mint-highlight surfaces'
+);
 
 if (failures.length > 0) {
   console.error('\nDesign system guardrails failed:\n');

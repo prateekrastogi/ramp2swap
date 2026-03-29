@@ -70,6 +70,32 @@ Partner-web does not own:
 - Analytics cards that support time windows must keep range behavior explicit per card and only show blank states when the authenticated partner truly has no data for that surface.
 - Tooltip content for analytics comparisons must be calculated from real backend values, not hardcoded percentages or placeholder conversion rates.
 
+## Stable Dashboard Cards
+- Dashboard cards that temporarily lose mock data must keep their production shell structure intact:
+  - same card chrome
+  - same header position
+  - same accent treatment
+  - same action area footprint when that card will later be refilled with live data
+- Recreating card structure from memory later is not acceptable. Empty states should preserve the exact shell we intend to refill.
+- Overview cards should return to the original KPI composition as soon as live data exists; the empty-shell layout is only for the empty state.
+
+## Empty Shell Rules
+- Overview, earnings, payout, analytics, and referral-management empty shells must use metric- or workflow-specific copy.
+- Avoid generic placeholders like `No data yet` and `--` inside metric cards when a centered empty-shell message can communicate the state more clearly.
+- If a dashboard metric card is empty, center the empty-state copy within the remaining card body while preserving the canonical card header.
+- Empty shell copy should be derived from the metric's intended meaning so the future live implementation does not drift from the shell semantics.
+
+## Mint Surface Hover Rules
+- Partner-web must not let shared `.glass-interactive:hover` darken mint-highlighted dashboard cards.
+- `Commission Balance`, `Top Performing Links`, and any other `.glass-highlight-soft` card must keep the original mint gradient and top flare on hover while only the mint border/ring becomes brighter.
+- `Primary Link Builder`, `Revenue Summary`, and other `.glass-mint` action surfaces must keep the filled mint treatment on hover while only the mint border/ring gains contrast.
+- When two mint-highlighted cards are meant to look alike, align flare width/intensity and hover border contrast deliberately instead of letting one become more subdued.
+
+## Tooltip Rules
+- Informational tooltips inside KPI cards should use compact circular info icons, not extra chip/button styling.
+- Tooltip copy must be specific, concise, and grounded in real backend logic or persisted data.
+- KPI tooltips must remain fully visible within the card stack and must not be clipped by local overflow rules.
+
 ## Referral Stream Rules
 - The transaction/referral stream must avoid horizontal overflow at every breakpoint.
 - Desktop keeps the full table.

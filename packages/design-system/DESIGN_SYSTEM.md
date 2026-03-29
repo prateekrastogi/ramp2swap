@@ -78,6 +78,12 @@ Do not reference undefined CSS variables. If a UI need is semantic, add a named 
 - Empty-state copy should use `--text-empty-state` and the shared `.empty-state-copy` utility instead of card-specific text overrides.
 - App styles may change layout around empty states, but should not redefine empty-state text color unless the shared token itself is being intentionally updated.
 
+## Empty Shell Rules
+- Empty shells must preserve the same outer card shell, header placement, accent treatment, and spacing structure as the populated state unless the product explicitly changes the design.
+- Do not replace a data card with a different empty-state component when the product intent is to fill that same card later.
+- Prefer vertically centered empty-state copy inside the existing shell over ad hoc placeholder numbers such as `--` or generic chips such as `No data yet` when a surface is intentionally awaiting backend wiring.
+- Empty-state copy should stay specific to the metric or workflow being represented, rather than using one repeated generic sentence across unrelated cards.
+
 ## Responsive Data-Dense Surface Rules
 - Shared table primitives must allow app-level viewport tuning, but app styles should size scroll regions with semantic variables instead of hardcoded one-off heights when a surface has a fixed visible-row requirement.
 - If a data surface intentionally collapses columns across breakpoints, define the visible-column behavior explicitly per breakpoint rather than relying on overflow.
@@ -153,6 +159,12 @@ Use `.glass-mint` for action surfaces only.
 ### Mint Highlight Variants
 - Use `.glass-highlight-soft` for softer green flare surfaces where the mint should read as atmospheric emphasis, not a full action fill.
 - Use `.glass-mint` for fuller mint-tinted secondary/action surfaces with stronger border and ring presence.
+
+### Interactive Mint Surface Rules
+- Hover and focus states must not replace a mint surface's base treatment with the generic dark glass hover wash.
+- For `.glass-highlight-soft` surfaces, preserve the atmospheric mint gradient and top flare; only the border/ring may intensify for interaction.
+- For `.glass-mint` surfaces, preserve the filled mint tint and top flare; interaction should primarily increase mint edge contrast rather than darken the card body.
+- When multiple mint surfaces should feel related, keep flare geometry and hover contrast intentionally aligned instead of using subdued one-off variants.
 
 ### Interactive Glass States
 - `.glass-interactive:hover`
