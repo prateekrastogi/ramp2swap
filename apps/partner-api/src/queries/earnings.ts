@@ -3,6 +3,8 @@ export const selectEarningsRowsByUsernameQuery = `
     c.transaction_id,
     c.timestamp,
     c.payout,
+    c.verified,
+    c.withdrawn,
     t.amount
   FROM conversions c
   LEFT JOIN transactions t

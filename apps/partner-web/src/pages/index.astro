@@ -197,14 +197,14 @@ if (sessionToken && partnerApiBaseUrl) {
         sessionToken,
         username: partnerSettings.username,
       }),
-      fetch(`${partnerApiBaseUrl}/analytics`, {
+      fetch(`${partnerApiBaseUrl}/analytic`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ sessionToken }),
       }),
-      fetch(`${partnerApiBaseUrl}/earnings`, {
+      fetch(`${partnerApiBaseUrl}/earning`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

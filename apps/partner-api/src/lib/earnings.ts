@@ -11,6 +11,8 @@ type EarningsRow = {
   transaction_id: string;
   timestamp: number;
   payout: string | null;
+  verified: string | null;
+  withdrawn: string | null;
   amount: string | null;
 };
 
@@ -39,6 +41,8 @@ const parseDecimal = (value: string | null) => {
 };
 
 const formatUsd = (value: Decimal) => USD_FORMATTER.format(Number(value.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toString()));
+
+const isTrueFlag = (value: string | null) => value?.trim().toLowerCase() === 'true';
 
 const getCommissionBpsFromPrecedingVolume = (precedingVolume: Decimal) => {
   if (precedingVolume.lt(FIRST_TIER_MAX_VOLUME)) {
@@ -91,11 +95,16 @@ export const getPartnerEarningsSummary = async (
   for (const row of rows) {
     const payout = parseDecimal(row.payout);
     if (payout) {
-      totalEarnings = totalEarnings.plus(payout);
       if (row.timestamp >= pendingCutoff) {
         pendingBalance = pendingBalance.plus(payout);
       } else {
-        availableBalance = availableBalance.plus(payout);
+        if (isTrueFlag(row.verified)) {
+          totalEarnings = totalEarnings.plus(payout);
+        }
+
+        if (isTrueFlag(row.verified) && !isTrueFlag(row.withdrawn)) {
+          availableBalance = availableBalance.plus(payout);
+        }
       }
     }
 

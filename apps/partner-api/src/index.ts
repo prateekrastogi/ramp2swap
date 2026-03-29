@@ -481,7 +481,7 @@ app.post('/transaction/feed', async (c) => {
   });
 });
 
-app.post('/analytics', async (c) => {
+app.post('/analytic', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
@@ -509,7 +509,7 @@ app.post('/analytics', async (c) => {
   });
 });
 
-app.post('/earnings', async (c) => {
+app.post('/earning', async (c) => {
   const body = await parseRequestBody(c.req);
   const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
   const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
