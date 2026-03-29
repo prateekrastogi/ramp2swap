@@ -943,6 +943,106 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.earnings-empty-state,
+.payout-history-empty-state {
+  display: grid;
+}
+
+.earnings-empty-card,
+.payout-history-empty-card {
+  min-height: 220px;
+}
+
+.earnings-kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  overflow: visible;
+}
+
+.revenue-summary-card,
+.revenue-summary-card .kpi-grid,
+.revenue-summary-card .kpi-card {
+  overflow: visible;
+}
+
+.earnings-info-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--slate-300);
+  cursor: help;
+  transition: all 0.15s ease;
+}
+
+.earnings-info-icon:hover,
+.earnings-info-icon:focus-visible {
+  color: var(--slate-100);
+}
+
+.earnings-info-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.earnings-info-tooltip {
+  position: relative;
+}
+
+.earnings-info-tooltip::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--white-a-10);
+  background: rgba(20, 28, 36, 0.92);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: var(--slate-100);
+  font-family: var(--font-data);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  pointer-events: none;
+  white-space: normal;
+  width: 220px;
+  max-width: min(220px, 72vw);
+  text-align: left;
+  z-index: 3;
+}
+
+.earnings-info-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 6px;
+  top: calc(100% + 4px);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--white-a-10);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.earnings-info-tooltip:hover::after,
+.earnings-info-tooltip:hover::before,
+.earnings-info-tooltip:focus-visible::after,
+.earnings-info-tooltip:focus-visible::before {
+  opacity: 1;
+}
+
 .payout-history-list {
   display: grid;
   gap: 12px;

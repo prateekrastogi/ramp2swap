@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import Decimal from 'decimal.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -52,6 +53,13 @@ const USER_PROFILES = [
 
 const EXTRA_TRANSACTION_TOTAL_CENTS = 40_000_000;
 const EXTRA_TRANSACTION_COUNT = 65;
+const ROLLING_WINDOW_MS = 30 * DAY_MS;
+const FIRST_TIER_MAX_VOLUME = new Decimal(100_000);
+const SECOND_TIER_MAX_VOLUME = new Decimal(1_000_000);
+const FIRST_TIER_RATE = new Decimal(15).div(10_000);
+const SECOND_TIER_RATE = new Decimal(20).div(10_000);
+const THIRD_TIER_RATE = new Decimal(25).div(10_000);
+const PAYOUT_DECIMAL_PLACES = 8;
 
 const PAIRS = [
   ['ETH', 'USDC'],
@@ -249,6 +257,72 @@ function buildAmountPlan(totalCents, count, rng) {
   return amounts;
 }
 
+function getCommissionRateFromPrecedingVolume(precedingVolume) {
+  if (precedingVolume.lt(FIRST_TIER_MAX_VOLUME)) {
+    return FIRST_TIER_RATE;
+  }
+
+  if (precedingVolume.lt(SECOND_TIER_MAX_VOLUME)) {
+    return SECOND_TIER_RATE;
+  }
+
+  return THIRD_TIER_RATE;
+}
+
+function formatPayoutForStorage(amount) {
+  const rounded = amount.toDecimalPlaces(PAYOUT_DECIMAL_PLACES, Decimal.ROUND_HALF_UP);
+  const asText = rounded.toFixed(PAYOUT_DECIMAL_PLACES);
+  return asText.replace(/(\.\d*?[1-9])0+$/u, '$1').replace(/\.0+$/u, '');
+}
+
+function assignConversionPayouts(conversions, transactions) {
+  const transactionAmounts = new Map(
+    transactions.map((transaction) => [transaction.transaction_id, new Decimal(transaction.amount)]),
+  );
+  const conversionsByUsername = new Map();
+
+  conversions.forEach((conversion) => {
+    const existing = conversionsByUsername.get(conversion.username) ?? [];
+    existing.push(conversion);
+    conversionsByUsername.set(conversion.username, existing);
+  });
+
+  conversionsByUsername.forEach((rows) => {
+    rows.sort((left, right) => {
+      if (left.timestamp !== right.timestamp) {
+        return left.timestamp - right.timestamp;
+      }
+
+      return left.transaction_id.localeCompare(right.transaction_id);
+    });
+
+    const rollingWindow = [];
+    let rollingVolume = new Decimal(0);
+
+    rows.forEach((conversion) => {
+      const windowStart = conversion.timestamp - ROLLING_WINDOW_MS;
+
+      while (rollingWindow.length > 0 && rollingWindow[0].timestamp < windowStart) {
+        const expired = rollingWindow.shift();
+        rollingVolume = rollingVolume.minus(expired.amount);
+      }
+
+      const amount = transactionAmounts.get(conversion.transaction_id);
+      conversion.payout = amount
+        ? formatPayoutForStorage(amount.mul(getCommissionRateFromPrecedingVolume(rollingVolume)))
+        : null;
+
+      if (amount) {
+        rollingWindow.push({
+          timestamp: conversion.timestamp,
+          amount,
+        });
+        rollingVolume = rollingVolume.plus(amount);
+      }
+    });
+  });
+}
+
 function createUsers(envName, emails) {
   return USER_PROFILES.map((profile, profileIndex) => {
     const email = emails[profileIndex];
@@ -420,9 +494,13 @@ function createTransactionRows(envName, users, referenceTimestamp, rng) {
     });
   });
 
+  const sortedTransactions = transactions.sort((left, right) => left.timestamp - right.timestamp);
+  const sortedConversions = conversions.sort((left, right) => left.timestamp - right.timestamp);
+  assignConversionPayouts(sortedConversions, sortedTransactions);
+
   return {
-    transactions: transactions.sort((left, right) => left.timestamp - right.timestamp),
-    conversions: conversions.sort((left, right) => left.timestamp - right.timestamp),
+    transactions: sortedTransactions,
+    conversions: sortedConversions,
   };
 }
 

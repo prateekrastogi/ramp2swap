@@ -4,6 +4,10 @@ import {
   upsertConversionQuery,
   upsertTransactionQuery,
 } from '../queries/ingest';
+import {
+  backfillMissingConversionPayouts,
+  recalculateConversionPayoutsForTransaction,
+} from './payouts';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CLICK_RETENTION_DAYS = 91;
@@ -39,6 +43,9 @@ export const saveTransaction = async (
     .prepare(upsertTransactionQuery)
     .bind(transactionId, status, amount, fromSymbol, toSymbol, walletAddress, timestamp, now, now)
     .run();
+
+  await recalculateConversionPayoutsForTransaction(db, transactionId);
+  await backfillMissingConversionPayouts(db);
 };
 
 export const saveClick = async (
@@ -78,7 +85,6 @@ export const saveConversion = async (
     campaign,
     country,
     timestamp,
-    payout,
   }: {
     transactionId: string;
     event: string;
@@ -86,11 +92,13 @@ export const saveConversion = async (
     campaign: string | null;
     country: string | null;
     timestamp: number;
-    payout: string | null;
   },
 ) => {
   await db
     .prepare(upsertConversionQuery)
-    .bind(transactionId, event, username, campaign, country, timestamp, payout)
+    .bind(transactionId, event, username, campaign, country, timestamp, null)
     .run();
+
+  await recalculateConversionPayoutsForTransaction(db, transactionId);
+  await backfillMissingConversionPayouts(db);
 };

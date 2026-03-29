@@ -22,6 +22,8 @@ import { deletePartnerLink, generatePartnerLink, listPartnerLinks } from './lib/
 import { listPartnerTransactionFeed } from './lib/transaction-feed';
 import { saveClick, saveConversion, saveTransaction } from './lib/ingest';
 import { getPartnerAnalytics } from './lib/analytics';
+import { getPartnerEarningsSummary } from './lib/earnings';
+import { backfillMissingConversionPayouts } from './lib/payouts';
 
 type Bindings = CloudflareBindings & {
   ASSETS: Fetcher;
@@ -505,6 +507,31 @@ app.post('/analytics', async (c) => {
   });
 });
 
+app.post('/earnings', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  await backfillMissingConversionPayouts(c.env.AUTH_DB);
+
+  const earnings = await getPartnerEarningsSummary(c.env.AUTH_DB, {
+    username: partnerSettings.username,
+  });
+
+  return c.json({
+    ok: true,
+    username: earnings.username,
+    currentCommissionBps: earnings.currentCommissionBps,
+    pendingBalance: earnings.pendingBalance,
+    availableBalance: earnings.availableBalance,
+    totalEarnings: earnings.totalEarnings,
+  });
+});
+
 app.post('/click', async (c) => {
   const click = await parseRequestBody(c.req);
   const event = typeof click.event === 'string' ? click.event.trim() : '';
@@ -552,7 +579,6 @@ app.post('/conversion', async (c) => {
     typeof conversion.timestamp === 'number' && Number.isFinite(conversion.timestamp)
       ? conversion.timestamp
       : null;
-  const payout = typeof conversion.payout === 'string' ? conversion.payout.trim() : null;
 
   if (!event) {
     return jsonError('event is required.');
@@ -573,7 +599,6 @@ app.post('/conversion', async (c) => {
     campaign,
     country,
     timestamp,
-    payout,
   });
 
   return c.json({

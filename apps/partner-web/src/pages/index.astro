@@ -1,6 +1,5 @@
 ---
 import '../styles/design-system.css';
-import { earningsSummary, payoutHistoryEntries } from '../data/earnings-payouts-mock';
 import { performanceSnapshotMetrics } from '../data/performance-snapshot-mock';
 import { payoutDisplaySettings } from '../data/settings-display';
 import { getPartnerApiBaseUrl, getPartnerLinkBaseUrl } from '../lib/runtime-env';
@@ -58,6 +57,15 @@ type PartnerAnalyticsPayload = {
   geography?: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>>;
 };
 
+type PartnerEarningsPayload = {
+  ok?: boolean;
+  username?: string;
+  currentCommissionBps?: number;
+  pendingBalance?: string;
+  availableBalance?: string;
+  totalEarnings?: string;
+};
+
 const sessionToken = Astro.cookies.get('partner_session')?.value ?? '';
 const partnerApiBaseUrl = await getPartnerApiBaseUrl();
 const partnerLinkBaseUrl = await getPartnerLinkBaseUrl();
@@ -76,6 +84,12 @@ let transactionFeedItems: TransactionFeedItem[] = [];
 let analyticsSummaries: Partial<Record<AnalyticsRangeKey, AnalyticsSummary>> = {};
 let topPerformingLinksByRange: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>> = {};
 let geographicBreakdownByRange: Partial<Record<AnalyticsRangeKey, AnalyticsBreakdownItem[]>> = {};
+let earningsSummary = {
+  currentCommissionBps: 15,
+  pendingBalance: '$0.00',
+  availableBalance: '$0.00',
+  totalEarnings: '$0.00',
+};
 
 const formatCompactDate = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -107,7 +121,7 @@ if (sessionToken && partnerApiBaseUrl) {
       partnerSettings.canUpdateWalletAddress = payload.settings?.canUpdateWalletAddress ?? partnerSettings.canUpdateWalletAddress;
     }
 
-    const [linksResponse, loadedTransactionFeed, analyticsResponse] = await Promise.all([
+    const [linksResponse, loadedTransactionFeed, analyticsResponse, earningsResponse] = await Promise.all([
       fetch(`${partnerApiBaseUrl}/link`, {
         method: 'POST',
         headers: {
@@ -121,6 +135,13 @@ if (sessionToken && partnerApiBaseUrl) {
         username: partnerSettings.username,
       }),
       fetch(`${partnerApiBaseUrl}/analytics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionToken }),
+      }),
+      fetch(`${partnerApiBaseUrl}/earnings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,6 +166,20 @@ if (sessionToken && partnerApiBaseUrl) {
         analyticsPayload.geography && typeof analyticsPayload.geography === 'object'
           ? analyticsPayload.geography
           : geographicBreakdownByRange;
+    }
+
+    const earningsPayload = (await earningsResponse.json().catch(() => null)) as PartnerEarningsPayload | null;
+    if (earningsResponse.ok && earningsPayload?.ok) {
+      earningsSummary = {
+        currentCommissionBps:
+          typeof earningsPayload.currentCommissionBps === 'number' &&
+          Number.isFinite(earningsPayload.currentCommissionBps)
+            ? earningsPayload.currentCommissionBps
+            : earningsSummary.currentCommissionBps,
+        pendingBalance: earningsPayload.pendingBalance ?? earningsSummary.pendingBalance,
+        availableBalance: earningsPayload.availableBalance ?? earningsSummary.availableBalance,
+        totalEarnings: earningsPayload.totalEarnings ?? earningsSummary.totalEarnings,
+      };
     }
 
     transactionFeedItems = loadedTransactionFeed;
@@ -598,22 +633,74 @@ const analyticsHasGeography = analyticsGeoDefaultItems.length > 0;
                 </div>
 
                 <div class="kpi-grid earnings-kpi-grid">
-                  <div class="kpi-card">
-                    <p class="ui-label">Commission Rate</p>
-                    <p class="data-large">{earningsSummary.commissionRate}</p>
-                  </div>
-                  <div class="kpi-card">
-                    <p class="ui-label">Pending Balance</p>
+                  <article class="kpi-card">
+                    <div class="earnings-kpi-head">
+                      <p class="ui-label">Commission Rate</p>
+                      <span
+                        class="earnings-info-icon earnings-info-tooltip"
+                        aria-label="Commission rate tier logic"
+                        data-label="15 BPS below volume of 100K USD, 20 BPS for volume from 100K to below 1M USD, 25 BPS for volume at 1M USD and above."
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="8"></circle>
+                          <path d="M12 10v6"></path>
+                          <path d="M12 7.5h.01"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <p class="data-large">{earningsSummary.currentCommissionBps} BPS</p>
+                  </article>
+                  <article class="kpi-card">
+                    <div class="earnings-kpi-head">
+                      <p class="ui-label">Pending Balance</p>
+                      <span
+                        class="earnings-info-icon earnings-info-tooltip"
+                        aria-label="Pending balance info"
+                        data-label="Pending commission covers the last 72 hours."
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="8"></circle>
+                          <path d="M12 10v6"></path>
+                          <path d="M12 7.5h.01"></path>
+                        </svg>
+                      </span>
+                    </div>
                     <p class="data-large">{earningsSummary.pendingBalance}</p>
-                  </div>
-                  <div class="kpi-card">
-                    <p class="ui-label">Available Balance</p>
+                  </article>
+                  <article class="kpi-card">
+                    <div class="earnings-kpi-head">
+                      <p class="ui-label">Available Balance</p>
+                      <span
+                        class="earnings-info-icon earnings-info-tooltip"
+                        aria-label="Available balance info"
+                        data-label="Available balance includes all earned commission older than the last 72 hours and is available for withdrawal."
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="8"></circle>
+                          <path d="M12 10v6"></path>
+                          <path d="M12 7.5h.01"></path>
+                        </svg>
+                      </span>
+                    </div>
                     <p class="data-large">{earningsSummary.availableBalance}</p>
-                  </div>
-                  <div class="kpi-card">
-                    <p class="ui-label">Total Paid Out</p>
-                    <p class="data-large">{earningsSummary.totalPaidOut}</p>
-                  </div>
+                  </article>
+                  <article class="kpi-card">
+                    <div class="earnings-kpi-head">
+                      <p class="ui-label">Total Earnings</p>
+                      <span
+                        class="earnings-info-icon earnings-info-tooltip"
+                        aria-label="Total earnings info"
+                        data-label="Total earnings includes all earned commission recorded so far in account history."
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="8"></circle>
+                          <path d="M12 10v6"></path>
+                          <path d="M12 7.5h.01"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <p class="data-large">{earningsSummary.totalEarnings}</p>
+                  </article>
                 </div>
 
                 <div class="row-12">
@@ -624,28 +711,15 @@ const analyticsHasGeography = analyticsGeoDefaultItems.length > 0;
               <article class="card glass glass-tier-1 glass-interactive on-glass payout-history-card">
                 <div class="widget-header">
                   <p class="heading-card">Payout History</p>
-                  <span class="chip">{payoutHistoryEntries.length} entries</span>
+                  <span class="chip">0 records</span>
                 </div>
 
-                <div class="payout-history-list">
-                  {payoutHistoryEntries.map((entry) => (
-                    <article class="payout-history-row">
-                      <div class="payout-history-head">
-                        <div class="stack-8">
-                          <p class="heading-card">{entry.amount}</p>
-                          <p class="data-small">{entry.destination}</p>
-                        </div>
-                        <span class={`status ${entry.status === 'paid' ? 'status-completed' : 'status-pending'}`}>
-                          {entry.status}
-                        </span>
-                      </div>
-
-                      <div class="row-12 payout-history-meta">
-                        <span class="data-small">{entry.date}</span>
-                        <span class="chip">{entry.id}</span>
-                      </div>
-                    </article>
-                  ))}
+                <div class="payout-history-empty-state">
+                  <article class="link-campaign-row link-campaign-row-empty payout-history-empty-card">
+                    <p class="body-small empty-state-copy">
+                      Payout records will show up here after withdrawals are generated from computed revenue data.
+                    </p>
+                  </article>
                 </div>
               </article>
             </div>
