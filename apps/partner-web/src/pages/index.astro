@@ -1703,7 +1703,7 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
         const generateButtonLabels = {
           idle: 'Generate Link',
           pending: 'Generating...',
-          complete: 'Generated',
+          complete: 'Generate Link',
         };
         let toastTimer = null;
         let hasAttemptedGenerate = false;
@@ -1722,7 +1722,8 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
 
           generateLinkButton.textContent = generateButtonLabels[state];
           generateLinkButton.dataset.state = state;
-          generateLinkButton.disabled = state !== 'idle';
+          generateLinkButton.setAttribute('aria-disabled', state === 'complete' ? 'true' : 'false');
+          generateLinkButton.disabled = state === 'pending';
         };
 
         const showLinkToast = (title, copy, tone = 'success') => {
@@ -2082,6 +2083,11 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
 
         if (generateLinkButton instanceof HTMLButtonElement) {
           generateLinkButton.addEventListener('click', async () => {
+            if (generateLinkButton.dataset.state === 'complete') {
+              showLinkToast('Link already generated', 'This campaign link has already been generated.', 'warning');
+              return;
+            }
+
             hasAttemptedGenerate = true;
             const validation = validateLinkInputs({ showWarnings: true });
             if (!validation.isValid) {
@@ -2142,8 +2148,8 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
 
               if (payload.duplicate) {
                 prependSavedLink(payload.link);
-                setGenerateButtonState('idle');
-                showLinkToast('Already generated', getDuplicateToastCopy(payload.duplicateField), 'warning');
+                setGenerateButtonState('complete');
+                showLinkToast('Link already generated', getDuplicateToastCopy(payload.duplicateField), 'warning');
                 return;
               }
 
