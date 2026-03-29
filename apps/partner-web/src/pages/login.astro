@@ -98,7 +98,7 @@ import '../styles/design-system.css';
             return;
           }
 
-          setBusy(continueButton, true, 'Sending OTP...', 'Send OTP');
+          setBusy(continueButton, true, 'Sending...', 'Send OTP');
           setFeedback('');
 
           try {
@@ -119,7 +119,7 @@ import '../styles/design-system.css';
             setFeedback('Unable to reach the login service.', true);
             return;
           } finally {
-            setBusy(continueButton, false, 'Sending OTP...', 'Send OTP');
+            setBusy(continueButton, false, 'Sending...', 'Send OTP');
           }
 
           if (emailStep instanceof HTMLElement) emailStep.hidden = true;
