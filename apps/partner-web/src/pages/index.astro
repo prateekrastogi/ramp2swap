@@ -290,13 +290,14 @@ const parseUsdNumber = (value: string) => {
   return Number.isFinite(numeric) ? numeric : 0;
 };
 const canRequestWithdrawal = parseUsdNumber(earningsSummary.availableBalance) >= 10;
+const hasZeroAvailableBalance = parseUsdNumber(earningsSummary.availableBalance) === 0;
 const hasPendingSettlementRequest =
   payoutHistoryEntries[0]?.status === 'pending' && !canRequestWithdrawal;
-const requestWithdrawalButtonState = hasPendingSettlementRequest ? 'complete' : 'idle';
-const requestWithdrawalDisabledReason = !canRequestWithdrawal
-  ? 'below-minimum'
-  : hasPendingSettlementRequest
-    ? 'pending'
+const requestWithdrawalButtonState = hasPendingSettlementRequest || hasZeroAvailableBalance ? 'complete' : 'idle';
+const requestWithdrawalDisabledReason = hasPendingSettlementRequest
+  ? 'pending'
+  : !canRequestWithdrawal
+    ? 'below-minimum'
     : '';
 const isRequestWithdrawalDisabled = false;
 
@@ -1312,10 +1313,12 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
             `)
             .join('');
         const syncWithdrawalButtonState = ({ availableBalance, records }) => {
-          const canRequest = parseUsdNumber(availableBalance) >= 10;
+          const availableBalanceValue = parseUsdNumber(availableBalance);
+          const canRequest = availableBalanceValue >= 10;
+          const hasZeroAvailable = availableBalanceValue === 0;
           const hasPendingRequest = Array.isArray(records) && records[0]?.status === 'pending' && !canRequest;
-          const disabledReason = !canRequest ? 'below-minimum' : hasPendingRequest ? 'pending' : '';
-          requestWithdrawalButton.dataset.state = hasPendingRequest ? 'complete' : 'idle';
+          const disabledReason = hasPendingRequest ? 'pending' : !canRequest ? 'below-minimum' : '';
+          requestWithdrawalButton.dataset.state = hasPendingRequest || hasZeroAvailable ? 'complete' : 'idle';
           requestWithdrawalButton.dataset.disabledReason = disabledReason;
           requestWithdrawalButton.setAttribute('aria-disabled', disabledReason ? 'true' : 'false');
           requestWithdrawalButton.disabled = false;

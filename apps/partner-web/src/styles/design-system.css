@@ -1289,12 +1289,29 @@
   cursor: progress;
 }
 
-.revenue-summary-card .btn-primary[aria-disabled='true']:not(:disabled) {
-  opacity: 0.5;
-  cursor: not-allowed;
-  border-color: rgba(0, 229, 160, 0.28);
-  background: rgba(0, 229, 160, 0.2);
-  color: rgba(15, 20, 25, 0.72);
+.revenue-summary-card .btn-primary.btn-glass[data-state='pending'],
+.revenue-summary-card .btn-primary.btn-glass[data-state='pending']:disabled {
+  opacity: 1 !important;
+  border-color: var(--mint-500) !important;
+  background: var(--mint-500) !important;
+  color: var(--obsidian-900) !important;
+  box-shadow:
+    0 10px 26px rgba(0, 229, 160, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  cursor: progress !important;
+}
+
+.revenue-summary-card .btn-primary.btn-glass[aria-disabled='true']:not(:disabled):not([data-state='complete']),
+.revenue-summary-card .btn-primary.btn-glass[aria-disabled='true']:not(:disabled):not([data-state='complete']):hover,
+.revenue-summary-card .btn-primary.btn-glass[aria-disabled='true']:not(:disabled):not([data-state='complete']):focus-visible,
+.revenue-summary-card .btn-primary.btn-glass[aria-disabled='true']:not(:disabled):not([data-state='complete']):active {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  border-color: rgba(0, 229, 160, 0.28) !important;
+  background: rgba(0, 229, 160, 0.2) !important;
+  color: rgba(15, 20, 25, 0.72) !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .link-output-actions {
