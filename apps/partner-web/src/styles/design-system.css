@@ -741,9 +741,21 @@
   transition: all 0.2s ease;
 }
 
+.settings-nav-button:focus {
+  outline: none;
+}
+
 .settings-nav-button:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--white-a-07);
+}
+
+.settings-nav-button:focus-visible {
+  border-color: var(--mint-border-soft);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 0 0 1px var(--mint-ring-edge),
+    inset 0 1px 0 var(--white-a-06);
 }
 
 .settings-nav-button-active {
