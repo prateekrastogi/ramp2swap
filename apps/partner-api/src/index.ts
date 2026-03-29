@@ -26,6 +26,7 @@ import { getPartnerEarningsSummary } from './lib/earnings';
 import { backfillMissingConversionPayouts } from './lib/payouts';
 import { getPartnerOverviewSummary } from './lib/overview';
 import { listPartnerSettlements } from './lib/settlements';
+import { requestPartnerSettlement, WithdrawalRequestError } from './lib/settlement-request';
 
 type Bindings = CloudflareBindings & {
   ASSETS: Fetcher;
@@ -575,6 +576,36 @@ app.post('/settlement', async (c) => {
     username: partnerSettings.username,
     records,
   });
+});
+
+app.post('/settlement/request', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+
+  try {
+    const settlement = await requestPartnerSettlement(c.env.AUTH_DB, {
+      username: partnerSettings.username,
+      withdrawalAddress: partnerSettings.withdrawalAddress,
+    });
+
+    return c.json({
+      ok: true,
+      settlement,
+    });
+  } catch (error) {
+    if (error instanceof WithdrawalRequestError) {
+      return jsonError(error.message, error.status);
+    }
+
+    console.error('[settlement] request failed', error);
+    return jsonError('Unable to request withdrawal right now.', 500);
+  }
 });
 
 app.post('/click', async (c) => {

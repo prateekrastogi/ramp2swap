@@ -284,6 +284,21 @@ const generatedLinkPlaceholder =
   partnerLinkBaseUrl && partnerSettings.username
     ? `${partnerLinkBaseUrl}?pid=${partnerSettings.username}&cmp=satoshi-nakamoto`
     : 'Generated referral link will appear here';
+const parseUsdNumber = (value: string) => {
+  const normalized = value.replace(/[^0-9.-]/g, '');
+  const numeric = Number(normalized);
+  return Number.isFinite(numeric) ? numeric : 0;
+};
+const canRequestWithdrawal = parseUsdNumber(earningsSummary.availableBalance) >= 10;
+const hasPendingSettlementRequest =
+  payoutHistoryEntries[0]?.status === 'pending' && !canRequestWithdrawal;
+const requestWithdrawalButtonState = hasPendingSettlementRequest ? 'complete' : 'idle';
+const requestWithdrawalDisabledReason = !canRequestWithdrawal
+  ? 'below-minimum'
+  : hasPendingSettlementRequest
+    ? 'pending'
+    : '';
+const isRequestWithdrawalDisabled = false;
 
 const renderAnalyticsBars = (points: AnalyticsChartPoint[]) =>
   points
@@ -759,7 +774,7 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large">{earningsSummary.currentCommissionBps} BPS</p>
+                    <p class="data-large" data-earning-current-commission>{earningsSummary.currentCommissionBps} BPS</p>
                   </article>
                   <article class="kpi-card">
                     <div class="earnings-kpi-head">
@@ -776,7 +791,7 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large">{earningsSummary.pendingBalance}</p>
+                    <p class="data-large" data-earning-pending-balance>{earningsSummary.pendingBalance}</p>
                   </article>
                   <article class="kpi-card">
                     <div class="earnings-kpi-head">
@@ -793,7 +808,7 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large">{earningsSummary.availableBalance}</p>
+                    <p class="data-large" data-earning-available-balance>{earningsSummary.availableBalance}</p>
                   </article>
                   <article class="kpi-card">
                     <div class="earnings-kpi-head">
@@ -810,23 +825,33 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large">{earningsSummary.totalEarnings}</p>
+                    <p class="data-large" data-earning-total-earnings>{earningsSummary.totalEarnings}</p>
                   </article>
                 </div>
 
                 <div class="row-12">
-                  <button class="btn-primary btn-glass" type="button">Request Withdrawal</button>
+                  <button
+                    class="btn-primary btn-glass"
+                    type="button"
+                    data-request-withdrawal
+                    data-state={requestWithdrawalButtonState}
+                    data-disabled-reason={requestWithdrawalDisabledReason}
+                    aria-disabled={requestWithdrawalDisabledReason ? 'true' : 'false'}
+                    disabled={isRequestWithdrawalDisabled}
+                  >
+                    Request Withdrawal
+                  </button>
                 </div>
               </article>
 
               <article class="card glass glass-tier-1 glass-interactive on-glass payout-history-card">
                 <div class="widget-header">
                   <p class="heading-card">Payout History</p>
-                  <span class="chip">{payoutHistoryEntries.length} records</span>
+                  <span class="chip" data-payout-history-count>{payoutHistoryEntries.length} records</span>
                 </div>
 
                 {payoutHistoryEntries.length > 0 ? (
-                  <div class="payout-history-list">
+                  <div class="payout-history-list" data-payout-history-list>
                     {payoutHistoryEntries.map((entry) => (
                       <article class="payout-history-row">
                         <div class="payout-history-head">
@@ -847,7 +872,7 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                     ))}
                   </div>
                 ) : (
-                  <div class="payout-history-empty-state">
+                  <div class="payout-history-empty-state" data-payout-history-empty-state>
                     <article class="link-campaign-row link-campaign-row-empty payout-history-empty-card">
                       <p class="body-small empty-state-copy">
                         Payout records will appear here once settlement history is available for this account.
@@ -1088,6 +1113,42 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
       const sidebarAvatar = document.querySelector('[data-sidebar-avatar]');
       const settingsViewTriggers = document.querySelectorAll('[data-settings-target]');
       const settingsPanels = document.querySelectorAll('[data-settings-panel]');
+      const dashboardToastNode = document.querySelector('[data-link-toast]');
+      const dashboardToastTitleNode = document.querySelector('[data-link-toast-title]');
+      const dashboardToastCopyNode = document.querySelector('[data-link-toast-copy]');
+      let dashboardToastTimer = null;
+      const parseUsdNumber = (value) => {
+        const normalized = String(value ?? '').replace(/[^0-9.-]/g, '');
+        const numeric = Number(normalized);
+        return Number.isFinite(numeric) ? numeric : 0;
+      };
+
+      const showDashboardToast = (title, copy, tone = 'success') => {
+        if (
+          !(dashboardToastNode instanceof HTMLElement) ||
+          !(dashboardToastTitleNode instanceof HTMLElement) ||
+          !(dashboardToastCopyNode instanceof HTMLElement)
+        ) {
+          return;
+        }
+
+        dashboardToastTitleNode.textContent = title;
+        dashboardToastCopyNode.textContent = copy;
+        dashboardToastNode.dataset.tone = tone;
+        dashboardToastNode.hidden = false;
+        dashboardToastNode.dataset.visible = 'true';
+
+        if (dashboardToastTimer !== null) {
+          window.clearTimeout(dashboardToastTimer);
+        }
+
+        dashboardToastTimer = window.setTimeout(() => {
+          dashboardToastNode.dataset.visible = 'false';
+          window.setTimeout(() => {
+            dashboardToastNode.hidden = true;
+          }, 220);
+        }, 2800);
+      };
 
       if (profileNameNode instanceof HTMLElement && sidebarAvatar instanceof HTMLImageElement) {
         const usernameSeed = profileNameNode.textContent?.trim() || 'prime-vault';
@@ -1218,6 +1279,181 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
             if (!target) return;
             setActiveSettingsPanel(target);
           });
+        });
+      }
+
+      const requestWithdrawalButton = document.querySelector('[data-request-withdrawal]');
+      if (requestWithdrawalButton instanceof HTMLButtonElement) {
+        const currentCommissionNode = document.querySelector('[data-earning-current-commission]');
+        const pendingBalanceNode = document.querySelector('[data-earning-pending-balance]');
+        const availableBalanceNode = document.querySelector('[data-earning-available-balance]');
+        const totalEarningsNode = document.querySelector('[data-earning-total-earnings]');
+        const payoutHistoryCountNode = document.querySelector('[data-payout-history-count]');
+        const payoutHistoryListNode = document.querySelector('[data-payout-history-list]');
+        const payoutHistoryEmptyStateNode = document.querySelector('[data-payout-history-empty-state]');
+        const formatPayoutHistoryRows = (records) =>
+          records
+            .map((entry) => `
+              <article class="payout-history-row">
+                <div class="payout-history-head">
+                  <div class="stack-8">
+                    <p class="heading-card">${entry.amount}</p>
+                    <p class="data-small">${entry.destination}</p>
+                  </div>
+                  <span class="status ${entry.status === 'paid' ? 'status-completed' : 'status-pending'}">
+                    ${entry.status}
+                  </span>
+                </div>
+                <div class="row-12 payout-history-meta">
+                  <span class="data-small">${entry.meta}</span>
+                  <span class="chip">${entry.date}</span>
+                </div>
+              </article>
+            `)
+            .join('');
+        const syncWithdrawalButtonState = ({ availableBalance, records }) => {
+          const canRequest = parseUsdNumber(availableBalance) >= 10;
+          const hasPendingRequest = Array.isArray(records) && records[0]?.status === 'pending' && !canRequest;
+          const disabledReason = !canRequest ? 'below-minimum' : hasPendingRequest ? 'pending' : '';
+          requestWithdrawalButton.dataset.state = hasPendingRequest ? 'complete' : 'idle';
+          requestWithdrawalButton.dataset.disabledReason = disabledReason;
+          requestWithdrawalButton.setAttribute('aria-disabled', disabledReason ? 'true' : 'false');
+          requestWithdrawalButton.disabled = false;
+          requestWithdrawalButton.textContent = 'Request Withdrawal';
+        };
+        const refreshEarningsAndPayouts = async () => {
+          const [earningResponse, settlementResponse] = await Promise.all([
+            fetch('/api/earning', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }),
+            fetch('/api/settlement', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }),
+          ]);
+
+          const earningPayload = (await earningResponse.json().catch(() => null)) as PartnerEarningsPayload | null;
+          const settlementPayload = (await settlementResponse.json().catch(() => null)) as PartnerSettlementsPayload | null;
+
+          if (
+            !earningResponse.ok ||
+            !earningPayload?.ok ||
+            !settlementResponse.ok ||
+            !settlementPayload?.ok ||
+            !Array.isArray(settlementPayload.records)
+          ) {
+            throw new Error('Unable to refresh withdrawal data.');
+          }
+
+          if (currentCommissionNode instanceof HTMLElement) {
+            currentCommissionNode.textContent = `${earningPayload.currentCommissionBps ?? 15} BPS`;
+          }
+          if (pendingBalanceNode instanceof HTMLElement) {
+            pendingBalanceNode.textContent = earningPayload.pendingBalance ?? '$0.00';
+          }
+          if (availableBalanceNode instanceof HTMLElement) {
+            availableBalanceNode.textContent = earningPayload.availableBalance ?? '$0.00';
+          }
+          if (totalEarningsNode instanceof HTMLElement) {
+            totalEarningsNode.textContent = earningPayload.totalEarnings ?? '$0.00';
+          }
+          if (payoutHistoryCountNode instanceof HTMLElement) {
+            payoutHistoryCountNode.textContent = `${settlementPayload.records.length} records`;
+          }
+          if (payoutHistoryListNode instanceof HTMLElement) {
+            if (settlementPayload.records.length > 0) {
+              payoutHistoryListNode.innerHTML = formatPayoutHistoryRows(settlementPayload.records);
+              payoutHistoryListNode.hidden = false;
+              if (payoutHistoryEmptyStateNode instanceof HTMLElement) {
+                payoutHistoryEmptyStateNode.hidden = true;
+              }
+            } else {
+              payoutHistoryListNode.innerHTML = '';
+              payoutHistoryListNode.hidden = true;
+              if (payoutHistoryEmptyStateNode instanceof HTMLElement) {
+                payoutHistoryEmptyStateNode.hidden = false;
+              }
+            }
+          }
+
+          syncWithdrawalButtonState({
+            availableBalance: earningPayload.availableBalance ?? '$0.00',
+            records: settlementPayload.records,
+          });
+        };
+
+        requestWithdrawalButton.addEventListener('click', async () => {
+          const disabledReason = requestWithdrawalButton.dataset.disabledReason ?? '';
+
+          if (disabledReason === 'below-minimum') {
+            showDashboardToast(
+              'Balance below minimum',
+              'Available balance must be at least $10.00 to request withdrawal.',
+              'warning',
+            );
+            return;
+          }
+
+          if (disabledReason === 'pending') {
+            return;
+          }
+
+          if (requestWithdrawalButton.disabled) {
+            return;
+          }
+
+          requestWithdrawalButton.disabled = true;
+          requestWithdrawalButton.dataset.state = 'pending';
+          requestWithdrawalButton.textContent = 'Requesting...';
+
+          try {
+            const response = await fetch('/api/settlement/request', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            const payload = (await response.json().catch(() => null)) as
+              | {
+                  ok?: boolean;
+                  error?: string;
+                }
+              | null;
+
+            if (!response.ok || !payload?.ok) {
+              throw new Error(payload?.error ?? 'Unable to request withdrawal.');
+            }
+
+            requestWithdrawalButton.dataset.state = 'complete';
+            requestWithdrawalButton.textContent = 'Request Withdrawal';
+            showDashboardToast(
+              'Withdrawal requested',
+              'Your withdrawal request has been submitted.',
+              'success',
+            );
+            await refreshEarningsAndPayouts();
+          } catch (error) {
+            requestWithdrawalButton.disabled = false;
+            requestWithdrawalButton.dataset.state = 'idle';
+            requestWithdrawalButton.textContent = 'Request Withdrawal';
+            const message = error instanceof Error ? error.message : 'Unable to request withdrawal.';
+            if (message.includes('Set a withdrawal address')) {
+              showDashboardToast(
+                'No wallet linked',
+                'Link a wallet address in Settings before requesting withdrawal.',
+                'warning',
+              );
+              return;
+            }
+
+            showDashboardToast('Withdrawal failed', message, 'warning');
+          }
         });
       }
 
