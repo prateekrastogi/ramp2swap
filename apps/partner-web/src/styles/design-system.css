@@ -1139,14 +1139,41 @@
 }
 
 .payout-history-list {
+  --payout-history-row-height: 116px;
   display: grid;
   gap: 12px;
+  max-height: calc((var(--payout-history-row-height) * 5) + (12px * 4));
+  overflow-y: auto;
+  padding-right: 4px;
+  align-content: start;
+  scrollbar-width: thin;
+  scrollbar-color: var(--slate-500) var(--obsidian-700);
+}
+
+.payout-history-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.payout-history-list::-webkit-scrollbar-track {
+  background: var(--obsidian-700);
+  border-radius: 999px;
+}
+
+.payout-history-list::-webkit-scrollbar-thumb {
+  background: var(--slate-500);
+  border-radius: 999px;
+  border: 2px solid var(--obsidian-700);
+}
+
+.payout-history-list::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-300);
 }
 
 .payout-history-row {
   display: grid;
   gap: 12px;
   padding: 14px;
+  min-height: var(--payout-history-row-height);
   border: 1px solid var(--white-a-07);
   border-radius: var(--radius-md);
   background: rgba(15, 20, 25, 0.36);
