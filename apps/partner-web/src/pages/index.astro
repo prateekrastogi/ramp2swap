@@ -66,6 +66,20 @@ type PartnerEarningsPayload = {
   totalEarnings?: string;
 };
 
+type PayoutHistoryEntry = {
+  amount: string;
+  status: 'paid' | 'pending';
+  destination: string;
+  meta: string;
+  date: string;
+};
+
+type PartnerSettlementsPayload = {
+  ok?: boolean;
+  username?: string;
+  records?: PayoutHistoryEntry[];
+};
+
 type OverviewMetricShell = {
   id: string;
   label: string;
@@ -114,6 +128,7 @@ let earningsSummary = {
   totalEarnings: '$0.00',
 };
 let overviewMetrics: OverviewMetricSummary[] = [];
+let payoutHistoryEntries: PayoutHistoryEntry[] = [];
 
 const overviewMetricShells: OverviewMetricShell[] = [
   {
@@ -169,7 +184,7 @@ if (sessionToken && partnerApiBaseUrl) {
       partnerSettings.canUpdateWalletAddress = payload.settings?.canUpdateWalletAddress ?? partnerSettings.canUpdateWalletAddress;
     }
 
-    const [linksResponse, loadedTransactionFeed, analyticsResponse, earningsResponse, overviewResponse] = await Promise.all([
+    const [linksResponse, loadedTransactionFeed, analyticsResponse, earningsResponse, overviewResponse, settlementsResponse] = await Promise.all([
       fetch(`${partnerApiBaseUrl}/link`, {
         method: 'POST',
         headers: {
@@ -197,6 +212,13 @@ if (sessionToken && partnerApiBaseUrl) {
         body: JSON.stringify({ sessionToken }),
       }),
       fetch(`${partnerApiBaseUrl}/overview`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionToken }),
+      }),
+      fetch(`${partnerApiBaseUrl}/settlement`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,6 +263,12 @@ if (sessionToken && partnerApiBaseUrl) {
     const overviewPayload = (await overviewResponse.json().catch(() => null)) as PartnerOverviewPayload | null;
     if (overviewResponse.ok && overviewPayload?.ok && Array.isArray(overviewPayload.metrics)) {
       overviewMetrics = overviewPayload.metrics;
+    }
+
+    const settlementsPayload =
+      (await settlementsResponse.json().catch(() => null)) as PartnerSettlementsPayload | null;
+    if (settlementsResponse.ok && settlementsPayload?.ok && Array.isArray(settlementsPayload.records)) {
+      payoutHistoryEntries = settlementsPayload.records;
     }
 
     transactionFeedItems = loadedTransactionFeed;
@@ -794,16 +822,39 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
               <article class="card glass glass-tier-1 glass-interactive on-glass payout-history-card">
                 <div class="widget-header">
                   <p class="heading-card">Payout History</p>
-                  <span class="chip">0 records</span>
+                  <span class="chip">{payoutHistoryEntries.length} records</span>
                 </div>
 
-                <div class="payout-history-empty-state">
-                  <article class="link-campaign-row link-campaign-row-empty payout-history-empty-card">
-                    <p class="body-small empty-state-copy">
-                      Payout records will show up here after withdrawals are generated from computed revenue data.
-                    </p>
-                  </article>
-                </div>
+                {payoutHistoryEntries.length > 0 ? (
+                  <div class="payout-history-list">
+                    {payoutHistoryEntries.map((entry) => (
+                      <article class="payout-history-row">
+                        <div class="payout-history-head">
+                          <div class="stack-8">
+                            <p class="heading-card">{entry.amount}</p>
+                            <p class="data-small">{entry.destination}</p>
+                          </div>
+                          <span class={`status ${entry.status === 'paid' ? 'status-completed' : 'status-pending'}`}>
+                            {entry.status}
+                          </span>
+                        </div>
+
+                        <div class="row-12 payout-history-meta">
+                          <span class="data-small">{entry.meta}</span>
+                          <span class="chip">{entry.date}</span>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="payout-history-empty-state">
+                    <article class="link-campaign-row link-campaign-row-empty payout-history-empty-card">
+                      <p class="body-small empty-state-copy">
+                        Payout records will appear here once settlement history is available for this account.
+                      </p>
+                    </article>
+                  </div>
+                )}
               </article>
             </div>
           </section>

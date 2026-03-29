@@ -60,6 +60,11 @@ const FIRST_TIER_RATE = new Decimal(15).div(10_000);
 const SECOND_TIER_RATE = new Decimal(20).div(10_000);
 const THIRD_TIER_RATE = new Decimal(25).div(10_000);
 const PAYOUT_DECIMAL_PLACES = 8;
+const SETTLEMENT_SPLITS_BY_USER_INDEX = {
+  1: 1,
+  2: 3,
+  3: 6,
+};
 
 const PAIRS = [
   ['ETH', 'USDC'],
@@ -273,6 +278,115 @@ function formatPayoutForStorage(amount) {
   const rounded = amount.toDecimalPlaces(PAYOUT_DECIMAL_PLACES, Decimal.ROUND_HALF_UP);
   const asText = rounded.toFixed(PAYOUT_DECIMAL_PLACES);
   return asText.replace(/(\.\d*?[1-9])0+$/u, '$1').replace(/\.0+$/u, '');
+}
+
+function formatDateText(timestamp) {
+  const date = new Date(timestamp);
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, '0'),
+    String(date.getUTCDate()).padStart(2, '0'),
+  ].join('/');
+}
+
+function generateWalletAddress(rng) {
+  const alphabet = '0123456789abcdef';
+  let value = '0x';
+
+  for (let index = 0; index < 40; index += 1) {
+    value += alphabet[Math.floor(rng() * alphabet.length)];
+  }
+
+  return value;
+}
+
+function splitDecimalAmount(total, parts) {
+  if (parts <= 1) {
+    return [total];
+  }
+
+  const base = total.div(parts).toDecimalPlaces(PAYOUT_DECIMAL_PLACES, Decimal.ROUND_DOWN);
+  const result = Array.from({ length: parts }, () => base);
+  let allocated = base.mul(parts);
+  let remainder = total.minus(allocated);
+  const step = new Decimal(1).div(new Decimal(10).pow(PAYOUT_DECIMAL_PLACES));
+  let index = 0;
+
+  while (remainder.greaterThan(0)) {
+    result[index] = result[index].plus(step);
+    remainder = remainder.minus(step);
+    index = (index + 1) % result.length;
+  }
+
+  return result;
+}
+
+function assignConversionFlags(conversions, usersByUsername) {
+  const conversionsByUsername = new Map();
+
+  conversions.forEach((conversion) => {
+    const existing = conversionsByUsername.get(conversion.username) ?? [];
+    existing.push(conversion);
+    conversionsByUsername.set(conversion.username, existing);
+  });
+
+  conversionsByUsername.forEach((rows, username) => {
+    rows.sort((left, right) => {
+      if (left.timestamp !== right.timestamp) {
+        return left.timestamp - right.timestamp;
+      }
+
+      return left.transaction_id.localeCompare(right.transaction_id);
+    });
+
+    const user = usersByUsername.get(username);
+    const verifiedCount = Math.floor(rows.length * 0.9);
+    const withdrawnCount = Math.floor(rows.length * 0.5);
+
+    rows.forEach((conversion, index) => {
+      conversion.verified = index < verifiedCount ? 'true' : 'false';
+      conversion.withdrawn = index < withdrawnCount ? 'true' : 'false';
+      conversion.wallet_address = user?.walletAddress ?? null;
+    });
+  });
+}
+
+function createSettlementRows(users, conversions, rng, referenceTimestamp) {
+  const payoutsByUsername = new Map();
+
+  conversions.forEach((conversion) => {
+    if (conversion.verified !== 'true' || conversion.withdrawn !== 'true' || !conversion.payout) {
+      return;
+    }
+
+    const runningTotal = payoutsByUsername.get(conversion.username) ?? new Decimal(0);
+    payoutsByUsername.set(conversion.username, runningTotal.plus(new Decimal(conversion.payout)));
+  });
+
+  const settlements = [];
+
+  users.forEach((user) => {
+    const total = payoutsByUsername.get(user.username) ?? new Decimal(0);
+    const settlementCount = SETTLEMENT_SPLITS_BY_USER_INDEX[user.index] ?? 1;
+    const amounts = splitDecimalAmount(total, settlementCount);
+    const firstSettlementTimestamp =
+      referenceTimestamp - (settlementCount + user.index) * DAY_MS;
+
+    amounts.forEach((amount, index) => {
+      const isNewest = index === amounts.length - 1;
+      const settlementTimestamp = firstSettlementTimestamp + index * 7 * DAY_MS;
+      settlements.push({
+        username: user.username,
+        amount: formatPayoutForStorage(amount),
+        date: formatDateText(settlementTimestamp),
+        wallet_address: generateWalletAddress(rng),
+        status:
+          user.index === 3 ? (isNewest ? 'pending' : 'paid') : 'paid',
+      });
+    });
+  });
+
+  return settlements;
 }
 
 function assignConversionPayouts(conversions, transactions) {
@@ -497,6 +611,10 @@ function createTransactionRows(envName, users, referenceTimestamp, rng) {
   const sortedTransactions = transactions.sort((left, right) => left.timestamp - right.timestamp);
   const sortedConversions = conversions.sort((left, right) => left.timestamp - right.timestamp);
   assignConversionPayouts(sortedConversions, sortedTransactions);
+  assignConversionFlags(
+    sortedConversions,
+    new Map(users.map((user) => [user.username, user])),
+  );
 
   return {
     transactions: sortedTransactions,
@@ -517,6 +635,7 @@ function buildSql(envName, selectedEmails, config) {
   const links = createLinksRows(envName, users, referenceTimestamp, config.linkBaseUrl);
   const clicks = createClicksRows(envName, users, referenceTimestamp, rng);
   const { transactions, conversions } = createTransactionRows(envName, users, referenceTimestamp, rng);
+  const settlements = createSettlementRows(users, conversions, rng, referenceTimestamp);
   const emails = users.map((user) => user.email);
   const usernames = users.map((user) => user.username);
   const userUids = users.map((user) => user.uid);
@@ -524,6 +643,7 @@ function buildSql(envName, selectedEmails, config) {
   const statements = [
     `-- Generated partner-api test bench for ${envName}`,
     `-- Reference timestamp: ${new Date(referenceTimestamp).toISOString()}`,
+    `DELETE FROM settlements WHERE username IN (${sqlList(usernames)});`,
     `DELETE FROM conversions WHERE username IN (${sqlList(usernames)});`,
     `DELETE FROM clicks WHERE username IN (${sqlList(usernames)});`,
     `DELETE FROM links WHERE user_uid IN (${sqlList(userUids)});`,
@@ -588,8 +708,23 @@ function buildSql(envName, selectedEmails, config) {
     ),
     ...insertStatement(
       'conversions',
-      ['transaction_id', 'event', 'username', 'campaign', 'timestamp', 'payout', 'country'],
+      [
+        'transaction_id',
+        'event',
+        'username',
+        'campaign',
+        'timestamp',
+        'payout',
+        'country',
+        'verified',
+        'withdrawn',
+      ],
       conversions,
+    ),
+    ...insertStatement(
+      'settlements',
+      ['username', 'amount', 'date', 'wallet_address', 'status'],
+      settlements,
     ),
   ];
 

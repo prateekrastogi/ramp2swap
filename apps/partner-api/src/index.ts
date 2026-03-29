@@ -25,6 +25,7 @@ import { getPartnerAnalytics } from './lib/analytics';
 import { getPartnerEarningsSummary } from './lib/earnings';
 import { backfillMissingConversionPayouts } from './lib/payouts';
 import { getPartnerOverviewSummary } from './lib/overview';
+import { listPartnerSettlements } from './lib/settlements';
 
 type Bindings = CloudflareBindings & {
   ASSETS: Fetcher;
@@ -553,6 +554,26 @@ app.post('/overview', async (c) => {
     ok: true,
     username: overview.username,
     metrics: overview.metrics,
+  });
+});
+
+app.post('/settlement', async (c) => {
+  const body = await parseRequestBody(c.req);
+  const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken.trim() : '';
+  const sessionResult = await getAuthenticatedSession(c.env.AUTH_DB, c.env.SESSION_SECRET, sessionToken);
+  if ('error' in sessionResult) {
+    return sessionResult.error;
+  }
+
+  const partnerSettings = await ensurePartnerSettings(c.env.AUTH_DB, sessionResult.sessionRow.email);
+  const records = await listPartnerSettlements(c.env.AUTH_DB, {
+    username: partnerSettings.username,
+  });
+
+  return c.json({
+    ok: true,
+    username: partnerSettings.username,
+    records,
   });
 });
 

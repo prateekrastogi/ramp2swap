@@ -46,6 +46,14 @@ const EXPECTED = {
   user_1_conversion_total: 100000,
   user_2_conversion_total: 500000,
   user_3_conversion_total: 1000000,
+  verified_true_count: 234,
+  withdrawn_true_count: 130,
+  settlements_count: 10,
+  user_1_settlement_count: 1,
+  user_2_settlement_count: 3,
+  user_3_settlement_count: 6,
+  paid_settlement_count: 9,
+  pending_settlement_count: 1,
 };
 
 function parseEnvName(argv) {
@@ -232,7 +240,15 @@ function buildEnvironmentQuery(envName, { emails, usernames }) {
         FROM conversions c
         JOIN transactions t ON t.transaction_id = c.transaction_id
         WHERE c.username = '${username3}'
-      ) AS user_3_conversion_total;
+      ) AS user_3_conversion_total,
+      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}') AND verified = 'true') AS verified_true_count,
+      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}') AND withdrawn = 'true') AS withdrawn_true_count,
+      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}')) AS settlements_count,
+      (SELECT COUNT(*) FROM settlements WHERE username = '${username1}') AS user_1_settlement_count,
+      (SELECT COUNT(*) FROM settlements WHERE username = '${username2}') AS user_2_settlement_count,
+      (SELECT COUNT(*) FROM settlements WHERE username = '${username3}') AS user_3_settlement_count,
+      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}') AND status = 'paid') AS paid_settlement_count,
+      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}') AND status = 'pending') AS pending_settlement_count;
   `.trim();
 }
 
