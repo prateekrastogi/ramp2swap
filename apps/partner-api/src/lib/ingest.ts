@@ -85,6 +85,8 @@ export const saveConversion = async (
     campaign,
     country,
     timestamp,
+    verified,
+    withdrawn,
   }: {
     transactionId: string;
     event: string;
@@ -92,11 +94,13 @@ export const saveConversion = async (
     campaign: string | null;
     country: string | null;
     timestamp: number;
+    verified: string | null;
+    withdrawn: string | null;
   },
 ) => {
   await db
     .prepare(upsertConversionQuery)
-    .bind(transactionId, event, username, campaign, country, timestamp, null)
+    .bind(transactionId, event, username, campaign, country, timestamp, null, verified, withdrawn)
     .run();
 
   await recalculateConversionPayoutsForTransaction(db, transactionId);

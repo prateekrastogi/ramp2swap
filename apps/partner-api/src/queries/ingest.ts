@@ -47,14 +47,18 @@ export const upsertConversionQuery = `
     campaign,
     country,
     timestamp,
-    payout
+    payout,
+    verified,
+    withdrawn
   )
-  VALUES (?, ?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(transaction_id) DO UPDATE SET
     event = excluded.event,
     username = excluded.username,
     campaign = excluded.campaign,
     country = excluded.country,
     timestamp = excluded.timestamp,
-    payout = excluded.payout
+    payout = excluded.payout,
+    verified = excluded.verified,
+    withdrawn = excluded.withdrawn
 `;
