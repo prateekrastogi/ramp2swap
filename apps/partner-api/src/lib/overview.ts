@@ -3,6 +3,8 @@ import { getPartnerEarningsSummary } from './earnings';
 import {
   selectClickCountByUsernameAndRangeQuery,
   selectConversionAmountRowsByUsernameQuery,
+  selectOldestClickTimestampByUsernameQuery,
+  selectOldestConversionTimestampByUsernameQuery,
 } from '../queries/overview';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -18,12 +20,16 @@ type ConversionAmountRow = {
   amount: string | null;
 };
 
+type TimestampRow = {
+  timestamp: number | string | null;
+};
+
 export type OverviewMetricSummary = {
   id: 'total-clicks' | 'conversions' | 'volume-driven' | 'commission-balance';
   label: string;
   value: string;
   detail: string;
-  delta: string;
+  delta: string | null;
   accent?: 'mint';
 };
 
@@ -71,6 +77,28 @@ const formatCount = (value: number) => COUNT_FORMATTER.format(value);
 const formatUsdCompact = (value: Decimal) =>
   COMPACT_USD_FORMATTER.format(Number(value.toDecimalPlaces(1, Decimal.ROUND_HALF_UP).toString()));
 
+const parseUsdDecimal = (value: string | null | undefined) => {
+  if (!value) {
+    return new Decimal(0);
+  }
+
+  const normalized = value.replace(/[^0-9.-]/g, '');
+  if (!normalized) {
+    return new Decimal(0);
+  }
+
+  try {
+    const parsed = new Decimal(normalized);
+    if (!parsed.isFinite()) {
+      return new Decimal(0);
+    }
+
+    return parsed;
+  } catch {
+    return new Decimal(0);
+  }
+};
+
 const formatDeltaPercentage = (current: Decimal, prior: Decimal) => {
   if (prior.eq(0)) {
     if (current.eq(0)) {
@@ -88,6 +116,9 @@ const formatDeltaPercentage = (current: Decimal, prior: Decimal) => {
 
 const isInRange = (timestamp: number, start: number, end: number) =>
   timestamp >= start && timestamp < end;
+
+const hasFullPriorPeriodData = (oldestTimestamp: number | null, priorPeriodStart: number) =>
+  oldestTimestamp !== null && oldestTimestamp <= priorPeriodStart;
 
 const queryCountForRange = async (
   db: D1Database,
@@ -118,9 +149,24 @@ export const getPartnerOverviewSummary = async (
   const priorPeriodStart = now - PRIOR_PERIOD_MS;
   const rangeEnd = now + 1;
 
-  const [currentClicks, priorClicks, conversionRows, earningsSummary] = await Promise.all([
+  const [
+    currentClicks,
+    priorClicks,
+    oldestClickTimestampRow,
+    oldestConversionTimestampRow,
+    conversionRows,
+    earningsSummary,
+  ] = await Promise.all([
     queryCountForRange(db, normalizedUsername, currentPeriodStart, rangeEnd),
     queryCountForRange(db, normalizedUsername, priorPeriodStart, currentPeriodStart),
+    db
+      .prepare(selectOldestClickTimestampByUsernameQuery)
+      .bind(normalizedUsername)
+      .first<TimestampRow>(),
+    db
+      .prepare(selectOldestConversionTimestampByUsernameQuery)
+      .bind(normalizedUsername)
+      .first<TimestampRow>(),
     db
       .prepare(selectConversionAmountRowsByUsernameQuery)
       .bind(normalizedUsername)
@@ -128,6 +174,18 @@ export const getPartnerOverviewSummary = async (
       .then((result) => result.results ?? []),
     getPartnerEarningsSummary(db, { username: normalizedUsername, now }),
   ]);
+
+  const oldestClickTimestamp =
+    oldestClickTimestampRow?.timestamp == null ? null : toNumber(oldestClickTimestampRow.timestamp);
+  const oldestConversionTimestamp =
+    oldestConversionTimestampRow?.timestamp == null
+      ? null
+      : toNumber(oldestConversionTimestampRow.timestamp);
+  const canShowClicksDelta = hasFullPriorPeriodData(oldestClickTimestamp, priorPeriodStart);
+  const canShowConversionsDelta = hasFullPriorPeriodData(oldestConversionTimestamp, priorPeriodStart);
+  const pendingBalance = parseUsdDecimal(earningsSummary.pendingBalance);
+  const availableBalance = parseUsdDecimal(earningsSummary.availableBalance);
+  const hasCommissionBalance = pendingBalance.gt(0) || availableBalance.gt(0);
 
   let currentConversions = 0;
   let priorConversions = 0;
@@ -156,35 +214,55 @@ export const getPartnerOverviewSummary = async (
   return {
     username: normalizedUsername,
     metrics: [
-      {
-        id: 'total-clicks',
-        label: 'Total Clicks',
-        value: formatCount(currentClicks),
-        detail: 'Last 30 days across all referral links',
-        delta: formatDeltaPercentage(new Decimal(currentClicks), new Decimal(priorClicks)),
-      },
-      {
-        id: 'conversions',
-        label: 'Conversions',
-        value: formatCount(currentConversions),
-        detail: 'Completed ramp transactions attributed',
-        delta: formatDeltaPercentage(new Decimal(currentConversions), new Decimal(priorConversions)),
-      },
-      {
-        id: 'volume-driven',
-        label: 'Volume Driven',
-        value: formatUsdCompact(currentVolume),
-        detail: 'Total partner-driven fiat to crypto volume',
-        delta: formatDeltaPercentage(currentVolume, priorVolume),
-      },
-      {
-        id: 'commission-balance',
-        label: 'Commission Balance',
-        value: earningsSummary.currentBalance,
-        detail: 'Available plus pending commission earnings',
-        delta: `${earningsSummary.availableBalance} available now`,
-        accent: 'mint',
-      },
+      ...(currentClicks > 0
+        ? [
+            {
+              id: 'total-clicks' as const,
+              label: 'Total Clicks',
+              value: formatCount(currentClicks),
+              detail: 'Last 30 days across all referral links',
+              delta: canShowClicksDelta
+                ? formatDeltaPercentage(new Decimal(currentClicks), new Decimal(priorClicks))
+                : null,
+            },
+          ]
+        : []),
+      ...(currentConversions > 0
+        ? [
+            {
+              id: 'conversions' as const,
+              label: 'Conversions',
+              value: formatCount(currentConversions),
+              detail: 'Completed ramp transactions attributed',
+              delta: canShowConversionsDelta
+                ? formatDeltaPercentage(new Decimal(currentConversions), new Decimal(priorConversions))
+                : null,
+            },
+          ]
+        : []),
+      ...(currentVolume.gt(0)
+        ? [
+            {
+              id: 'volume-driven' as const,
+              label: 'Volume Driven',
+              value: formatUsdCompact(currentVolume),
+              detail: 'Total partner-driven fiat to crypto volume',
+              delta: canShowConversionsDelta ? formatDeltaPercentage(currentVolume, priorVolume) : null,
+            },
+          ]
+        : []),
+      ...(hasCommissionBalance
+        ? [
+            {
+              id: 'commission-balance' as const,
+              label: 'Commission Balance',
+              value: earningsSummary.currentBalance,
+              detail: 'Available plus pending commission earnings',
+              delta: `${earningsSummary.availableBalance} available now`,
+              accent: 'mint' as const,
+            },
+          ]
+        : []),
     ],
   };
 };

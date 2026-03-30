@@ -6,6 +6,12 @@ export const selectClickCountByUsernameAndRangeQuery = `
     AND timestamp < ?
 `;
 
+export const selectOldestClickTimestampByUsernameQuery = `
+  SELECT MIN(timestamp) AS timestamp
+  FROM clicks
+  WHERE username = ?
+`;
+
 export const selectConversionAmountRowsByUsernameQuery = `
   SELECT
     c.timestamp,
@@ -15,4 +21,10 @@ export const selectConversionAmountRowsByUsernameQuery = `
     ON t.transaction_id = c.transaction_id
   WHERE c.username = ?
   ORDER BY c.timestamp ASC, c.transaction_id ASC
+`;
+
+export const selectOldestConversionTimestampByUsernameQuery = `
+  SELECT MIN(timestamp) AS timestamp
+  FROM conversions
+  WHERE username = ?
 `;

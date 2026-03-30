@@ -92,7 +92,7 @@ type OverviewMetricSummary = {
   label: string;
   value: string;
   detail: string;
-  delta: string;
+  delta: string | null;
   accent?: 'mint';
 };
 
@@ -291,6 +291,17 @@ const parseUsdNumber = (value: string) => {
 };
 const canRequestWithdrawal = parseUsdNumber(earningsSummary.availableBalance) >= 10;
 const hasZeroAvailableBalance = parseUsdNumber(earningsSummary.availableBalance) === 0;
+const hasAttributedTransactions = transactionFeedItems.length > 0;
+const displayCommissionRate = hasAttributedTransactions
+  ? `${earningsSummary.currentCommissionBps} BPS`
+  : '';
+const displayPendingBalance = hasAttributedTransactions ? earningsSummary.pendingBalance : '';
+const displayAvailableBalance = hasAttributedTransactions ? earningsSummary.availableBalance : '';
+const displayTotalEarnings = hasAttributedTransactions ? earningsSummary.totalEarnings : '';
+const emptyCommissionRateMessage = 'Commission rate will appear here once your first attributed transaction is recorded.';
+const emptyPendingBalanceMessage = 'Pending commission will appear here once attributed transactions begin processing.';
+const emptyAvailableBalanceMessage = 'Available commission will appear here once attributed transactions clear the 72 hour pending window.';
+const emptyTotalEarningsMessage = 'Total earnings will appear here once attributed transactions start generating commission.';
 const hasPendingSettlementRequest =
   payoutHistoryEntries[0]?.status === 'pending' && !canRequestWithdrawal;
 const requestWithdrawalButtonState = hasPendingSettlementRequest || hasZeroAvailableBalance ? 'complete' : 'idle';
@@ -493,9 +504,11 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                     <>
                       <div class="performance-metric-card-top">
                         <p class="ui-label">{overviewMetric.label}</p>
-                        <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>
-                          {overviewMetric.delta}
-                        </span>
+                        {overviewMetric.delta ? (
+                          <span class={`performance-metric-delta ${metric.accent === 'mint' ? 'performance-metric-delta-accent' : ''}`}>
+                            {overviewMetric.delta}
+                          </span>
+                        ) : null}
                       </div>
                       <p class="data-large performance-metric-value">{overviewMetric.value}</p>
                       <p class="body-small performance-metric-detail">{overviewMetric.detail}</p>
@@ -775,7 +788,15 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large" data-earning-current-commission>{earningsSummary.currentCommissionBps} BPS</p>
+                    {hasAttributedTransactions ? (
+                      <p class="data-large" data-earning-current-commission>{displayCommissionRate}</p>
+                    ) : (
+                      <div class="earnings-empty-state">
+                        <div class="link-campaign-row-empty earnings-empty-copy-wrap">
+                          <p class="body-small empty-state-copy" data-earning-current-commission>{emptyCommissionRateMessage}</p>
+                        </div>
+                      </div>
+                    )}
                   </article>
                   <article class="kpi-card">
                     <div class="earnings-kpi-head">
@@ -792,7 +813,15 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large" data-earning-pending-balance>{earningsSummary.pendingBalance}</p>
+                    {hasAttributedTransactions ? (
+                      <p class="data-large" data-earning-pending-balance>{displayPendingBalance}</p>
+                    ) : (
+                      <div class="earnings-empty-state">
+                        <div class="link-campaign-row-empty earnings-empty-copy-wrap">
+                          <p class="body-small empty-state-copy" data-earning-pending-balance>{emptyPendingBalanceMessage}</p>
+                        </div>
+                      </div>
+                    )}
                   </article>
                   <article class="kpi-card">
                     <div class="earnings-kpi-head">
@@ -809,7 +838,15 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large" data-earning-available-balance>{earningsSummary.availableBalance}</p>
+                    {hasAttributedTransactions ? (
+                      <p class="data-large" data-earning-available-balance>{displayAvailableBalance}</p>
+                    ) : (
+                      <div class="earnings-empty-state">
+                        <div class="link-campaign-row-empty earnings-empty-copy-wrap">
+                          <p class="body-small empty-state-copy" data-earning-available-balance>{emptyAvailableBalanceMessage}</p>
+                        </div>
+                      </div>
+                    )}
                   </article>
                   <article class="kpi-card">
                     <div class="earnings-kpi-head">
@@ -826,7 +863,15 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                         </svg>
                       </span>
                     </div>
-                    <p class="data-large" data-earning-total-earnings>{earningsSummary.totalEarnings}</p>
+                    {hasAttributedTransactions ? (
+                      <p class="data-large" data-earning-total-earnings>{displayTotalEarnings}</p>
+                    ) : (
+                      <div class="earnings-empty-state">
+                        <div class="link-campaign-row-empty earnings-empty-copy-wrap">
+                          <p class="body-small empty-state-copy" data-earning-total-earnings>{emptyTotalEarningsMessage}</p>
+                        </div>
+                      </div>
+                    )}
                   </article>
                 </div>
 

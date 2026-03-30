@@ -1012,9 +1012,12 @@
   display: grid;
 }
 
-.earnings-empty-card,
 .payout-history-empty-card {
   min-height: 220px;
+}
+
+.earnings-empty-copy-wrap {
+  min-height: 128px;
 }
 
 .earnings-kpi-head {
