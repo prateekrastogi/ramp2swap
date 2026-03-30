@@ -17,9 +17,11 @@ const DEFAULTS = {
   LOCAL_TEST_EMAIL_1: 'test1@gmail.com',
   LOCAL_TEST_EMAIL_2: 'test2@gmail.com',
   LOCAL_TEST_EMAIL_3: 'test3@gmail.com',
+  LOCAL_TEST_EMAIL_4: 'test4@gmail.com',
   STAGING_TEST_EMAIL_1: 'prastogi34@gmail.com',
   STAGING_TEST_EMAIL_2: 'prtk6592@gmail.com',
   STAGING_TEST_EMAIL_3: 'p.rastogi@outlook.com',
+  STAGING_TEST_EMAIL_4: 'r.prateek@outlook.com',
   PARTNER_TEST_LINK_BASE_URL: DEFAULT_LINK_BASE_URL,
   PARTNER_TEST_REFERENCE_ISO: DEFAULT_REFERENCE_ISO,
 };
@@ -49,6 +51,16 @@ const USER_PROFILES = [
     conversionTotalCents: 100_000_000,
     conversionTransactionCount: 160,
   },
+  {
+    index: 4,
+    days: 20,
+    clicks: 720,
+    links: 2,
+    conversionTotalCents: 7_900_000,
+    conversionTransactionCount: 7,
+    allowedCountries: ['US', 'IN'],
+    scenario: 'light-history',
+  },
 ];
 
 const EXTRA_TRANSACTION_TOTAL_CENTS = 40_000_000;
@@ -64,6 +76,7 @@ const SETTLEMENT_SPLITS_BY_USER_INDEX = {
   1: 1,
   2: 3,
   3: 6,
+  4: 1,
 };
 
 const PAIRS = [
@@ -129,11 +142,13 @@ function getConfig() {
       resolve('LOCAL_TEST_EMAIL_1'),
       resolve('LOCAL_TEST_EMAIL_2'),
       resolve('LOCAL_TEST_EMAIL_3'),
+      resolve('LOCAL_TEST_EMAIL_4'),
     ],
     stagingEmails: [
       resolve('STAGING_TEST_EMAIL_1'),
       resolve('STAGING_TEST_EMAIL_2'),
       resolve('STAGING_TEST_EMAIL_3'),
+      resolve('STAGING_TEST_EMAIL_4'),
     ],
     linkBaseUrl: resolve('PARTNER_TEST_LINK_BASE_URL'),
     referenceIso: resolve('PARTNER_TEST_REFERENCE_ISO'),
@@ -185,7 +200,7 @@ function sanitizeEmailLocalPart(email) {
 }
 
 function deriveUsername(email, index) {
-  const suffixes = ['prime', 'vector', 'summit'];
+  const suffixes = ['prime', 'vector', 'summit', 'user4'];
   return `${sanitizeEmailLocalPart(email)}-${suffixes[index - 1] ?? `user${index}`}`;
 }
 
@@ -344,8 +359,10 @@ function assignConversionFlags(conversions, usersByUsername) {
     const withdrawnCount = Math.floor(rows.length * 0.5);
 
     rows.forEach((conversion, index) => {
-      conversion.verified = index < verifiedCount ? 'true' : 'false';
-      conversion.withdrawn = index < withdrawnCount ? 'true' : 'false';
+      conversion.verified =
+        conversion.desiredVerified ?? (index < verifiedCount ? 'true' : 'false');
+      conversion.withdrawn =
+        conversion.desiredWithdrawn ?? (index < withdrawnCount ? 'true' : 'false');
       conversion.wallet_address = user?.walletAddress ?? null;
     });
   });
@@ -527,6 +544,7 @@ function createClicksRows(envName, users, referenceTimestamp, rng) {
 
   for (const user of users) {
     const horizonStart = referenceTimestamp - user.days * DAY_MS;
+    const countries = user.allowedCountries ?? COUNTRIES;
 
     for (let index = 0; index < user.clicks; index += 1) {
       const timestamp = randomInt(rng, horizonStart, referenceTimestamp);
@@ -535,7 +553,7 @@ function createClicksRows(envName, users, referenceTimestamp, rng) {
         event: 'affiliate',
         username: user.username,
         campaign: campaignTag,
-        country: COUNTRIES[randomInt(rng, 0, COUNTRIES.length - 1)],
+        country: countries[randomInt(rng, 0, countries.length - 1)],
         week_bucket_start: getWeekBucketStart(timestamp),
         timestamp,
         created_at: timestamp + randomInt(rng, 0, 1_800_000),
@@ -546,12 +564,70 @@ function createClicksRows(envName, users, referenceTimestamp, rng) {
   return rows.sort((left, right) => left.timestamp - right.timestamp);
 }
 
+function createLightHistoryScenarioRows(envName, user, referenceTimestamp) {
+  const offsets = [19, 16, 12, 9, 6, 2, 1];
+  const amountCentsPlan = [2_000_000, 1_500_000, 1_200_000, 1_033_333, 1_666_667, 300_000, 200_000];
+  const pairPlan = [
+    ['ETH', 'USDC'],
+    ['USDT', 'ETH'],
+    ['WBTC', 'ETH'],
+    ['DAI', 'USDC'],
+    ['ARB', 'USDC'],
+    ['SOL', 'USDC'],
+    ['MATIC', 'USDT'],
+  ];
+  const statusPlan = ['COMPLETED', 'COMPLETED', 'COMPLETED', 'COMPLETED', 'COMPLETED', 'PENDING', 'PENDING'];
+  const countries = user.allowedCountries ?? ['US', 'IN'];
+
+  return offsets.map((daysOffset, index) => {
+    const timestamp = referenceTimestamp - daysOffset * DAY_MS + index * 60_000;
+    const transactionId = `${envName}_tx_${String(user.index * 1000 + index + 1).padStart(5, '0')}`;
+    const campaign = user.linkTags[index % user.linkTags.length];
+    const pair = pairPlan[index % pairPlan.length];
+    const country = countries[index % countries.length];
+
+    return {
+      transaction: {
+        transaction_id: transactionId,
+        status: statusPlan[index],
+        amount: formatUsd(amountCentsPlan[index]),
+        from_symbol: pair[0],
+        to_symbol: pair[1],
+        wallet_address: user.walletAddress,
+        timestamp,
+        created_at: timestamp - 300_000,
+        updated_at: timestamp,
+      },
+      conversion: {
+        transaction_id: transactionId,
+        event: 'conversion',
+        username: user.username,
+        campaign,
+        timestamp: timestamp + 300_000,
+        payout: null,
+        country,
+        desiredVerified: index <= 4 ? 'true' : 'false',
+        desiredWithdrawn: index === 4 ? 'true' : 'false',
+      },
+    };
+  });
+}
+
 function createTransactionRows(envName, users, referenceTimestamp, rng) {
   const transactions = [];
   const conversions = [];
   let transactionSequence = 0;
 
   for (const user of users) {
+    if (user.scenario === 'light-history') {
+      const rows = createLightHistoryScenarioRows(envName, user, referenceTimestamp);
+      rows.forEach(({ transaction, conversion }) => {
+        transactions.push(transaction);
+        conversions.push(conversion);
+      });
+      continue;
+    }
+
     const amounts = buildAmountPlan(user.conversionTotalCents, user.conversionTransactionCount, rng);
     const horizonStart = referenceTimestamp - user.days * DAY_MS;
 

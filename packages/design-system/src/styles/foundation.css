@@ -329,6 +329,11 @@ body {
   touch-action: manipulation;
 }
 
+.bar-button[data-bar-zero='true'] {
+  min-height: 0;
+  cursor: default;
+}
+
 .bar-fill {
   display: block;
   width: 100%;
@@ -337,6 +342,10 @@ body {
   background: var(--mint-tint-strong);
   border: 1px solid var(--mint-border-soft);
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.bar-button[data-bar-zero='true'] .bar-fill {
+  display: none;
 }
 
 .bar-button:hover .bar-fill,
@@ -371,6 +380,11 @@ body {
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
   z-index: 4;
+}
+
+.bar-button[data-bar-zero='true']::after,
+.bar-button[data-bar-zero='true']::before {
+  display: none;
 }
 
 .bar-button::before {

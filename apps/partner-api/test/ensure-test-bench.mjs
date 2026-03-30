@@ -21,38 +21,45 @@ const CONFIG_DEFAULTS = {
   LOCAL_TEST_EMAIL_1: 'test1@gmail.com',
   LOCAL_TEST_EMAIL_2: 'test2@gmail.com',
   LOCAL_TEST_EMAIL_3: 'test3@gmail.com',
+  LOCAL_TEST_EMAIL_4: 'test4@gmail.com',
   STAGING_TEST_EMAIL_1: 'prastogi34@gmail.com',
   STAGING_TEST_EMAIL_2: 'prtk6592@gmail.com',
   STAGING_TEST_EMAIL_3: 'p.rastogi@outlook.com',
+  STAGING_TEST_EMAIL_4: 'r.prateek@outlook.com',
 };
 
 const EXPECTED = {
-  auth_user_count: 3,
-  auth_session_count: 3,
-  auth_otp_count: 3,
-  settings_count: 3,
+  auth_user_count: 4,
+  auth_session_count: 4,
+  auth_otp_count: 4,
+  settings_count: 4,
   user_1_link_count: 3,
   user_2_link_count: 10,
   user_3_link_count: 32,
+  user_4_link_count: 2,
   user_1_click_count: 1000,
   user_2_click_count: 10000,
   user_3_click_count: 50000,
+  user_4_click_count: 720,
   user_1_click_campaign_count: 3,
   user_2_click_campaign_count: 10,
   user_3_click_campaign_count: 32,
-  transaction_count: 325,
-  transaction_total: 2000000,
-  conversion_count: 260,
+  user_4_click_campaign_count: 2,
+  transaction_count: 332,
+  transaction_total: 2079000,
+  conversion_count: 267,
   user_1_conversion_total: 100000,
   user_2_conversion_total: 500000,
   user_3_conversion_total: 1000000,
-  verified_true_count: 234,
-  withdrawn_true_count: 130,
-  settlements_count: 10,
+  user_4_conversion_total: 79000,
+  verified_true_count: 239,
+  withdrawn_true_count: 131,
+  settlements_count: 11,
   user_1_settlement_count: 1,
   user_2_settlement_count: 3,
   user_3_settlement_count: 6,
-  paid_settlement_count: 9,
+  user_4_settlement_count: 1,
+  paid_settlement_count: 10,
   pending_settlement_count: 1,
 };
 
@@ -108,11 +115,13 @@ function resolveConfig() {
       read('LOCAL_TEST_EMAIL_1'),
       read('LOCAL_TEST_EMAIL_2'),
       read('LOCAL_TEST_EMAIL_3'),
+      read('LOCAL_TEST_EMAIL_4'),
     ],
     stagingEmails: [
       read('STAGING_TEST_EMAIL_1'),
       read('STAGING_TEST_EMAIL_2'),
       read('STAGING_TEST_EMAIL_3'),
+      read('STAGING_TEST_EMAIL_4'),
     ],
   };
 }
@@ -127,7 +136,7 @@ function sanitizeEmailLocalPart(email) {
 }
 
 function deriveUsername(email, index) {
-  const suffixes = ['prime', 'vector', 'summit'];
+  const suffixes = ['prime', 'vector', 'summit', 'user4'];
   return `${sanitizeEmailLocalPart(email)}-${suffixes[index - 1] ?? `user${index}`}`;
 }
 
@@ -166,10 +175,10 @@ function coerceNumeric(value) {
 }
 
 function buildEnvironmentQuery(envName, { emails, usernames }) {
-  const [email1, email2, email3] = emails;
-  const [username1, username2, username3] = usernames;
-  const orderedEmailCase = `CASE email WHEN '${email1}' THEN 1 WHEN '${email2}' THEN 2 WHEN '${email3}' THEN 3 ELSE 99 END`;
-  const orderedUsernameCase = `CASE username WHEN '${username1}' THEN 1 WHEN '${username2}' THEN 2 WHEN '${username3}' THEN 3 ELSE 99 END`;
+  const [email1, email2, email3, email4] = emails;
+  const [username1, username2, username3, username4] = usernames;
+  const orderedEmailCase = `CASE email WHEN '${email1}' THEN 1 WHEN '${email2}' THEN 2 WHEN '${email3}' THEN 3 WHEN '${email4}' THEN 4 ELSE 99 END`;
+  const orderedUsernameCase = `CASE username WHEN '${username1}' THEN 1 WHEN '${username2}' THEN 2 WHEN '${username3}' THEN 3 WHEN '${username4}' THEN 4 ELSE 99 END`;
 
   return `
     SELECT
@@ -178,51 +187,54 @@ function buildEnvironmentQuery(envName, { emails, usernames }) {
         FROM (
           SELECT email
           FROM auth_users
-          WHERE email IN ('${email1}', '${email2}', '${email3}')
+          WHERE email IN ('${email1}', '${email2}', '${email3}', '${email4}')
           ORDER BY ${orderedEmailCase}
         )
       ) AS ordered_emails,
       (
         SELECT COUNT(*)
         FROM auth_users
-        WHERE email IN ('${email1}', '${email2}', '${email3}')
+        WHERE email IN ('${email1}', '${email2}', '${email3}', '${email4}')
       ) AS auth_user_count,
       (
         SELECT COUNT(*)
         FROM auth_sessions
-        WHERE email IN ('${email1}', '${email2}', '${email3}')
+        WHERE email IN ('${email1}', '${email2}', '${email3}', '${email4}')
       ) AS auth_session_count,
       (
         SELECT COUNT(*)
         FROM auth_otps
-        WHERE email IN ('${email1}', '${email2}', '${email3}')
+        WHERE email IN ('${email1}', '${email2}', '${email3}', '${email4}')
       ) AS auth_otp_count,
       (
         SELECT GROUP_CONCAT(username, '|')
         FROM (
           SELECT username
           FROM settings
-          WHERE username IN ('${username1}', '${username2}', '${username3}')
+          WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}')
           ORDER BY ${orderedUsernameCase}
         )
       ) AS ordered_usernames,
       (
         SELECT COUNT(*)
         FROM settings
-        WHERE username IN ('${username1}', '${username2}', '${username3}')
+        WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}')
       ) AS settings_count,
       (SELECT COUNT(*) FROM links WHERE user_uid = '${envName}_user_01') AS user_1_link_count,
       (SELECT COUNT(*) FROM links WHERE user_uid = '${envName}_user_02') AS user_2_link_count,
       (SELECT COUNT(*) FROM links WHERE user_uid = '${envName}_user_03') AS user_3_link_count,
+      (SELECT COUNT(*) FROM links WHERE user_uid = '${envName}_user_04') AS user_4_link_count,
       (SELECT COUNT(*) FROM clicks WHERE username = '${username1}') AS user_1_click_count,
       (SELECT COUNT(*) FROM clicks WHERE username = '${username2}') AS user_2_click_count,
       (SELECT COUNT(*) FROM clicks WHERE username = '${username3}') AS user_3_click_count,
+      (SELECT COUNT(*) FROM clicks WHERE username = '${username4}') AS user_4_click_count,
       (SELECT COUNT(DISTINCT campaign) FROM clicks WHERE username = '${username1}') AS user_1_click_campaign_count,
       (SELECT COUNT(DISTINCT campaign) FROM clicks WHERE username = '${username2}') AS user_2_click_campaign_count,
       (SELECT COUNT(DISTINCT campaign) FROM clicks WHERE username = '${username3}') AS user_3_click_campaign_count,
+      (SELECT COUNT(DISTINCT campaign) FROM clicks WHERE username = '${username4}') AS user_4_click_campaign_count,
       (SELECT COUNT(*) FROM transactions WHERE transaction_id LIKE '${envName}_tx_%') AS transaction_count,
       (SELECT ROUND(COALESCE(SUM(CAST(amount AS REAL)), 0), 2) FROM transactions WHERE transaction_id LIKE '${envName}_tx_%') AS transaction_total,
-      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}')) AS conversion_count,
+      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}')) AS conversion_count,
       (
         SELECT ROUND(COALESCE(SUM(CAST(t.amount AS REAL)), 0), 2)
         FROM conversions c
@@ -241,14 +253,21 @@ function buildEnvironmentQuery(envName, { emails, usernames }) {
         JOIN transactions t ON t.transaction_id = c.transaction_id
         WHERE c.username = '${username3}'
       ) AS user_3_conversion_total,
-      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}') AND verified = 'true') AS verified_true_count,
-      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}') AND withdrawn = 'true') AS withdrawn_true_count,
-      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}')) AS settlements_count,
+      (
+        SELECT ROUND(COALESCE(SUM(CAST(t.amount AS REAL)), 0), 2)
+        FROM conversions c
+        JOIN transactions t ON t.transaction_id = c.transaction_id
+        WHERE c.username = '${username4}'
+      ) AS user_4_conversion_total,
+      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}') AND verified = 'true') AS verified_true_count,
+      (SELECT COUNT(*) FROM conversions WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}') AND withdrawn = 'true') AS withdrawn_true_count,
+      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}')) AS settlements_count,
       (SELECT COUNT(*) FROM settlements WHERE username = '${username1}') AS user_1_settlement_count,
       (SELECT COUNT(*) FROM settlements WHERE username = '${username2}') AS user_2_settlement_count,
       (SELECT COUNT(*) FROM settlements WHERE username = '${username3}') AS user_3_settlement_count,
-      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}') AND status = 'paid') AS paid_settlement_count,
-      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}') AND status = 'pending') AS pending_settlement_count;
+      (SELECT COUNT(*) FROM settlements WHERE username = '${username4}') AS user_4_settlement_count,
+      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}') AND status = 'paid') AS paid_settlement_count,
+      (SELECT COUNT(*) FROM settlements WHERE username IN ('${username1}', '${username2}', '${username3}', '${username4}') AND status = 'pending') AS pending_settlement_count;
   `.trim();
 }
 

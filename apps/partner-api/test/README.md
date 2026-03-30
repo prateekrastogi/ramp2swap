@@ -15,10 +15,12 @@ This folder contains a deterministic database test bench for `partner-api`.
   - `LOCAL_TEST_EMAIL_1=test1@gmail.com`
   - `LOCAL_TEST_EMAIL_2=test2@gmail.com`
   - `LOCAL_TEST_EMAIL_3=test3@gmail.com`
+  - `LOCAL_TEST_EMAIL_4=test4@gmail.com`
 - Staging:
   - `STAGING_TEST_EMAIL_1=prastogi34@gmail.com`
   - `STAGING_TEST_EMAIL_2=prtk6592@gmail.com`
   - `STAGING_TEST_EMAIL_3=p.rastogi@outlook.com`
+  - `STAGING_TEST_EMAIL_4=r.prateek@outlook.com`
 
 ## Generated outputs
 - `partner-testbench.local.sql`
@@ -62,7 +64,17 @@ Manual SQL apply is still available if needed:
   - 50,000 clicks
   - 32 links
   - 1,000,000 USD attributed conversions
+- User 4:
+  - 20 days
+  - 720 clicks
+  - 2 links
+  - 79,000 USD attributed conversions across 7 attributed transactions
+  - 2 geographies
+  - pending balance about 7.50 USD
+  - available balance about 86.00 USD
+  - total earnings about 111.00 USD
+  - 1 settlement history row
 - Transactions:
-  - 2,000,000 USD total
+  - 2,079,000 USD total
   - no single transaction exceeds 10,000 USD
   - `payout` stays `NULL` in conversions

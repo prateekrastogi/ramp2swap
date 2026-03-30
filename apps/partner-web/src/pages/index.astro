@@ -322,6 +322,7 @@ const renderAnalyticsBars = (points: AnalyticsChartPoint[]) =>
           data-bar-label="${point.label}"
           data-bar-clicks="${point.clicks}"
           data-bar-conversion="${point.conversionRate}"
+          data-bar-zero="${point.clicks === 0 ? 'true' : 'false'}"
           aria-label="${point.label}: ${point.clicks} clicks, ${point.conversionRate} conversion rate"
           style="height: ${point.height}%"
         >
@@ -2397,6 +2398,7 @@ const overviewMetricsById = new Map(overviewMetrics.map((metric) => [metric.id, 
                   data-bar-label="${escapeAnalyticsHtml(point.label)}"
                   data-bar-clicks="${Number(point.clicks) || 0}"
                   data-bar-conversion="${escapeAnalyticsHtml(point.conversionRate)}"
+                  data-bar-zero="${(Number(point.clicks) || 0) === 0 ? 'true' : 'false'}"
                   aria-label="${escapeAnalyticsHtml(point.label)}: ${Number(point.clicks) || 0} clicks, ${escapeAnalyticsHtml(point.conversionRate)} conversion rate"
                   style="height: ${Math.max(0, Number(point.height) || 0)}%"
                 >
