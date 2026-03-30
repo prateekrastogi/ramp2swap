@@ -78,3 +78,4 @@ Manual SQL apply is still available if needed:
   - 2,079,000 USD total
   - no single transaction exceeds 10,000 USD
   - `payout` stays `NULL` in conversions
+
