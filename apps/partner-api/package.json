@@ -3,7 +3,6 @@
 	"type": "module",
 	"scripts": {
 		"dev": "node ../../scripts/setup-partner-auth-local.mjs && wrangler d1 migrations apply AUTH_DB --local && node ./test/ensure-test-bench.mjs --env local && wrangler dev --local",
-		"preview:otp-email": "node --experimental-strip-types ./scripts/preview-otp-email.mjs",
 		"deploy:staging": "node ./scripts/check-design-system.mjs && node ./scripts/deploy-with-migrations.mjs --env staging --minify",
 		"deploy": "node ./scripts/check-design-system.mjs && node ./scripts/deploy-with-migrations.mjs --minify"
 	},
