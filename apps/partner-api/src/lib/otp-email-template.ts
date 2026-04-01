@@ -12,6 +12,7 @@ const escapeHtml = (value: string) =>
     .replaceAll("'", '&#39;');
 
 const formatOtpForDisplay = (otp: string) => otp.replace(/\D/g, '').replace(/(\d{3})(\d{3})/, '$1 $2');
+const formatEmailForDisplay = (email: string) => escapeHtml(email).replace('@', '&#8203;@&#8203;').replaceAll('.', '&#8203;.&#8203;');
 
 const buildAbsoluteUrl = (baseUrl: string, path: string) => new URL(path, baseUrl).toString();
 
@@ -27,6 +28,7 @@ export const buildOtpEmailHtml = ({
   partnerLogoUrl?: string;
 }) => {
   const safeEmail = escapeHtml(email);
+  const displayEmail = formatEmailForDisplay(email);
   const displayOtp = escapeHtml(formatOtpForDisplay(otp));
   const currentYear = new Date().getUTCFullYear();
   const resolvedPartnerLogoUrl = partnerLogoUrl ?? buildAbsoluteUrl(assetBaseUrl, '/logo_horizontal_email.png');
@@ -53,6 +55,25 @@ export const buildOtpEmailHtml = ({
       Approved shared logo asset: /logo_horizontal.png
       Email-specific rendering asset: /logo_horizontal_email.png
     */
+    a,
+    a:link,
+    a:visited {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a[x-apple-data-detectors],
+    #MessageViewBody a,
+    u + .body a,
+    .ExternalClass a {
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+
     @media (max-width: 520px) {
       .shell-padding { padding: 24px 12px !important; }
       .section-padding { padding-left: 22px !important; padding-right: 22px !important; }
@@ -70,7 +91,7 @@ export const buildOtpEmailHtml = ({
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0a0d0f; color: #e8f0f7; font-family: Arial, Helvetica, sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+<body class="body" style="margin: 0; padding: 0; background-color: #0a0d0f; color: #e8f0f7; font-family: Arial, Helvetica, sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width: 100%; border-collapse: collapse; background-color: #0a0d0f; margin: 0; padding: 0; mso-table-lspace: 0pt; mso-table-rspace: 0pt;" bgcolor="#0a0d0f">
     <tr>
       <td align="center" class="shell-padding" style="padding: 40px 16px;">
@@ -112,7 +133,7 @@ export const buildOtpEmailHtml = ({
                       </tr>
                       <tr>
                         <td style="padding: 0 0 28px 0; color: #7a98b3; font-size: 14px; line-height: 24px;">
-                          Use the one-time password below to complete your sign-in for <strong style="color: #a5bbcf !important; font-weight: 700;"><span style="color: #a5bbcf !important; text-decoration: none !important;">${safeEmail}</span></strong>. This code is short-lived and can only be used once.
+                          Use the one-time password below to complete your sign-in for <strong style="color: #a5bbcf !important; font-weight: 700;"><span style="color: #a5bbcf !important; text-decoration: none !important;">${displayEmail}</span></strong>. This code is short-lived and can only be used once.
                         </td>
                       </tr>
                       <tr>
