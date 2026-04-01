@@ -41,6 +41,17 @@ export const buildOtpEmailHtml = ({
   <meta name="supported-color-schemes" content="dark" />
   <title>Your Ramp2Swap Partner Portal Login OTP</title>
   <style>
+    /*
+      Design system source of truth for transactional email:
+      @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&family=Syne:wght@700;800&display=swap');
+      --obsidian-900: #0A0D0F;
+      --slate-100: #E8F0F7;
+      --mint-500: #00E5A0;
+      --state-amber: #F59E0B;
+      --state-red: #EF4444;
+      Approved shared logo asset: /logo_horizontal.png
+      Email-specific rendering asset: /logo_horizontal_email.png
+    */
     @media (max-width: 520px) {
       .shell-padding { padding: 24px 12px !important; }
       .section-padding { padding-left: 22px !important; padding-right: 22px !important; }
