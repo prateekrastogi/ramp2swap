@@ -39,6 +39,7 @@ export const buildOtpEmailHtml = ({
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="color-scheme" content="dark" />
   <meta name="supported-color-schemes" content="dark" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no" />
   <title>Your Ramp2Swap Partner Portal Login OTP</title>
   <style>
     /*
@@ -111,7 +112,7 @@ export const buildOtpEmailHtml = ({
                       </tr>
                       <tr>
                         <td style="padding: 0 0 28px 0; color: #7a98b3; font-size: 14px; line-height: 24px;">
-                          Use the one-time password below to complete your sign-in for <strong style="color: #a5bbcf; font-weight: 700;">${safeEmail}</strong>. This code is short-lived and can only be used once.
+                          Use the one-time password below to complete your sign-in for <strong style="color: #a5bbcf !important; font-weight: 700;"><span style="color: #a5bbcf !important; text-decoration: none !important;">${safeEmail}</span></strong>. This code is short-lived and can only be used once.
                         </td>
                       </tr>
                       <tr>
