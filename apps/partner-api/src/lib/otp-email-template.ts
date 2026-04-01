@@ -74,6 +74,13 @@ export const buildOtpEmailHtml = ({
       line-height: inherit !important;
     }
 
+    .mint-link,
+    .mint-link:link,
+    .mint-link:visited {
+      color: #00E5A0 !important;
+      text-decoration: none !important;
+    }
+
     @media (max-width: 520px) {
       .shell-padding { padding: 24px 12px !important; }
       .section-padding { padding-left: 22px !important; padding-right: 22px !important; }
@@ -181,12 +188,12 @@ export const buildOtpEmailHtml = ({
                             </tr>
                             <tr>
                               <td style="padding: 12px 0; border-top: 1px solid #1f2a35; color: #7a98b3; font-size: 13px; line-height: 22px;">
-                                <strong style="color: #e8f0f7;">Need help?</strong> Contact <a href="mailto:${SUPPORT_EMAIL}" style="color: #00e5a0; text-decoration: none;">${SUPPORT_EMAIL}</a>.
+                                <strong style="color: #e8f0f7;">Need help?</strong> Contact <a href="mailto:${SUPPORT_EMAIL}" class="mint-link" style="color: #00e5a0 !important; text-decoration: none !important;">${SUPPORT_EMAIL}</a>.
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 12px 0; border-top: 1px solid #1f2a35; color: #7a98b3; font-size: 13px; line-height: 22px;">
-                                <strong style="color: #e8f0f7;">Partner Portal:</strong> <a href="${PARTNER_PORTAL_URL}" target="_blank" rel="noreferrer noopener" style="color: #00e5a0; text-decoration: none;">partner.ramp2swap.com</a>
+                                <strong style="color: #e8f0f7;">Partner Portal:</strong> <a href="${PARTNER_PORTAL_URL}" target="_blank" rel="noreferrer noopener" class="mint-link" style="color: #00e5a0 !important; text-decoration: none !important;">partner.ramp2swap.com</a>
                               </td>
                             </tr>
                           </table>
