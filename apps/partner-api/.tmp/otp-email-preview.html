@@ -1,37 +1,4 @@
-const PARTNER_PORTAL_URL = 'https://partner.ramp2swap.com';
-const PRIVACY_URL = 'https://ramp2swap.com/privacy';
-const TERMS_URL = 'https://ramp2swap.com/terms';
-const SUPPORT_EMAIL = 'help@ramp2swap.com';
-
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-
-const formatOtpForDisplay = (otp: string) => otp.replace(/\D/g, '').replace(/(\d{3})(\d{3})/, '$1 $2');
-
-const buildAbsoluteUrl = (baseUrl: string, path: string) => new URL(path, baseUrl).toString();
-
-export const buildOtpEmailHtml = ({
-  assetBaseUrl,
-  email,
-  otp,
-  partnerLogoUrl,
-}: {
-  assetBaseUrl: string;
-  email: string;
-  otp: string;
-  partnerLogoUrl?: string;
-}) => {
-  const safeEmail = escapeHtml(email);
-  const displayOtp = escapeHtml(formatOtpForDisplay(otp));
-  const currentYear = new Date().getUTCFullYear();
-  const resolvedPartnerLogoUrl = partnerLogoUrl ?? buildAbsoluteUrl(assetBaseUrl, '/logo_horizontal_email.png');
-
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -72,7 +39,7 @@ export const buildOtpEmailHtml = ({
                       <tr>
                         <td class="stack-column" valign="top" style="width: 68%; padding: 0;">
                           <img
-                            src="${resolvedPartnerLogoUrl}"
+                            src="../public/logo_horizontal_email.png"
                             alt="Ramp2Swap"
                             width="180"
                             class="header-logo"
@@ -100,7 +67,7 @@ export const buildOtpEmailHtml = ({
                       </tr>
                       <tr>
                         <td style="padding: 0 0 28px 0; color: #7a98b3; font-size: 14px; line-height: 24px;">
-                          Use the one-time password below to complete your sign-in for <strong style="color: #a5bbcf; font-weight: 700;">${safeEmail}</strong>. This code is short-lived and can only be used once.
+                          Use the one-time password below to complete your sign-in for <strong style="color: #a5bbcf; font-weight: 700;">test@outlook.com</strong>. This code is short-lived and can only be used once.
                         </td>
                       </tr>
                       <tr>
@@ -112,7 +79,7 @@ export const buildOtpEmailHtml = ({
                                   One-Time Password
                                 </div>
                                 <div class="otp-code" style="margin: 0 0 18px 0; color: #fdf6e3; font-size: 38px; line-height: 42px; font-weight: 700; letter-spacing: 8px; text-align: center; font-family: 'Courier New', Courier, monospace;">
-                                  ${displayOtp}
+                                  123 456
                                 </div>
                                 <span class="expire-pill" style="display: inline-block; padding: 7px 14px; border: 1px solid #7f1d1d; background-color: #2b1417; color: #f87171; font-size: 11px; line-height: 14px; letter-spacing: 1px; text-transform: uppercase; font-family: 'Courier New', Courier, monospace; border-radius: 999px;">
                                   Expires in 10 minutes
@@ -143,12 +110,12 @@ export const buildOtpEmailHtml = ({
                             </tr>
                             <tr>
                               <td style="padding: 12px 0; border-top: 1px solid #1f2a35; color: #7a98b3; font-size: 13px; line-height: 22px;">
-                                <strong style="color: #e8f0f7;">Need help?</strong> Contact <a href="mailto:${SUPPORT_EMAIL}" style="color: #00e5a0; text-decoration: none;">${SUPPORT_EMAIL}</a>.
+                                <strong style="color: #e8f0f7;">Need help?</strong> Contact <a href="mailto:help@ramp2swap.com" style="color: #00e5a0; text-decoration: none;">help@ramp2swap.com</a>.
                               </td>
                             </tr>
                             <tr>
                               <td style="padding: 12px 0; border-top: 1px solid #1f2a35; color: #7a98b3; font-size: 13px; line-height: 22px;">
-                                <strong style="color: #e8f0f7;">Partner Portal:</strong> <a href="${PARTNER_PORTAL_URL}" target="_blank" rel="noreferrer noopener" style="color: #00e5a0; text-decoration: none;">partner.ramp2swap.com</a>
+                                <strong style="color: #e8f0f7;">Partner Portal:</strong> <a href="https://partner.ramp2swap.com" target="_blank" rel="noreferrer noopener" style="color: #00e5a0; text-decoration: none;">partner.ramp2swap.com</a>
                               </td>
                             </tr>
                           </table>
@@ -164,12 +131,12 @@ export const buildOtpEmailHtml = ({
                         <td align="center" style="padding-top: 20px; color: #51687d; font-size: 12px; line-height: 20px; text-align: center;">
                           <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto 10px auto; border-collapse: collapse;">
                             <tr>
-                              <td style="padding: 0 10px 0 0;"><a href="${TERMS_URL}" target="_blank" rel="noreferrer noopener" style="color: #7a98b3; text-decoration: none;">Terms</a></td>
-                              <td style="padding: 0 10px;"><a href="${PRIVACY_URL}" target="_blank" rel="noreferrer noopener" style="color: #7a98b3; text-decoration: none;">Privacy</a></td>
-                              <td style="padding: 0 0 0 10px;"><a href="mailto:${SUPPORT_EMAIL}" style="color: #7a98b3; text-decoration: none;">Support</a></td>
+                              <td style="padding: 0 10px 0 0;"><a href="https://ramp2swap.com/terms" target="_blank" rel="noreferrer noopener" style="color: #7a98b3; text-decoration: none;">Terms</a></td>
+                              <td style="padding: 0 10px;"><a href="https://ramp2swap.com/privacy" target="_blank" rel="noreferrer noopener" style="color: #7a98b3; text-decoration: none;">Privacy</a></td>
+                              <td style="padding: 0 0 0 10px;"><a href="mailto:help@ramp2swap.com" style="color: #7a98b3; text-decoration: none;">Support</a></td>
                             </tr>
                           </table>
-                          <div>&copy; ${currentYear} Ramp2Swap. This is an automated security email, so replies are not monitored.</div>
+                          <div>&copy; 2026 Ramp2Swap. This is an automated security email, so replies are not monitored.</div>
                         </td>
                       </tr>
                     </table>
@@ -183,5 +150,4 @@ export const buildOtpEmailHtml = ({
     </tr>
   </table>
 </body>
-</html>`;
-};
+</html>
