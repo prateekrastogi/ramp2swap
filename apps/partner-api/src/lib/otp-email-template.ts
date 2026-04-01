@@ -196,10 +196,10 @@ export const buildOtpEmailHtml = ({
                   </td>
                 </tr>
                 <tr>
-                  <td class="section-padding" style="padding: 0 34px 30px 34px;">
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width: 100%; border-collapse: collapse; border-top: 1px solid #1f2a35;">
+                  <td style="padding: 0; border-top: 1px solid #243241; background-color: #121922;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width: 100%; border-collapse: collapse;">
                       <tr>
-                        <td align="center" style="padding-top: 20px; color: #51687d; font-size: 12px; line-height: 20px; text-align: center;">
+                        <td class="section-padding" align="center" style="padding: 20px 34px 30px 34px; color: #51687d; font-size: 12px; line-height: 20px; text-align: center;">
                           <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto 10px auto; border-collapse: collapse;">
                             <tr>
                               <td style="padding: 0 10px 0 0;"><a href="${TERMS_URL}" target="_blank" rel="noreferrer noopener" style="color: #7a98b3; text-decoration: none;">Terms</a></td>
