@@ -81,7 +81,7 @@ export const buildOtpEmailHtml = ({
                   <td class="section-padding" style="padding: 34px 34px 18px 34px; border-bottom: 1px solid #1f2a35; background-color: #121922;">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width: 100%; border-collapse: separate; border-spacing: 0;">
                       <tr>
-                        <td class="stack-column" valign="top" style="width: 68%; padding: 0;">
+                        <td class="stack-column" valign="middle" style="width: 68%; padding: 0;">
                           <img
                             src="${resolvedPartnerLogoUrl}"
                             alt="Ramp2Swap"
@@ -90,7 +90,7 @@ export const buildOtpEmailHtml = ({
                             style="display: block; width: 180px; max-width: 100%; height: auto; border: 0; outline: none; text-decoration: none;"
                           />
                         </td>
-                        <td class="stack-column-right" valign="top" align="right" style="width: 32%; padding: 0; text-align: right;">
+                        <td class="stack-column-right" valign="middle" align="right" style="width: 32%; padding: 0; text-align: right;">
                           <div class="stack-column-right-inner" style="text-align: right;">
                             <span class="header-glass" style="display: inline-block; padding: 8px 13px; border: 1px solid #2b4a42; background-color: #162028; color: #00e5a0; font-size: 11px; line-height: 1; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; font-family: 'Courier New', Courier, monospace; border-radius: 999px;">
                               Partner Portal Security
