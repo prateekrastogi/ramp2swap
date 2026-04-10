@@ -4,17 +4,18 @@ Use these sample queries in the main-web intent box to quickly sanity-check AI S
 
 ## Recommended Test Queries
 
-1. Swap 250 USDC from Arbitrum to Base
-2. Bridge 100 USDC from Ethereum to Base and send it to 0x111111125421cA6dc452d289314280a0f8842A65
-3. I want to bridge 500 USDC from Ethereum mainnet to Arbitrum
-4. Convert 2 ETH on Base into USDC on Base
-5. Swap 100 USDC from Arbitrum
-6. Swap to USDC on Base
-7. Move some tokens somewhere
+1. Send 75 USDC out of Base into Arbitrum USDC
+2. Bridge 123.45 USDT from Arbitrum to Ethereum for 0x29DaCdF7cCaDf4eE67c923b4C22255A4B2494eD7
+3. Swap 0.5 ETH on Ethereum mainnet into USDC on Base
+4. Trade 10 USDC on Base for ETH on Base
+5. Start with 42 USDC on Ethereum
+6. Receive USDC on Arbitrum
+7. Swap USDC to USDT
+8. Send tokens somewhere later
 
 ## Extra Variants
 
-These should stay identical to the inputs in `system-prompt.md` so the prompt examples and mock test set do not drift.
+These are intentionally different from the examples in `system-prompt.md` so the mock set catches generalization issues instead of example memorization.
 
 ## What To Check
 
