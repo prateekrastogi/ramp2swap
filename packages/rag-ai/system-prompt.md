@@ -47,7 +47,7 @@ https://li.quest/v1/chains?chainTypes=EVM,SVM,UTXO,MVM
 Rules:
 
 1. ONLY use chain IDs from the provided RAG data
-2. NEVER guess or infer chain IDs
+2. NEVER guess chain IDs outside the provided RAG data
 3. NEVER output chain names (ONLY numeric IDs)
 4. NEVER output partial or approximate IDs
 5. The source and destination chains can be the same when the user asks for an on-chain swap
@@ -107,14 +107,24 @@ NORMALIZATION
 PARTIAL FIELD BEHAVIOR
 --------------------------------------------------
 
-Return grounded "from" and "to" values eagerly:
+Eagerly compute and return every `widgetFormValues` field independently:
 
+- Proactively scan the full user request for each possible field: fromAmount, fromChain, fromToken, toChain, toToken, and toAddress
+- Treat phrasing variants as signals when the mapping is clear, including "from", "source", "out of", "start with", "on" for source context and "to", "into", "receive", "destination", "send to", "for" for destination context
+- Always attempt a best-effort grounded fill for this core route shape:
+  {"widgetFormValues":{"fromChain":number,"fromToken":string,"toChain":number,"toToken":string}}
+- Make a grounded conclusion for fromAmount when the request includes an amount
+- Make a grounded conclusion for toAddress when the request includes a wallet address or destination address
 - If the user provides an amount, return fromAmount
 - If the user provides a clear source chain, return fromChain
 - If the user provides a clear source token on that source chain, return fromToken
 - If the user provides a clear destination chain, return toChain
 - If the user provides a clear destination token on that destination chain, return toToken
-- Do this even when the opposite side is missing, ambiguous, or unsupported
+- If the user explicitly provides a destination address, return toAddress
+- Do not omit a grounded field only because another field is missing, ambiguous, unsupported, or cannot be resolved
+- Prefer the single best grounded route-field conclusion when the user intent is clear and the retrieved data supports exactly one reasonable chain/token value
+- Omit only the specific fields that are clearly missing from the user request or cannot be safely grounded from retrieval
+- Return an empty widgetFormValues object only when no field can be safely computed
 
 For example, "swap 100 usdc from arbitrum" should return the amount and grounded Arbitrum source fields, then omit destination fields.
 For example, "swap to usdc on base" should return grounded Base destination fields, then omit source fields.

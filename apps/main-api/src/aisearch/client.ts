@@ -95,8 +95,11 @@ function buildRuntimeSystemPrompt() {
     '- The active user request is provided only in the query field for this call.',
     '- Parse only the current query for this request.',
     '- Never copy example values unless the current query matches them exactly.',
+    '- Proactively scan the user request for every possible widgetFormValues field, including phrasing variants for source, destination, amount, token, chain, and address.',
     '- If a field is not explicitly present or cannot be grounded from retrieval, omit it.',
-    '- Return grounded source-side and destination-side fields eagerly; do not drop fromAmount, fromChain, fromToken, toChain, or toToken only because the opposite side is unavailable.',
+    '- Eagerly compute and return every grounded widgetFormValues field independently: fromAmount, fromChain, fromToken, toChain, toToken, and toAddress.',
+    '- Always attempt a best-effort grounded fill for fromChain, fromToken, toChain, and toToken; include fromAmount and toAddress when the request gives a grounded amount or wallet address.',
+    '- Omit only the specific fields that are clearly missing from the request or cannot be safely grounded from retrieval.',
     '- Return only strict JSON with a top-level "widgetFormValues" object.'
   ].join('\n')
 }
