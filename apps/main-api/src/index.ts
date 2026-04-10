@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { stream } from 'hono/streaming'
 import { callBoundRagAiService, type MainApiBindings } from './aisearch/client'
 import { isAppEventName, mapAppEvent } from './app-events'
 import {
@@ -107,33 +108,42 @@ app.post('/intent', async (c) => {
     )
   }
 
-  try {
-    const result = await callBoundRagAiService(c.env, {
-      query: text
-    })
+  return stream(c, async (stream) => {
+    // Set explicit JSON content type as we are streaming it manually
+    c.header('content-type', 'application/json')
+    
+    // Send an initial space to start the response immediately
+    await stream.write(new TextEncoder().encode(' '))
 
-    const responsePayload = {
-      success: true,
-      receivedText: text,
-      widgetFormValues: result.body.widgetFormValues
+    // Periodic heartbeat to keep connection alive (Cloudflare 30s limit)
+    const heartbeat = setInterval(() => {
+      stream.write(new TextEncoder().encode(' '))
+    }, 20000)
+
+    try {
+      const result = await callBoundRagAiService(c.env, {
+        query: text
+      })
+
+      const responsePayload = {
+        success: true,
+        receivedText: text,
+        widgetFormValues: result.body.widgetFormValues
+      }
+
+      clearInterval(heartbeat)
+      await stream.write(new TextEncoder().encode(JSON.stringify(responsePayload)))
+    } catch (error) {
+      clearInterval(heartbeat)
+      const fallbackResponse = {
+        success: true,
+        receivedText: text,
+        widgetFormValues: {}
+      }
+
+      await stream.write(new TextEncoder().encode(JSON.stringify(fallbackResponse)))
     }
-
-    return c.json(
-      responsePayload,
-      200
-    )
-  } catch (error) {
-    const fallbackResponse = {
-      success: true,
-      receivedText: text,
-      widgetFormValues: {}
-    }
-
-    return c.json(
-      fallbackResponse,
-      200
-    )
-  }
+  })
 })
 
 app.post('/widget-event', async (c) => {

@@ -54,11 +54,12 @@ export type MainApiBindings = {
   RAG_AI_NAME?: string
   PARTNER_API_BASE_URL?: string
   PARTNER_API?: ServiceBinding
+  AI_SEARCH_TIMEOUT_MS?: string
 }
 
 const DEFAULT_RAG_AI_NAME = 'rag-ai'
 const DEFAULT_GENERATION_MODEL = '@cf/zai-org/glm-4.7-flash'
-const DEFAULT_AI_SEARCH_TIMEOUT_MS = 25_000
+const FALLBACK_AI_SEARCH_TIMEOUT_MS = 25_000
 
 export function getAiSearchName(env: MainApiBindings) {
   const configuredName = env.RAG_AI_NAME?.trim()
@@ -111,10 +112,16 @@ export async function callBoundRagAiService(env: MainApiBindings, payload: AiSea
 
   const requestBody = buildRagAiPayload(payload)
   const ragAiName = getAiSearchName(env)
+  
+  // Use environment variable if present, otherwise fall back to code constant
+  const envTimeout = env.AI_SEARCH_TIMEOUT_MS ? parseInt(env.AI_SEARCH_TIMEOUT_MS, 10) : undefined
+  const finalTimeoutMs = payload.timeoutMs ?? envTimeout ?? FALLBACK_AI_SEARCH_TIMEOUT_MS
+
   const rawBody = await waitForAiSearch(
     env.AI.autorag(ragAiName).aiSearch(requestBody),
-    payload.timeoutMs ?? DEFAULT_AI_SEARCH_TIMEOUT_MS
+    finalTimeoutMs
   )
+
   const parsedBody = extractWidgetFormValuesResponse(rawBody)
 
   return {

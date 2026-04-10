@@ -24,7 +24,8 @@
   },
   "vars": {
     "RAG_AI_NAME": "rag-ai",
-    "PARTNER_API_BASE_URL": "https://api.partner.ramp2swap.com"
+    "PARTNER_API_BASE_URL": "https://api.partner.ramp2swap.com",
+    "AI_SEARCH_TIMEOUT_MS": "60000"
   },
   "env": {
     "staging": {
@@ -40,7 +41,8 @@
       ],
       "vars": {
         "RAG_AI_NAME": "rag-ai",
-        "PARTNER_API_BASE_URL": "https://staging.api.partner.ramp2swap.com"
+        "PARTNER_API_BASE_URL": "https://staging.api.partner.ramp2swap.com",
+        "AI_SEARCH_TIMEOUT_MS": "60000"
       }
     }
   }

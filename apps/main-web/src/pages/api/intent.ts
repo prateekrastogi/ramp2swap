@@ -5,7 +5,10 @@ export const POST: APIRoute = async ({ request }) => {
   const body = (await request.json().catch(() => null)) as { text?: unknown } | null;
   const text = typeof body?.text === 'string' ? body.text.trim() : '';
 
+  console.log('[Web Intent API] Forwarding text:', text);
+
   if (!text) {
+    console.error('[Web Intent API] Error: Intent text is required.');
     return new Response(
       JSON.stringify({
         success: false,
