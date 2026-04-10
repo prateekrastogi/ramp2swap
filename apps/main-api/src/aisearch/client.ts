@@ -21,6 +21,7 @@ export type AiSearchRequestPayload = {
   model?: string
   max_num_results?: number
   rewrite_query?: boolean
+  timeoutMs?: number
 }
 
 export type WidgetFormValues = Partial<{
@@ -44,14 +45,20 @@ type AiBinding = {
   autorag(name: string): AutoRagService
 }
 
+type ServiceBinding = {
+  fetch(input: Request | string, init?: RequestInit): Promise<Response>
+}
+
 export type MainApiBindings = {
   AI?: AiBinding
   RAG_AI_NAME?: string
   PARTNER_API_BASE_URL?: string
-  PARTNER_API?: Fetcher
+  PARTNER_API?: ServiceBinding
 }
 
 const DEFAULT_RAG_AI_NAME = 'rag-ai'
+const DEFAULT_GENERATION_MODEL = '@cf/zai-org/glm-4.7-flash'
+const DEFAULT_AI_SEARCH_TIMEOUT_MS = 25_000
 
 export function getAiSearchName(env: MainApiBindings) {
   const configuredName = env.RAG_AI_NAME?.trim()
@@ -66,7 +73,7 @@ export function buildRagAiPayload(payload: AiSearchRequestPayload) {
   return {
     query: payload.query,
     system_prompt: buildRuntimeSystemPrompt(),
-    model: payload.model ?? '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+    model: payload.model ?? DEFAULT_GENERATION_MODEL,
     rewrite_query: payload.rewrite_query ?? true,
     max_num_results: payload.max_num_results ?? 6,
     ranking_options: {
@@ -89,6 +96,7 @@ function buildRuntimeSystemPrompt() {
     '- Parse only the current query for this request.',
     '- Never copy example values unless the current query matches them exactly.',
     '- If a field is not explicitly present or cannot be grounded from retrieval, omit it.',
+    '- Return grounded source-side and destination-side fields eagerly; do not drop fromAmount, fromChain, fromToken, toChain, or toToken only because the opposite side is unavailable.',
     '- Return only strict JSON with a top-level "widgetFormValues" object.'
   ].join('\n')
 }
@@ -100,7 +108,10 @@ export async function callBoundRagAiService(env: MainApiBindings, payload: AiSea
 
   const requestBody = buildRagAiPayload(payload)
   const ragAiName = getAiSearchName(env)
-  const rawBody = await env.AI.autorag(ragAiName).aiSearch(requestBody)
+  const rawBody = await waitForAiSearch(
+    env.AI.autorag(ragAiName).aiSearch(requestBody),
+    payload.timeoutMs ?? DEFAULT_AI_SEARCH_TIMEOUT_MS
+  )
   const parsedBody = extractWidgetFormValuesResponse(rawBody)
 
   return {
@@ -108,6 +119,23 @@ export async function callBoundRagAiService(env: MainApiBindings, payload: AiSea
     status: 200,
     body: parsedBody
   }
+}
+
+function waitForAiSearch<T>(promise: Promise<T>, timeoutMs: number) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`AI Search request timed out after ${timeoutMs}ms.`))
+      }, timeoutMs)
+    })
+  ]).finally(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+  })
 }
 
 export function extractWidgetFormValuesResponse(value: unknown): WidgetFormValuesResponse {
